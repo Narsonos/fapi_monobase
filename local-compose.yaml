@@ -1,0 +1,93 @@
+name: app_dev
+
+services:
+  app:
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - db
+    volumes:
+      - ./services/api/app:/app/app
+    environment:
+      TZ: "Europe/Moscow"
+      MODE: local #${MODE:?Error}
+      GIT_COMMIT: ${GIT_COMMIT}
+    env_file:
+      - .env
+    networks:
+      - appnet_dev
+
+  nginx:
+    image: nginx:1.27.0
+    container_name: app_dev-nginx
+    restart: always
+    ports:
+      - "127.0.0.1:9092:80"
+    depends_on:
+      - app
+    volumes:
+      - ./services/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./services/nginx/upstream.conf:/etc/nginx/conf.d/upstream.conf:ro
+      - ./services/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - appnet_dev
+
+  #POSTGRES TEMPLATE
+  #db:
+  #  container_name: app_dev-db
+  #  image: postgres:16
+  #  restart: unless-stopped
+  #  env_file:
+  #    - .env
+  #  volumes:
+  #    - appdb-data:/var/lib/postgresql/data
+  #  networks:
+  #    - appnet_dev
+
+  #MYSQL TEMPLATE
+  db:
+    container_name: app_dev-db
+    image: mysql:8.0
+    restart: always
+    env_file: 
+      - .env
+    volumes:
+      - appdb-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - appnet_dev
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    restart: always
+    entrypoint: ["/bin/bash", "/usr/local/bin/redis-entrypoint.sh"]
+    volumes:
+      - app-redis-data:/data
+      - ./services/redis/redis.conf:/usr/local/etc/redis/redis.conf.template:ro      
+      - ./services/redis/redis-entrypoint.sh:/usr/local/bin/redis-entrypoint.sh:ro
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "redis-cli","-a", "$$REDIS_PASS","ping"]
+      interval: 10s
+      retries: 3
+      timeout: 3s
+    networks:
+      - appnet_dev
+
+networks:
+  appnet_dev:
+    name: appnet_dev
+    driver: bridge
+
+volumes:
+  appdb-data:
+  chromadb-data:
+  app-redis-data:
