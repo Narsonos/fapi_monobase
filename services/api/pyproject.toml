@@ -1,0 +1,35 @@
+[project]
+#About
+name = "api"
+version = "0.1.0"
+description = "A FastAPI app template with basic User capabilities"
+authors = [{ name = "Narsonos", email = "narsonos39@gmail.com" } ]
+
+#Dependencies
+requires-python = ">=3.12,<4.0"
+package-mode = false
+dependencies = [
+    "fastapi[standard]==0.115.7",
+    "httpx==0.28.1",
+    "uvicorn==0.34.0",
+    "httptools==0.6.4",
+    "loguru==0.7.3",
+    "tzlocal==5.3",
+    "pytz==2025.1",
+    "sqlalchemy==2.0.38",
+    "aiomysql==0.2.0",
+    "sqlmodel==0.0.24",
+    "redis==5.2.1",
+    "pyjwt==2.10.1",
+    "cryptography==44.0.2",
+    "gunicorn>=23.0.0",
+    "passlib[bcrypt]==1.7.4",
+]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.2"
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
