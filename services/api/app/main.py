@@ -6,10 +6,10 @@ from contextlib import asynccontextmanager
 
 #Project files
 from app.config import Config
-from app.routers import user
+from app.routers import auth, user
 from app.db import sessManagerObject, wait_for_db, init_db, redis_client
-from app.security.base import create_admin_on_startup_if_not_exists
-
+from app.security.base import create_admin_on_startup_if_not_exists, CurrentUserDependency
+from app.models.common import User
 
 #Misc
 import datetime
@@ -67,9 +67,16 @@ app = FastAPI(
 )
 
 app.include_router(user.router)
+app.include_router(auth.router)
 
 
+########################################
+#        GETTING USER PROFILE          #
+########################################
 
+@app.get("/me")
+async def whoami(current_user:CurrentUserDependency) -> User:
+    return current_user
 
 
 ########################
