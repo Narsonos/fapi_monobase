@@ -10,6 +10,7 @@ from app.routers import auth, user
 from app.db import sessManagerObject, wait_for_db, init_db, redis_client
 from app.security.base import create_admin_on_startup_if_not_exists, CurrentUserDependency
 from app.models.common import User
+import app.application.exceptions as appexc
 
 #Misc
 import datetime
@@ -69,6 +70,17 @@ app = FastAPI(
 app.include_router(user.router)
 app.include_router(auth.router)
 
+
+@app.exception_handler(appexc.AuthBaseException)
+async def auth_exception_handler(request, exc: appexc.AuthBaseException):
+    mapping = {
+        appexc.CredentialsException: 401,
+        appexc.InvalidTokenError: 401,
+        appexc.TokenExpiredException: 401,
+        appexc.LoggedOutException: 403,
+    }
+    status = mapping.get(type(exc), 500)
+    return JSONResponse({"detail": str(exc)}, status_code=status)
 
 ########################################
 #        GETTING USER PROFILE          #

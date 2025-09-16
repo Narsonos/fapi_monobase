@@ -2,5 +2,6 @@ venv/
 __pycache__
 .env*
 .vscode/
-logs/*.log
+
+*.log
 todo.txt

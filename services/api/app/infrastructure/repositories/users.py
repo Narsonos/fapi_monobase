@@ -1,11 +1,23 @@
 import app.domain.repositories as repo
-import app.domain.models as m
+import app.domain.models as domain
 import app.domain.exceptions as e
+import app.infrastructure.models as db
 
 from sqlalchemy.ext.asyncio import AsyncSession
 import sqlalchemy.exc as sqlexc
 import sqlmodel as sqlm
 import typing as t
+import pydantic as p
+
+from redis.asyncio import Redis
+import json
+import logging
+from app.common.config import Config
+
+# Cache TTL (seconds)
+USER_CACHE_TTL_SECONDS = Config.USER_CACHE_TTL_SECONDS
+
+logger = logging.getLogger('app')
 
 class MySQLUserRepository(repo.UserRepository):
     """Repository implementation for User model using MySQL via SQLAlchemy AsyncSession.
@@ -40,7 +52,7 @@ class MySQLUserRepository(repo.UserRepository):
                 raise e.UserAlreadyExists(f"Another user with this username already exists") from error
         raise error
 
-    async def get_by_id(self, user_id: int) -> m.User | None:
+    async def get_by_id(self, user_id: int) -> domain.User | None:
         """Retrieve a user by their unique ID.
 
         Args:
@@ -49,11 +61,13 @@ class MySQLUserRepository(repo.UserRepository):
         Returns:
             User | None: The user object if found, else None.
         """
-        return (await self.session.scalars(
-            sqlm.select(m.User).where(m.User.id == user_id)
+        user = (await self.session.scalars(
+            sqlm.select(db.User).where(db.User.id == user_id)
         )).one_or_none()
+        return domain.User.model_validate(user) if user is not None else None
+        
 
-    async def get_by_username(self, username: str) -> m.User | None:
+    async def get_by_username(self, username: str) -> domain.User | None:
         """Retrieve a user by their unique username.
 
         Args:
@@ -62,19 +76,23 @@ class MySQLUserRepository(repo.UserRepository):
         Returns:
             User | None: The user object if found, else None.
         """
-        return (await self.session.scalars(
-            sqlm.select(m.User).where(m.User.username == username)
+        user = (await self.session.scalars(
+            sqlm.select(db.User).where(db.User.username == username)
         )).one_or_none()
+        return domain.User.model_validate(user) if user is not None else None
 
-    async def list(self) -> list[m.User]:
+    async def list(self, limit: int = 100, offset: int = 0) -> list[domain.User]:
         """Retrieve all users in the system.
 
         Returns:
             list[User]: List of all users.
         """
-        return (await self.session.scalars(sqlm.select(m.User))).all()
+        q = sqlm.select(db.User).limit(limit).offset(offset)
+        users_db = (await self.session.scalars(q)).all()
+        return [domain.User.model_validate(u) for u in users_db]
 
-    async def create(self, user: m.User, return_result: bool = True) -> m.User | None:
+
+    async def create(self, user: domain.User, return_result: bool = True) -> domain.User | None:
         """Create a new user in the database.
 
         Args:
@@ -88,15 +106,16 @@ class MySQLUserRepository(repo.UserRepository):
             UserAlreadyExists: If a user with the same username already exists.
         """
         try:
+            user = db.User.model_validate(user)
             self.session.add(user)
             await self.session.commit()
             if return_result: 
                 await self.session.refresh(user)
-                return user
+                return domain.User.model_validate(user)
         except sqlexc.IntegrityError as error:
             self._handle_integrity_error(error)
 
-    async def update(self, user: m.User, return_result: bool = True) -> m.User | None:
+    async def update(self, user: domain.User, return_result: bool = True) -> domain.User | None:
         """Update an existing user by merging changes.
 
         Args:
@@ -115,15 +134,16 @@ class MySQLUserRepository(repo.UserRepository):
             raise e.UserDoesNotExist('User with given ID does not exist!')
         
         try:
+            user = db.User.model_validate(user)
             await self.session.merge(user)
             await self.session.commit()
             if return_result: 
                 await self.session.refresh(user)
-                return user        
+                return domain.User.model_validate(user)        
         except sqlexc.IntegrityError as error:
             self._handle_integrity_error(error)
 
-    async def update_fields(self, user_id:int, fields: dict[str, t.Any], return_result:bool = True) -> m.User | None:
+    async def update_fields(self, user_id:int, fields: dict[str, t.Any], return_result:bool = True) -> domain.User | None:
         """Update specific fields of a user by their ID.
 
         Args:
@@ -142,8 +162,8 @@ class MySQLUserRepository(repo.UserRepository):
         if not existing_user:
             raise e.UserDoesNotExist('User with given ID does not exist!')
         
-        q = (sqlm.update(m.User)
-            .where(m.User.id == user_id)
+        q = (sqlm.update(db.User)
+            .where(db.User.id == user_id)
             .values(**fields)
             .execution_options(synchronize_session='fetch')
         )
@@ -151,6 +171,125 @@ class MySQLUserRepository(repo.UserRepository):
             await self.session.execute(q)
             await self.session.commit()
             if return_result:
-                return await self.get_by_id(user_id)
+                user = await self.get_by_id(user_id)
+                return domain.User.model_validate(user) if user else None
         except sqlexc.IntegrityError as error:
             self._handle_integrity_error(error)
+
+
+
+class RedisCacheUserRepository(repo.UserRepository):
+    def __init__(self, user_db_repo: repo.UserRepository, connection: Redis):
+        self.user_db = user_db_repo
+        self.redis = connection
+
+    async def __clear_userlist_cache(self):
+        cursor = b'0'
+        while cursor:
+            cursor, keys = await self.redis.scan(0, "users:list:*")
+            if keys:
+                await self.redis.delete(*keys)
+
+    async def get_by_id(self, user_id: int) -> domain.User | None:
+        key = f'user:{user_id}'
+        raw = await self.redis.get(key)
+        if raw:
+            logger.debug(f'[CACHE: USERS] hit id={user_id}')
+            try:
+                return domain.User.model_validate_json(raw)
+            except p.ValidationError:
+                logger.debug(f'[CACHE: USERS] cache record for user id={user_id} contains corrupt data. Fallback')
+
+        user = await self.user_db.get_by_id(user_id)
+        if user:
+            logger.debug(f'[CACHE: USERS] miss id={user_id} - priming')
+            await self.redis.set(key, user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+            await self.redis.set(f'user:username:{user.username}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+        return user
+
+    async def get_by_username(self, username: str) -> domain.User | None:
+        key = f'user:username:{username}'
+        raw = await self.redis.get(key)
+        if raw:
+            logger.debug(f'[CACHE: USERS] hit username={username}')
+            try:
+                return domain.User.model_validate_json(raw)
+            except Exception:
+                logger.debug(f'[CACHE: USERS] cache record for username={username} contains corrupt data. Fallback')
+
+        user = await self.user_db.get_by_username(username)
+        if user:
+            logger.debug(f'[CACHE: USERS] miss username={username} - priming')
+            await self.redis.set(key, user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+            await self.redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+        return user
+
+    async def list(self, limit: int = 100, offset: int = 0) -> list[domain.User]:
+        key = f'users:list:offset={offset}:limit={limit}'
+        raw = await self.redis.get(key)
+        if raw:
+            logger.debug('[CACHE: USERS] hit users:all')
+            try:
+                data = json.loads(raw)
+                return [domain.User.model_validate(item) for item in data]
+            except Exception:
+                pass
+        users = await self.user_db.list(limit=limit, offset=offset)
+        logger.debug(f'[CACHE: USERS] miss {key} - priming')
+        await self.redis.set(key, json.dumps([u.model_dump() for u in users]), ex=USER_CACHE_TTL_SECONDS)
+        return users
+    
+    async def create(self, user: domain.User, return_result:bool = True) -> domain.User | None:
+        created = await self.user_db.create(user, return_result=return_result)
+        if created:
+            logger.debug(f'[CACHE: USERS] create priming id={created.id} username={created.username}')
+            await self.redis.set(f'user:{created.id}', created.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+            await self.redis.set(f'user:username:{created.username}', created.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+            await self.__clear_userlist_cache()
+        return created
+
+    async def update(self, user: domain.User, return_result:bool = True) -> domain.User | None:
+        updated = await self.user_db.update(user, return_result=return_result)
+        if updated:
+            id_key = f'user:{updated.id}'
+            cached_raw = await self.redis.get(id_key)
+            if cached_raw:
+                try:
+                    cached_user = domain.User.model_validate_json(cached_raw)
+                    await self.redis.delete(f'user:username:{cached_user.username}')
+                except Exception:
+                    pass
+
+            logger.debug(f'[CACHE: USERS] update priming id={updated.id} username={updated.username}')
+
+            updated_raw = updated.model_dump_json()
+            await self.redis.set(id_key, updated_raw, ex=USER_CACHE_TTL_SECONDS)
+            await self.redis.set(f'user:username:{updated.username}', updated_raw, ex=USER_CACHE_TTL_SECONDS)
+            await self.__clear_userlist_cache()
+        return updated
+
+    async def update_fields(self, user_id:int, fields: dict[str, t.Any], return_result:bool = True) -> domain.User | None:
+        updated = await self.user_db.update_fields(user_id, fields, return_result=return_result)
+        if updated:
+            # refresh caches similar to update
+            logger.debug(f'[CACHE: USERS] update_fields priming id={updated.id} username={updated.username}')
+            updated_raw = updated.model_dump_json()
+            await self.redis.set(f'user:{updated.id}', updated_raw, ex=USER_CACHE_TTL_SECONDS)
+            await self.redis.set(f'user:username:{updated.username}', updated_raw, ex=USER_CACHE_TTL_SECONDS)
+            await self.__clear_userlist_cache()
+        return updated
+
+    async def delete(self, user_id: int) -> None:
+        # fetch user to know username and remove both keys
+        user = await self.user_db.get_by_id(user_id)
+        await self.user_db.delete(user_id)
+        logger.debug(f'[CACHE: USERS] delete id={user_id}')
+        await self.redis.delete(f'user:{user_id}')
+        if user:
+            await self.redis.delete(f'user:username:{user.username}')
+        await self.__clear_userlist_cache()
+
+
+
+
+    

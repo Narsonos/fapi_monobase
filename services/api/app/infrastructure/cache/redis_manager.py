@@ -1,5 +1,5 @@
 from app.common.config import Config
-import app.infrastructure.db.base as mgrs
+import app.infrastructure.interfaces as mgrs
 from redis.asyncio.client import Redis
 
 

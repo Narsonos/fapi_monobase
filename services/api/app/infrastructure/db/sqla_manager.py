@@ -1,6 +1,6 @@
 from app.common.config import Config
 import app.infrastructure.exceptions as exc
-import app.infrastructure.db.base as mgrs
+import app.infrastructure.interfaces as mgrs
 
 import typing as t
 import sqlmodel as sqlm 

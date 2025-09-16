@@ -26,6 +26,7 @@ class Config():
 
     #Redis
     REDIS_PASS = os.getenv("REDIS_PASS")
+    USER_CACHE_TTL_SECONDS = int(os.getenv("USER_CACHE_TTL_SECONDS", "300"))
 
     #MySQL Template
     DB_USER = os.getenv("MYSQL_USER")
