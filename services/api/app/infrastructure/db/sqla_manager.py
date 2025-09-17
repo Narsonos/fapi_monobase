@@ -11,7 +11,7 @@ import asyncio
 import contextlib
 import logging
 
-logger = logging.getLogger('app.db')
+logger = logging.getLogger('app.storage')
 
 
 
@@ -29,7 +29,7 @@ class SQLAlchemySessionManager(mgrs.SessionManagerInterface[AsyncConnection, Asy
 
     async def close(self) -> None:
         if self._engine is None:
-            raise exc.CustomDatabaseException("[DB Manager] DatabaseSessionManager is not initizalized!")
+            raise exc.StorageNotInitialzied("[DB Manager] DatabaseSessionManager is not initizalized!")
         await self._engine.dispose()
         self._engine = None 
         self._sessionmaker = None
@@ -37,7 +37,7 @@ class SQLAlchemySessionManager(mgrs.SessionManagerInterface[AsyncConnection, Asy
     @contextlib.asynccontextmanager
     async def connect(self) -> t.AsyncIterator[AsyncConnection]:
         if self._engine is None:
-            raise exc.CustomDatabaseException("[DB Manager] DatabaseSessionManager is not initizalized!")
+            raise exc.StorageNotInitialzied("[DB Manager] DatabaseSessionManager is not initizalized!")
 
         async with self._engine.begin() as connection:
             try:
@@ -49,7 +49,7 @@ class SQLAlchemySessionManager(mgrs.SessionManagerInterface[AsyncConnection, Asy
     @contextlib.asynccontextmanager
     async def session(self, **kwargs) -> t.AsyncIterator[AsyncSession]:
         if self._sessionmaker is None:
-            raise exc.CustomDatabaseException("[DB Manager] DatabaseSessionManager is not initizalized!")
+            raise exc.StorageNotInitialzied("[DB Manager] DatabaseSessionManager is not initizalized!")
 
         if kwargs:
             session = AsyncSession(**kwargs)
@@ -69,34 +69,25 @@ class SQLAlchemySessionManager(mgrs.SessionManagerInterface[AsyncConnection, Asy
         async with self.session() as session:
             yield session
 
-    @staticmethod
-    async def get_engine_by_session(session: AsyncSession):
-        """Gets sqlalchemy session binding"""
-        engine = session.get_bind()
-        return engine
-
     
-    async def wait_for_db(self):
+    async def wait_for_startup(self, attempts:int = 5, interval_sec: int = 5):
         """Sends SELECT 1 to a DB and waits till response with retries"""
 
         retries = 0
-        max_retries = Config.DB_WAIT_MAX_RETRIES
-        wait_interval = Config.DB_WAIT_INTERVAL_SECONDS
         async with self.session() as session:
-            while retries < max_retries:
+            while retries < attempts:
                 try:
                     await session.execute(sqlm.text("SELECT 1"))
                     logger.info("[WAIT FOR DB] SELECT 1 Executed -> Database is up and running!")
-                    return True
                 except Exception as e:
                     logger.debug(e)
-                    logger.info(f"[WAIT FOR DB] Database is not ready yet, retrying ({retries}/{max_retries})...")
+                    logger.info(f"[WAIT FOR DB] Database is not ready yet, retrying ({retries}/{attempts})...")
                     retries += 1
-                    await asyncio.sleep(wait_interval)
-            logger.info(f"[WAIT FOR DB] Database is not available after all {max_retries} retries. All other components will launch regardless...")
-            return False
+                    await asyncio.sleep(interval_sec)
+            logger.info(f"[WAIT FOR DB] Database is not available after all {attempts} retries. All other components will launch regardless...")
+            raise exc.StorageBootError(f"Database failed to boot within {retries*interval_sec}sec!")
 
-    async def init_db(self):
+    async def initialize_data_structures(self):
         """Creates tables using SQLModel models"""
         logger.info('[INIT DB] Creating database tables...(if needed)')
         async with self.connect() as conn:

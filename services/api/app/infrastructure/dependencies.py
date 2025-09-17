@@ -25,3 +25,14 @@ CacheDependency = t.Annotated[CacheConnectionType, Depends(CacheManager.connect)
 UserDB = repos.MySQLUserRepository
 UserRepository = repos.RedisCacheUserRepository
 SessionRepository = repos.RedisSessionRepository
+
+def get_user_repo(dbsession: DatabaseDependency, cache: CacheDependency):
+    user_db = UserDB(dbsession)
+    user_repo = UserRepository(user_db, cache)
+    return user_repo
+
+def get_session_repo(cache: CacheDependency):
+    return SessionRepository(cache)
+
+UserRepoDependency = t.Annotated[UserRepository, Depends(get_user_repo)]
+SessionRepoDependency = t.Annotated[SessionRepository, Depends(get_session_repo)]

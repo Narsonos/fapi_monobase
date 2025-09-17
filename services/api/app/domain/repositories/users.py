@@ -1,5 +1,6 @@
 from abc import abstractmethod, ABC
 import app.domain.models.users as m
+import app.presentation.schemas as schemas
 import typing as t
 
 class UserRepository(ABC):
@@ -12,7 +13,7 @@ class UserRepository(ABC):
     async def get_by_username(self, username: str) -> m.User | None: ...
 
     @abstractmethod
-    async def list(self, limit: int = 100, offset: int = 0) -> list[m.User]: ...
+    async def list(self, limit: int = 100, offset: int = 0, filters: schemas.UserFilterSchema = None, filter_mode: t.Literal["and","or"] = "and") -> list[m.User]: ...
     
     @abstractmethod
     async def create(self, user: m.User, return_result:bool = True) -> m.User | None: ...
@@ -26,4 +27,5 @@ class UserRepository(ABC):
     @abstractmethod
     async def delete(self, user_id: int) -> None: ...
 
-
+    @abstractmethod
+    async def ensure_admin_exists(self) -> None: ...

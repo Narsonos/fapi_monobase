@@ -1,23 +1,30 @@
+import app.presentation.schemas as schemas
 import app.domain.repositories as repo
 import app.domain.models as domain
 import app.domain.exceptions as e
+import app.domain.services as domsvc
 import app.infrastructure.models as db
 
+
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel.sql.expression import SelectOfScalar
 import sqlalchemy.exc as sqlexc
 import sqlmodel as sqlm
 import typing as t
 import pydantic as p
 
 from redis.asyncio import Redis
-import json
+import json, hashlib
 import logging
 from app.common.config import Config
 
 # Cache TTL (seconds)
 USER_CACHE_TTL_SECONDS = Config.USER_CACHE_TTL_SECONDS
+DEFAULT_ADMIN_USERNAME = Config.DEFAULT_ADMIN_USERNAME
+DEFAULT_ADMIN_PASSWORD = Config.DEFAULT_ADMIN_PASSWORD
 
 logger = logging.getLogger('app')
+
 
 class MySQLUserRepository(repo.UserRepository):
     """Repository implementation for User model using MySQL via SQLAlchemy AsyncSession.
@@ -50,7 +57,16 @@ class MySQLUserRepository(repo.UserRepository):
             error_code, msg = error.orig.args
             if error_code == 1062 and 'username' in msg:
                 raise e.UserAlreadyExists(f"Another user with this username already exists") from error
-        raise error
+            if error_code == 1062 and 'id' in msg:
+                raise e.UserAlreadyExists(f"Another user with this id already exists") from error
+        raise e.UserIntegrityError("Action causes integrity constraint violation for User model. Cancelled", orig=error.orig)
+
+    def _apply_filters(self, select_query: SelectOfScalar[db.User], filters: schemas.UserFilterSchema, filter_mode: t.Literal["and","or"] = "and"):
+        d = filters.model_dump(exclude_none=True)
+        f = sqlm.and_ if filter_mode == "and" else sqlm.or_
+        where_filters = [getattr(db.User, key)==value for key,value in d.items()]
+        return select_query.where(f(*where_filters)) if where_filters else select_query
+            
 
     async def get_by_id(self, user_id: int) -> domain.User | None:
         """Retrieve a user by their unique ID.
@@ -81,13 +97,16 @@ class MySQLUserRepository(repo.UserRepository):
         )).one_or_none()
         return domain.User.model_validate(user) if user is not None else None
 
-    async def list(self, limit: int = 100, offset: int = 0) -> list[domain.User]:
+    async def list(self, limit: int = 100, offset: int = 0, filters: schemas.UserFilterSchema = None, filter_mode: t.Literal["and","or"] = "and") -> list[domain.User]:
         """Retrieve all users in the system.
 
         Returns:
             list[User]: List of all users.
         """
-        q = sqlm.select(db.User).limit(limit).offset(offset)
+        q = sqlm.select(db.User)
+        if filters:
+            q = self._apply_filters(q, filters, filter_mode)
+        q = q.limit(limit).offset(offset)
         users_db = (await self.session.scalars(q)).all()
         return [domain.User.model_validate(u) for u in users_db]
 
@@ -176,7 +195,33 @@ class MySQLUserRepository(repo.UserRepository):
         except sqlexc.IntegrityError as error:
             self._handle_integrity_error(error)
 
+    async def delete(self, user_id: int):
+        """Update specific fields of a user by their ID.
 
+        Args:
+            user_id (int): The ID of the user to update.
+
+        Returns:
+            None.
+
+        Raises:
+            UserDoesNotExist: If no user with the given ID exists.
+        """
+        existing_user = await self.get_by_id(user_id)
+        if not existing_user:
+            raise e.UserDoesNotExist('User with given ID does not exist!')
+        await self.session.delete(existing_user)
+        await self.session.commit()
+
+    async def ensure_admin_exists(self, hasher: domsvc.PasswordHasher):
+        admins = await self.list(limit=1, filters=schemas.UserFilterSchema(role="admin"))
+        if not admins:
+            default_admin = db.User(
+                username=DEFAULT_ADMIN_USERNAME,
+                password_hash=hasher.hash(DEFAULT_ADMIN_PASSWORD)
+            )
+            await self.create(default_admin)
+    
 
 class RedisCacheUserRepository(repo.UserRepository):
     def __init__(self, user_db_repo: repo.UserRepository, connection: Redis):
@@ -224,17 +269,22 @@ class RedisCacheUserRepository(repo.UserRepository):
             await self.redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
         return user
 
-    async def list(self, limit: int = 100, offset: int = 0) -> list[domain.User]:
-        key = f'users:list:offset={offset}:limit={limit}'
+    async def list(self, limit: int = 100, offset: int = 0, filters: schemas.UserFilterSchema = None, filter_mode: t.Literal["and","or"] = "and") -> list[domain.User]:
+        pagination = f':offset={offset}:limit={limit}'
+        filters_dict = filters.model_dump(exclude_none=True) if filters else None
+        filters_json = json.dumps(filters_dict, sort_keys=True) if filters_dict else ""
+        full_hash = hashlib.sha256((pagination + filters_json).encode()).hexdigest()
+        key = f'users:list:{full_hash}'
+
         raw = await self.redis.get(key)
         if raw:
-            logger.debug('[CACHE: USERS] hit users:all')
+            logger.debug(f'[CACHE: USERS] hit {key}')
             try:
                 data = json.loads(raw)
                 return [domain.User.model_validate(item) for item in data]
             except Exception:
                 pass
-        users = await self.user_db.list(limit=limit, offset=offset)
+        users = await self.user_db.list(limit=limit, offset=offset, filters=filters, filter_mode=filter_mode)
         logger.debug(f'[CACHE: USERS] miss {key} - priming')
         await self.redis.set(key, json.dumps([u.model_dump() for u in users]), ex=USER_CACHE_TTL_SECONDS)
         return users
@@ -246,7 +296,7 @@ class RedisCacheUserRepository(repo.UserRepository):
             await self.redis.set(f'user:{created.id}', created.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
             await self.redis.set(f'user:username:{created.username}', created.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
             await self.__clear_userlist_cache()
-        return created
+        return created if return_result else None
 
     async def update(self, user: domain.User, return_result:bool = True) -> domain.User | None:
         updated = await self.user_db.update(user, return_result=return_result)
@@ -266,7 +316,7 @@ class RedisCacheUserRepository(repo.UserRepository):
             await self.redis.set(id_key, updated_raw, ex=USER_CACHE_TTL_SECONDS)
             await self.redis.set(f'user:username:{updated.username}', updated_raw, ex=USER_CACHE_TTL_SECONDS)
             await self.__clear_userlist_cache()
-        return updated
+        return updated if return_result else None
 
     async def update_fields(self, user_id:int, fields: dict[str, t.Any], return_result:bool = True) -> domain.User | None:
         updated = await self.user_db.update_fields(user_id, fields, return_result=return_result)
@@ -277,7 +327,7 @@ class RedisCacheUserRepository(repo.UserRepository):
             await self.redis.set(f'user:{updated.id}', updated_raw, ex=USER_CACHE_TTL_SECONDS)
             await self.redis.set(f'user:username:{updated.username}', updated_raw, ex=USER_CACHE_TTL_SECONDS)
             await self.__clear_userlist_cache()
-        return updated
+        return updated if return_result else None
 
     async def delete(self, user_id: int) -> None:
         # fetch user to know username and remove both keys
@@ -289,6 +339,9 @@ class RedisCacheUserRepository(repo.UserRepository):
             await self.redis.delete(f'user:username:{user.username}')
         await self.__clear_userlist_cache()
 
+    async def ensure_admin_exists(self, hasher: domsvc.PasswordHasher):
+        await self.user_db.ensure_admin_exists(hasher)
+    
 
 
 

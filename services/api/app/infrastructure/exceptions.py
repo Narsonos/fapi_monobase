@@ -1,13 +1,22 @@
 from app.common.exceptions import AppBaseException
 
-class CustomDatabaseException(AppBaseException):
-    """Base for exceptions raised manually in database-related functions"""
-    pass
+class CustomStorageException(AppBaseException):
+    """Base for exceptions raised manually in storage services (databases, caches)"""
 
-class TableNameIsTooLong(CustomDatabaseException):
+### Databases
+class DatabaseException(CustomStorageException): ...
+
+class DatabaseQueryException(DatabaseException): ...
+
+class TableNameIsTooLong(DatabaseQueryException):
     """If table name that is generated automatically based off of .xlsx sheet and file name is too long"""
-    pass
 
-class UnsupportedDialectException(CustomDatabaseException):
+class UnsupportedDialectException(DatabaseQueryException):
     """Can be used to show that chosen SQL dialect is not supported by the function"""
-    pass
+
+### Startup
+class StorageBootError(CustomStorageException):
+    '''Storage service failed to boot within given time'''
+
+class StorageNotInitialzied(CustomStorageException):
+    '''Storage service has been booted successfully, yet seems not to be initialized entirely'''

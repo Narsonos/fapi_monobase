@@ -5,12 +5,13 @@ import asyncio
 from contextlib import asynccontextmanager
 
 #Project files
-from app.config import Config
-from app.routers import auth, user
-from app.db import sessManagerObject, wait_for_db, init_db, redis_client
-from app.security.base import create_admin_on_startup_if_not_exists, CurrentUserDependency
-from app.models.common import User
+from app.common.config import Config
+import app.common.logs as logs
+from app.infrastructure.dependencies import DatabaseManager, CacheManager
+from app.application.dependencies import UserRepoDependency, PasswordHasher, CurrentUserDependency
 import app.application.exceptions as appexc
+import app.presentation.routers as routers
+import app.presentation.schemas as schemas
 
 #Misc
 import datetime
@@ -19,7 +20,6 @@ import os
 
 #Logging
 import logging
-import logs.log
 import loguru # type: ignore
 
 
@@ -31,32 +31,32 @@ import loguru # type: ignore
 ###################
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI, user_repo: UserRepoDependency):
     logger.info(f'[APP: Startup] Startup began...')
 
+    #Cache
+    await CacheManager.wait_for_startup()
+    await CacheManager.initialize_data_structures()
+
     #Database
-    await wait_for_db()    
-    await init_db()
-    await create_admin_on_startup_if_not_exists()
-    #Redis
-    app.state.redis = redis_client
+    await DatabaseManager.wait_for_startup(attempts=Config.DB_WAIT_MAX_RETRIES, interval_sec=Config.DB_WAIT_INTERVAL_SECONDS)
+    await DatabaseManager.initialize_data_structures()
+    
+    #Default_admin
+    await user_repo.ensure_admin_exists(PasswordHasher())
 
     logger.info(f'[APP: Startup] Startup finished!')
     yield
-    await app.state.redis.close() #exit redis
-    if sessManagerObject._engine is not None:
-        await sessManagerObject.close() #exit db
+    await CacheManager.close()
+    await DatabaseManager.close()
     
     
 
-logs.log.init_loggers()
+logs.init_loggers()
 logger = logging.getLogger('app')
 
-GIT_COMMIT = os.getenv("GIT_COMMIT")
-MODE = os.getenv("MODE")
-
 app = FastAPI(
-    title = f'{Config.APP_NAME} commit {GIT_COMMIT if GIT_COMMIT else "None"}',
+    title = f'{Config.APP_NAME} commit {Config.GIT_COMMIT}',
     keep_blank_values_in_query_string=True,
     swagger_ui_parameters={
         "defaultModelsExpandDepth": -1,
@@ -67,8 +67,9 @@ app = FastAPI(
     root_path=f"/{Config.APP_NAME}"
 )
 
-app.include_router(user.router)
-app.include_router(auth.router)
+app.include_router(routers.AuthRouter)
+app.include_router(routers.UserRouter)
+
 
 
 @app.exception_handler(appexc.AuthBaseException)
@@ -87,7 +88,7 @@ async def auth_exception_handler(request, exc: appexc.AuthBaseException):
 ########################################
 
 @app.get("/me")
-async def whoami(current_user:CurrentUserDependency) -> User:
+async def whoami(current_user:CurrentUserDependency) -> schemas.UserDTO:
     return current_user
 
 

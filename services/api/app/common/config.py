@@ -13,6 +13,8 @@ class Config():
     UVICORN_PORT = 8000
     UVICORN_HOST = '0.0.0.0'
     BASE_URL_LOCAL = f"http://{UVICORN_HOST}:{UVICORN_PORT}" #Utilized by telegram proxy mechanisms
+    GIT_COMMIT = os.getenv("GIT_COMMIT", "[commit hash unknown]")
+    MODE = os.getenv("MODE", "Local build")
 
     #Security settings
     DEFAULT_ADMIN_USERNAME = os.getenv("DEFAULT_ADMIN_USERNAME")

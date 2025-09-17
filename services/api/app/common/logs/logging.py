@@ -29,7 +29,7 @@ def configure_logger(name: str, stream_level=logging.INFO, file_level=logging.DE
 def init_loggers():
     """Use this func to add or edit list of used loggers"""
     applogger = configure_logger('app')                      
-    db_logger = configure_logger('app.db')          
+    storage = configure_logger('app.storage')          
     queue_logger = configure_logger('app.queue')
     queue_logger.propagate = False 
 
