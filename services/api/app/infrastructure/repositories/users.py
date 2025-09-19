@@ -26,7 +26,7 @@ DEFAULT_ADMIN_PASSWORD = Config.DEFAULT_ADMIN_PASSWORD
 logger = logging.getLogger('app')
 
 
-class MySQLUserRepository(repo.UserRepository):
+class SQLAUserRepository(repo.IUserRepository):
     """Repository implementation for User model using MySQL via SQLAlchemy AsyncSession.
 
     This class handles CRUD operations for users and converts database-specific
@@ -67,6 +67,12 @@ class MySQLUserRepository(repo.UserRepository):
         where_filters = [getattr(db.User, key)==value for key,value in d.items()]
         return select_query.where(f(*where_filters)) if where_filters else select_query
             
+    async def _get_by_id(self, user_id: int) -> db.User | None:
+        """Gets user by ID. For internal use, does not convert to domain level model."""
+        return (await self.session.scalars(
+            sqlm.select(db.User).where(db.User.id == user_id)
+        )).one_or_none()
+
 
     async def get_by_id(self, user_id: int) -> domain.User | None:
         """Retrieve a user by their unique ID.
@@ -77,10 +83,8 @@ class MySQLUserRepository(repo.UserRepository):
         Returns:
             User | None: The user object if found, else None.
         """
-        user = (await self.session.scalars(
-            sqlm.select(db.User).where(db.User.id == user_id)
-        )).one_or_none()
-        return domain.User.model_validate(user) if user is not None else None
+        user = await self._get_by_id(user_id=user_id)
+        return domain.User.model_validate(user, from_attributes=True) if user is not None else None
         
 
     async def get_by_username(self, username: str) -> domain.User | None:
@@ -95,7 +99,7 @@ class MySQLUserRepository(repo.UserRepository):
         user = (await self.session.scalars(
             sqlm.select(db.User).where(db.User.username == username)
         )).one_or_none()
-        return domain.User.model_validate(user) if user is not None else None
+        return domain.User.model_validate(user, from_attributes=True) if user is not None else None
 
     async def list(self, limit: int = 100, offset: int = 0, filters: schemas.UserFilterSchema = None, filter_mode: t.Literal["and","or"] = "and") -> list[domain.User]:
         """Retrieve all users in the system.
@@ -108,132 +112,76 @@ class MySQLUserRepository(repo.UserRepository):
             q = self._apply_filters(q, filters, filter_mode)
         q = q.limit(limit).offset(offset)
         users_db = (await self.session.scalars(q)).all()
-        return [domain.User.model_validate(u) for u in users_db]
+        return [domain.User.model_validate(u, from_attributes=True) for u in users_db]
 
 
-    async def create(self, user: domain.User, return_result: bool = True) -> domain.User | None:
-        """Create a new user in the database.
-
+    async def create(self, user: domain.User) -> domain.User:
+        """Creates a given user in the database
         Args:
-            user (User): The user object to create.
-            return_result (bool, optional): Whether to refresh and return the created user. Defaults to True.
+            user: User to save
 
         Returns:
-            User | None: The created user if `return_result` is True, else None.
-
-        Raises:
-            UserAlreadyExists: If a user with the same username already exists.
+            User: a created user.
         """
         try:
-            user = db.User.model_validate(user)
             self.session.add(user)
             await self.session.commit()
-            if return_result: 
-                await self.session.refresh(user)
-                return domain.User.model_validate(user)
-        except sqlexc.IntegrityError as error:
-            self._handle_integrity_error(error)
+            await self.session.refresh(user)
+            return domain.User.model_validate(user, from_attributes=True)
+        except sqlexc.IntegrityError as e:
+            self._handle_integrity_error(e)
 
-    async def update(self, user: domain.User, return_result: bool = True) -> domain.User | None:
-        """Update an existing user by merging changes.
-
-        Args:
-            user (User): The user object with updated fields. Must have a valid ID.
-            return_result (bool, optional): Whether to refresh and return the updated user. Defaults to True.
-
-        Returns:
-            User | None: The updated user if `return_result` is True, else None.
-
-        Raises:
-            UserDoesNotExist: If no user with the given ID exists.
-            UserAlreadyExists: If updating the username causes a duplicate.
-        """
-        existing_user = await self.get_by_id(user.id)
-        if not existing_user:
-            raise e.UserDoesNotExist('User with given ID does not exist!')
-        
-        try:
-            user = db.User.model_validate(user)
-            await self.session.merge(user)
-            await self.session.commit()
-            if return_result: 
-                await self.session.refresh(user)
-                return domain.User.model_validate(user)        
-        except sqlexc.IntegrityError as error:
-            self._handle_integrity_error(error)
-
-    async def update_fields(self, user_id:int, fields: dict[str, t.Any], return_result:bool = True) -> domain.User | None:
-        """Update specific fields of a user by their ID.
-
-        Args:
-            user_id (int): The ID of the user to update.
-            fields (dict[str, Any]): A dictionary of field names and values to update.
-            return_result (bool, optional): Whether to return the updated user. Defaults to True.
-
-        Returns:
-            User | None: The updated user if `return_result` is True, else None.
-
-        Raises:
-            UserDoesNotExist: If no user with the given ID exists.
-            UserAlreadyExists: If updating the username causes a duplicate.
-        """
-        existing_user = await self.get_by_id(user_id)
-        if not existing_user:
-            raise e.UserDoesNotExist('User with given ID does not exist!')
-        
-        q = (sqlm.update(db.User)
-            .where(db.User.id == user_id)
-            .values(**fields)
-            .execution_options(synchronize_session='fetch')
+    async def update(self, user: domain.User) -> domain.User:
+        result = await self.session.execute(
+            sqlm.update(db.User)
+            .where(db.User.id == user.id, db.User.version == user.version)
+            .values(**user.model_dump(exclude={"version"}), version=user.version+1)
         )
-        try:
-            await self.session.execute(q)
-            await self.session.commit()
-            if return_result:
-                user = await self.get_by_id(user_id)
-                return domain.User.model_validate(user) if user else None
-        except sqlexc.IntegrityError as error:
-            self._handle_integrity_error(error)
+        if result.rowcount == 0:
+            raise e.VersionError("User was updated concurrently. Your operation cancelled -> Retry.")
+        await self.session.commit()
+        user.version += 1
+        return user
 
-    async def delete(self, user_id: int):
-        """Update specific fields of a user by their ID.
+    async def delete(self, user: domain.User):
+        """Delete a user from database.
 
         Args:
-            user_id (int): The ID of the user to update.
+            user: User to delete
 
         Returns:
             None.
-
-        Raises:
-            UserDoesNotExist: If no user with the given ID exists.
         """
-        existing_user = await self.get_by_id(user_id)
-        if not existing_user:
-            raise e.UserDoesNotExist('User with given ID does not exist!')
-        await self.session.delete(existing_user)
+        user = db.User.model_validate(user)
+        await self.session.delete(user)
         await self.session.commit()
 
-    async def ensure_admin_exists(self, hasher: domsvc.PasswordHasher):
+    async def ensure_admin_exists(self, hasher: domsvc.IPasswordHasher):
         admins = await self.list(limit=1, filters=schemas.UserFilterSchema(role="admin"))
         if not admins:
-            default_admin = db.User(
+            default_admin = domain.User(
                 username=DEFAULT_ADMIN_USERNAME,
-                password_hash=hasher.hash(DEFAULT_ADMIN_PASSWORD)
+                password_hash=hasher.hash(DEFAULT_ADMIN_PASSWORD),
+                role="admin",
+                status="active"
             )
             await self.create(default_admin)
     
 
-class RedisCacheUserRepository(repo.UserRepository):
-    def __init__(self, user_db_repo: repo.UserRepository, connection: Redis):
+class RedisCacheUserRepository(repo.IUserRepository):
+    def __init__(self, user_db_repo: repo.IUserRepository, connection: Redis):
         self.user_db = user_db_repo
         self.redis = connection
 
     async def __clear_userlist_cache(self):
-        cursor = b'0'
+        logger.debug('[CACHE: USERS] Dropping users:list cache')
+        cursor = "0"
         while cursor:
-            cursor, keys = await self.redis.scan(0, "users:list:*")
+            cursor, keys = await self.redis.scan(cursor, "users:list:*")
             if keys:
                 await self.redis.delete(*keys)
+            if cursor == 0:
+                break
 
     async def get_by_id(self, user_id: int) -> domain.User | None:
         key = f'user:{user_id}'
@@ -289,57 +237,40 @@ class RedisCacheUserRepository(repo.UserRepository):
         await self.redis.set(key, json.dumps([u.model_dump() for u in users]), ex=USER_CACHE_TTL_SECONDS)
         return users
     
-    async def create(self, user: domain.User, return_result:bool = True) -> domain.User | None:
-        created = await self.user_db.create(user, return_result=return_result)
-        if created:
-            logger.debug(f'[CACHE: USERS] create priming id={created.id} username={created.username}')
-            await self.redis.set(f'user:{created.id}', created.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
-            await self.redis.set(f'user:username:{created.username}', created.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
-            await self.__clear_userlist_cache()
-        return created if return_result else None
-
-    async def update(self, user: domain.User, return_result:bool = True) -> domain.User | None:
-        updated = await self.user_db.update(user, return_result=return_result)
-        if updated:
-            id_key = f'user:{updated.id}'
-            cached_raw = await self.redis.get(id_key)
-            if cached_raw:
-                try:
-                    cached_user = domain.User.model_validate_json(cached_raw)
-                    await self.redis.delete(f'user:username:{cached_user.username}')
-                except Exception:
-                    pass
-
-            logger.debug(f'[CACHE: USERS] update priming id={updated.id} username={updated.username}')
-
-            updated_raw = updated.model_dump_json()
-            await self.redis.set(id_key, updated_raw, ex=USER_CACHE_TTL_SECONDS)
-            await self.redis.set(f'user:username:{updated.username}', updated_raw, ex=USER_CACHE_TTL_SECONDS)
-            await self.__clear_userlist_cache()
-        return updated if return_result else None
-
-    async def update_fields(self, user_id:int, fields: dict[str, t.Any], return_result:bool = True) -> domain.User | None:
-        updated = await self.user_db.update_fields(user_id, fields, return_result=return_result)
-        if updated:
-            # refresh caches similar to update
-            logger.debug(f'[CACHE: USERS] update_fields priming id={updated.id} username={updated.username}')
-            updated_raw = updated.model_dump_json()
-            await self.redis.set(f'user:{updated.id}', updated_raw, ex=USER_CACHE_TTL_SECONDS)
-            await self.redis.set(f'user:username:{updated.username}', updated_raw, ex=USER_CACHE_TTL_SECONDS)
-            await self.__clear_userlist_cache()
-        return updated if return_result else None
-
-    async def delete(self, user_id: int) -> None:
-        # fetch user to know username and remove both keys
-        user = await self.user_db.get_by_id(user_id)
-        await self.user_db.delete(user_id)
-        logger.debug(f'[CACHE: USERS] delete id={user_id}')
-        await self.redis.delete(f'user:{user_id}')
+    async def create(self, user: domain.User) -> domain.User:
+        user = await self.user_db.create(user)
         if user:
-            await self.redis.delete(f'user:username:{user.username}')
+            logger.debug(f'[CACHE: USERS] User id={user.id}, username={user.username} created. Priming.')
+            await self.redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+            await self.redis.set(f'user:username:{user.username}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+            await self.__clear_userlist_cache()
+        return user
+
+    async def update(self, user: domain.User) -> domain.User:
+        old = await self.redis.get(f'user:{user.id}')
+        old_user = domain.User.model_validate_json(old) if old else None
+        user = await self.user_db.update(user)
+        if user:
+            logger.debug(f'[CACHE: USERS] User id={user.id}, username={user.username} updated. Priming.')
+            async with self.redis.pipeline() as pipe:
+                pipe.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+                if old_user:
+                    pipe.delete(f'user:username:{old_user.username}')
+                pipe.set(f'user:username:{user.username}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+                await pipe.execute()
+            await self.__clear_userlist_cache()
+        return user
+
+
+    async def delete(self, user: domain.User) -> None:
+        # fetch user to know username and remove both keys
+        await self.user_db.delete(user)
+        logger.debug(f'[CACHE: USERS] delete id={user.id}')
+        await self.redis.delete(f'user:{user.id}')
+        await self.redis.delete(f'user:username:{user.username}')
         await self.__clear_userlist_cache()
 
-    async def ensure_admin_exists(self, hasher: domsvc.PasswordHasher):
+    async def ensure_admin_exists(self, hasher: domsvc.IPasswordHasher):
         await self.user_db.ensure_admin_exists(hasher)
     
 

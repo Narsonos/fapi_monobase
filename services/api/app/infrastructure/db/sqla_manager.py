@@ -79,6 +79,7 @@ class SQLAlchemySessionManager(mgrs.SessionManagerInterface[AsyncConnection, Asy
                 try:
                     await session.execute(sqlm.text("SELECT 1"))
                     logger.info("[WAIT FOR DB] SELECT 1 Executed -> Database is up and running!")
+                    return
                 except Exception as e:
                     logger.debug(e)
                     logger.info(f"[WAIT FOR DB] Database is not ready yet, retrying ({retries}/{attempts})...")

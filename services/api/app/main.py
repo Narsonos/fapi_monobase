@@ -7,11 +7,12 @@ from contextlib import asynccontextmanager
 #Project files
 from app.common.config import Config
 import app.common.logs as logs
-from app.infrastructure.dependencies import DatabaseManager, CacheManager
+from app.infrastructure.dependencies import DatabaseManager, CacheManager, get_user_repo
 from app.application.dependencies import UserRepoDependency, PasswordHasher, CurrentUserDependency
 import app.application.exceptions as appexc
 import app.presentation.routers as routers
 import app.presentation.schemas as schemas
+import app.domain.exceptions as domexc
 
 #Misc
 import datetime
@@ -31,7 +32,7 @@ import loguru # type: ignore
 ###################
 
 @asynccontextmanager
-async def lifespan(app: FastAPI, user_repo: UserRepoDependency):
+async def lifespan(app: FastAPI):
     logger.info(f'[APP: Startup] Startup began...')
 
     #Cache
@@ -43,7 +44,9 @@ async def lifespan(app: FastAPI, user_repo: UserRepoDependency):
     await DatabaseManager.initialize_data_structures()
     
     #Default_admin
-    await user_repo.ensure_admin_exists(PasswordHasher())
+    async with DatabaseManager.session() as session:
+        user_repo = get_user_repo(session, CacheManager.connect())
+        await user_repo.ensure_admin_exists(PasswordHasher())
 
     logger.info(f'[APP: Startup] Startup finished!')
     yield

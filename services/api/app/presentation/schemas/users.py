@@ -12,7 +12,6 @@ class UserDTO(p.BaseModel):
         return self.role == 'admin'    
 
 class UserFilterSchema(p.BaseModel):
-    id: int|None = p.Field(default=None)
     username: str|None = p.Field(default=None)
     role: Role|None = p.Field(default=None)
     status: Status|None = p.Field(default=None)
@@ -34,13 +33,14 @@ class UserLoginModel(p.BaseModel):
     password: str = p.Field(min_length=8, max_length=32)
 
 class PublicUserUpdateModel(p.BaseModel):
-    username: str|None = p.Field(min_length=3, max_length=32, description="New username")
-    password: str|None = p.Field(min_length=8, max_length=32, description="New password")    
+    username: str|None = p.Field(default=None, min_length=3, max_length=32, description="New username")
+    old_password: str|None = p.Field(default=None, min_length=8, max_length=32, description="Old password for confirmation")    
+    new_password: str|None = p.Field(default=None, min_length=8, max_length=32, description="New password")
 
     class Config:
         extra = "forbid"
 
-    @p.field_validator('username', 'password', mode='before')
+    @p.field_validator('username', 'old_password', 'new_password', mode='before')
     @classmethod
     def empty_to_none(cls, v):
         if isinstance(v, str) and not v.strip():
@@ -50,6 +50,6 @@ class PublicUserUpdateModel(p.BaseModel):
 class PrivateUserUpdateModel(PublicUserUpdateModel):
     """This model is used for UPDATING users BY ADMINS ONLY. It, in addition, allows to set a role"""
     role: Role|None = p.Field(default=None, description='Role identifier')
-
+    status: Status|None = p.Field(default=None, description='Status of user account')
 
 

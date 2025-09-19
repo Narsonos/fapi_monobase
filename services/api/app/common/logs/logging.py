@@ -1,7 +1,8 @@
 import logging
 import logging.handlers
-import os
+import os, pathlib
 
+current_dir = pathlib.Path(__file__).parent
 
 def configure_logger(name: str, stream_level=logging.INFO, file_level=logging.DEBUG):
     logger = logging.getLogger(name)
@@ -16,7 +17,7 @@ def configure_logger(name: str, stream_level=logging.INFO, file_level=logging.DE
 
     if file_level <= logging.CRITICAL:
         debug_handler = logging.handlers.RotatingFileHandler(
-            filename=os.path.join('app', 'logs', f'{name}.log'),
+            filename = current_dir / f'{name}.log',
             maxBytes=10 * 1024 * 1024,
             backupCount=3,
             encoding='utf-8'
@@ -32,5 +33,7 @@ def init_loggers():
     storage = configure_logger('app.storage')          
     queue_logger = configure_logger('app.queue')
     queue_logger.propagate = False 
+    storage.propagate = False
+    applogger.propagate = False
 
     

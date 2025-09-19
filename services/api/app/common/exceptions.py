@@ -8,32 +8,7 @@ class AppBaseException(Exception):
     """Global base exception"""
     pass
 
-class CustomDatabaseException(AppBaseException):
-    """Base for exceptions raised manually in database-related functions"""
-    pass
 
-class TableNameIsTooLong(CustomDatabaseException):
-    """If table name that is generated automatically based off of .xlsx sheet and file name is too long"""
-    pass
-
-class UnsupportedDialectException(CustomDatabaseException):
-    """Can be used to show that chosen SQL dialect is not supported by the function"""
-    pass
-
-class SQLException(CustomDatabaseException):
-    '''Base for exceptions raised by JSON-SQL constructions'''
-    def __init__(self, detail: dict):
-        self.detail = detail
-
-    def get_http_exception(self):
-        return HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=self.detail
-        )
-
-class ValueNotAllowed(SQLException):
-    '''Raised mostly when some is not in ENUM'''
-    pass
 
 
 

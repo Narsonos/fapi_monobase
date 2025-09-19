@@ -22,7 +22,7 @@ CacheDependency = t.Annotated[CacheConnectionType, Depends(CacheManager.connect)
 
 
 #Repositories
-UserDB = repos.MySQLUserRepository
+UserDB = repos.SQLAUserRepository
 UserRepository = repos.RedisCacheUserRepository
 SessionRepository = repos.RedisSessionRepository
 

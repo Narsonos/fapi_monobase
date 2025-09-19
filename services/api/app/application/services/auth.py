@@ -1,17 +1,16 @@
 import app.application.intefraces as iapp
-import app.application.security as security
 import app.presentation.schemas as schemas
 import typing as t
 
 TLoginReturn = t.TypeVar("TLoginReturn")
 
 class AuthService:
-    def __init__(self, auth_strategy: iapp.AuthStrategy):
+    def __init__(self, auth_strategy: iapp.IAuthStrategy):
         self.auth_strategy = auth_strategy
 
     async def authenticate(self, credentials: dict) -> schemas.UserDTO:
         user = await self.auth_strategy.authenticate(credentials)
-        return schemas.UserDTO.model_validate(user)
+        return schemas.UserDTO.model_validate(user, from_attributes=True)
 
 
 class LoginLogoutMixin(t.Generic[TLoginReturn]):

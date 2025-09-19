@@ -4,7 +4,7 @@ import typing as t
 ConnectionType = t.TypeVar("ConnectionType") 
 SessionType = t.TypeVar("SessionType")
 
-class ConnectionManagerInterface(ABC, t.Generic[ConnectionType]):
+class ConnectionManagerInterface(t.Generic[ConnectionType], ABC):
     @abstractmethod
     async def connect(self) -> ConnectionType: ...
 
@@ -19,7 +19,7 @@ class ConnectionManagerInterface(ABC, t.Generic[ConnectionType]):
     async def initialize_data_structures(self):
         '''Creates all data structures, if there are any to create'''
 
-class SessionManagerInterface(ConnectionManagerInterface[ConnectionType], t.Generic[SessionType], ABC):
+class SessionManagerInterface(ConnectionManagerInterface[ConnectionType], t.Generic[ConnectionType, SessionType], ABC):
     @abstractmethod
     async def session(self, **kwargs) -> SessionType: 
         '''Must return a context manager -> async with self.session() as session'''
