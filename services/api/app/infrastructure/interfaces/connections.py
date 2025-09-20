@@ -4,6 +4,8 @@ import typing as t
 ConnectionType = t.TypeVar("ConnectionType") 
 SessionType = t.TypeVar("SessionType")
 
+
+
 class ConnectionManagerInterface(t.Generic[ConnectionType], ABC):
     @abstractmethod
     async def connect(self) -> ConnectionType: ...
@@ -23,9 +25,8 @@ class SessionManagerInterface(ConnectionManagerInterface[ConnectionType], t.Gene
     @abstractmethod
     async def session(self, **kwargs) -> SessionType: 
         '''Must return a context manager -> async with self.session() as session'''
-        ...
 
     @abstractmethod
     async def get_db_session(self) -> SessionType: 
         '''Must use this context manager to safely pass the session and close it after'''
-        ...
+    

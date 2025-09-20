@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 #Project files
 from app.common.config import Config
 import app.common.logs as logs
-from app.infrastructure.dependencies import DatabaseManager, CacheManager, get_user_repo
+import app.infrastructure.dependencies as idep
 from app.application.dependencies import UserRepoDependency, PasswordHasher, CurrentUserDependency
 import app.application.exceptions as appexc
 import app.presentation.routers as routers
@@ -36,22 +36,25 @@ async def lifespan(app: FastAPI):
     logger.info(f'[APP: Startup] Startup began...')
 
     #Cache
-    await CacheManager.wait_for_startup()
-    await CacheManager.initialize_data_structures()
+    await idep.CacheManager.wait_for_startup()
+    await idep.CacheManager.initialize_data_structures()
 
     #Database
-    await DatabaseManager.wait_for_startup(attempts=Config.DB_WAIT_MAX_RETRIES, interval_sec=Config.DB_WAIT_INTERVAL_SECONDS)
-    await DatabaseManager.initialize_data_structures()
+    await idep.DatabaseManager.wait_for_startup(attempts=Config.DB_WAIT_MAX_RETRIES, interval_sec=Config.DB_WAIT_INTERVAL_SECONDS)
+    await idep.DatabaseManager.initialize_data_structures()
     
     #Default_admin
-    async with DatabaseManager.session() as session:
-        user_repo = get_user_repo(session, CacheManager.connect())
-        await user_repo.ensure_admin_exists(PasswordHasher())
+    async with idep.DatabaseManager.session() as session:
+        db = idep.UserDB(session)
+        cache = idep.CacheManager.connect()
+        uow = idep.UnitOfWork(session)
+        repo = idep.UserRepository(connection=cache, user_db_repo=db, uow=uow)
+        await repo.ensure_admin_exists(PasswordHasher())
 
     logger.info(f'[APP: Startup] Startup finished!')
     yield
-    await CacheManager.close()
-    await DatabaseManager.close()
+    await idep.CacheManager.close()
+    await idep.DatabaseManager.close()
     
     
 

@@ -30,7 +30,7 @@ class UserService:
             status='active',
             hasher=self.hasher
         )
-        saved_user = await self.user_repo.save(user)
+        saved_user = await self.user_repo.create(user)
         return schemas.UserDTO.model_validate(saved_user, from_attributes=True)    
 
     async def admin_create(self, current_user: schemas.UserDTO, user_data: schemas.PrivateUserCreationModel) -> schemas.UserDTO:
@@ -45,7 +45,7 @@ class UserService:
             status='active',
             hasher=self.hasher
         )
-        saved_user = await self.user_repo.save(user)
+        saved_user = await self.user_repo.create(user)
         return schemas.UserDTO.model_validate(saved_user, from_attributes=True)
         
     async def update(self, current_user: schemas.UserDTO, edited_user: schemas.PublicUserUpdateModel):

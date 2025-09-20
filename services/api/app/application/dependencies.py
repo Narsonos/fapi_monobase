@@ -7,11 +7,11 @@ import app.application.services as services
 import app.infrastructure.security as security
 import app.presentation.schemas as schemas
 
-def get_auth_service(user_repo: UserRepoDependency, session_repo: SessionRepoDependency):
+async def get_auth_service(user_repo: UserRepoDependency, session_repo: SessionRepoDependency):
     strategy = security.StatefulOAuthStrategy(session_repo, user_repo, PasswordHasher())
     return services.StatefulOAuthService(strategy)
 
-def get_user_service(user_repo: UserRepoDependency):
+async def get_user_service(user_repo: UserRepoDependency):
     return services.UserService(user_repo, PasswordHasher())
 
 

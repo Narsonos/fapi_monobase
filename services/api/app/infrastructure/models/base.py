@@ -3,6 +3,3 @@ import sqlalchemy as sa
 
 class VersionedBaseModel(sqlm.SQLModel):
     version: int = sqlm.Field(sa_column=sqlm.Column(sa.Integer, default=0, nullable=False))
-    __table_args__ = (
-        {'version_id_col': 'version'},
-    )

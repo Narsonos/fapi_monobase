@@ -7,6 +7,7 @@ import sqlmodel as sqlm
 
 from sqlalchemy.ext.asyncio import AsyncConnection,AsyncSession,async_sessionmaker,create_async_engine
 
+
 import asyncio
 import contextlib
 import logging
@@ -69,7 +70,7 @@ class SQLAlchemySessionManager(mgrs.SessionManagerInterface[AsyncConnection, Asy
         async with self.session() as session:
             yield session
 
-    
+
     async def wait_for_startup(self, attempts:int = 5, interval_sec: int = 5):
         """Sends SELECT 1 to a DB and waits till response with retries"""
 
@@ -89,9 +90,8 @@ class SQLAlchemySessionManager(mgrs.SessionManagerInterface[AsyncConnection, Asy
             raise exc.StorageBootError(f"Database failed to boot within {retries*interval_sec}sec!")
 
     async def initialize_data_structures(self):
-        """Creates tables using SQLModel models"""
-        logger.info('[INIT DB] Creating database tables...(if needed)')
-        async with self.connect() as conn:
+        logger.info('[INIT DB] Configuring models for versioning...')
+        async with self._engine.begin() as conn:
             await conn.run_sync(sqlm.SQLModel.metadata.create_all)
 
 

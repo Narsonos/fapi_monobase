@@ -4,7 +4,7 @@ import os, pathlib
 
 current_dir = pathlib.Path(__file__).parent
 
-def configure_logger(name: str, stream_level=logging.INFO, file_level=logging.DEBUG):
+def configure_logger(name: str, stream_level=logging.DEBUG, file_level=logging.INFO):
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
     logger.handlers.clear()
