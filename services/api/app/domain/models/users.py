@@ -13,6 +13,8 @@ class Status(str, Enum):
     DEACTIVATED = "deactivated"
 
 class User(p.BaseModel):
+    model_config = p.ConfigDict(validate_assignment=True)
+
     id: int|None = None
     username: str
     password_hash: str
@@ -26,28 +28,30 @@ class User(p.BaseModel):
             raise domexc.UserValueError("Username must contain only numbers and letters")
         return v
 
-    def _set_new_password(self, password: str, hasher: IPasswordHasher):
+    @staticmethod
+    def _hash_password(password: str, hasher: IPasswordHasher):
         if len(password) < 8:
             raise domexc.UserValueError(f"Minimal password length is 8 symbols. Your length: {len(password)}")
-        self.password_hash = hasher.hash(password)
+        return hasher.hash(password)
 
 
     @property
     def is_admin(self):
-        return self.role == 'admin'
+        return self.role == Role.ADMIN
 
-    def set_status(self, status: Role):
+    def set_status(self, status: Status):
+        if not status in Status:
+            raise domexc.UserValueError(f"Given status '{status}' is not a valid status!")
         self.status = status
 
-    def set_role(self, new: Role):
-        self.role = new        
+    def set_role(self, role: Role):
+        if not role in Role:
+            raise domexc.UserValueError(f"Given role '{role}' is not a valid role!")
+        self.role = role        
     
     @staticmethod
     def create(username: str, password: str, role: Role, hasher: IPasswordHasher):
-        if len(password) < 8:
-            raise domexc.UserValueError(f"Minimal password length is 8 symbols. Your length: {len(password)}")
-
-        password_hash = hasher.hash(password)
+        password_hash = User._hash_password(password, hasher)
         return User(
             username=username.lower(),
             password_hash=password_hash,
@@ -60,11 +64,10 @@ class User(p.BaseModel):
             raise domexc.UserValueError("Old password invalid")
         if hasher.verify(new, self.password_hash):
             raise domexc.UserValueError(f'New password must not match the old one. Use different password.')
-        self._set_new_password(new, hasher)
+        self.password_hash = self._hash_password(new, hasher)
 
     def force_change_password(self, new: str, hasher: IPasswordHasher):
-        self._set_new_password(new, hasher)
+        self.password_hash = self._hash_password(new, hasher)
 
-    class Config:
-        validate_assignment = True
+    
 

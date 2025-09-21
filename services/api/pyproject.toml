@@ -24,12 +24,34 @@ dependencies = [
     "cryptography==44.0.2",
     "gunicorn>=23.0.0",
     "passlib[bcrypt]==1.7.4",
+    "pytest-sugar (>=1.1.1,<2.0.0)",
+    "pytest-cov (>=7.0.0,<8.0.0)",
+    "pytest-mock (>=3.15.1,<4.0.0)",
+    "pytest-asyncio (>=1.2.0,<2.0.0)",
 ]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.2"
 
-
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = "."
+testpaths = ["./tests"]
+python_files = ["test_*.py", "*_test.py"]
+addopts = "-ra -v --cov=app --cov-report=term-missing"
+markers = ['exceptions', 'services', 'unit']
+
+[tool.coverage.run]
+omit = [
+    "tests/*",
+    "app/common/*",
+    "app/main.py",
+    "app/gunicorn_conf.py",
+    "*/__init__.py",
+]
+
+[tool.coverage.report]
+fail_under = 95

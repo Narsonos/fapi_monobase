@@ -20,8 +20,7 @@ class PublicUserCreationModel(p.BaseModel):
     username: str = p.Field(min_length=3, max_length=32, description='A unique username used for logging in')
     password: str = p.Field(min_length=8, max_length=32, description='User password')
 
-    class Config:
-        extra = "forbid"
+    model_config = p.ConfigDict(extra='forbid')
 
 class PrivateUserCreationModel(PublicUserCreationModel):
     """This model is used for CREATING users BY ADMINS ONLY. It, in addition, allows to set a role"""
@@ -37,8 +36,7 @@ class PublicUserUpdateModel(p.BaseModel):
     old_password: str|None = p.Field(default=None, min_length=8, max_length=32, description="Old password for confirmation")    
     new_password: str|None = p.Field(default=None, min_length=8, max_length=32, description="New password")
 
-    class Config:
-        extra = "forbid"
+    model_config = p.ConfigDict(extra='forbid')
 
     @p.field_validator('username', 'old_password', 'new_password', mode='before')
     @classmethod

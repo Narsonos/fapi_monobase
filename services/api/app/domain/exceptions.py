@@ -13,13 +13,13 @@ class ActionNotAllowedForRole(AccessException):
     """Raised when action is not allowed for current user"""
 
 ### Model related
-class ModelIntegrityError:
+class ModelIntegrityError(Exception):
     '''Base for integrity violation exceptons. Use as adapter for repositories' integrity exceptions'''
     def __init__(self, *args, orig: Exception|None = None):
         super().__init__(*args)
         self.orig = orig
 
-class VersionError: ...
+class VersionError(Exception): ...
 
 ####### Users
 

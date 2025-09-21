@@ -15,19 +15,13 @@ class UserService:
         self.user_repo = user_repo
         self.hasher = password_hasher
 
-    def _clean_fields_update_dict(self, fields: dict[str, t.Any]):
-        if password:=fields.get("password"):
-            fields["password_hash"] = self.hasher.hash(password)
-            del fields["password"]
-
-
+ 
     async def create(self, user_data: schemas.PublicUserCreationModel) -> schemas.UserDTO:
         'Used by users to signup'
         user = domain.User.create(
             username=user_data.username,
             password=user_data.password,
             role='user',
-            status='active',
             hasher=self.hasher
         )
         saved_user = await self.user_repo.create(user)
@@ -40,9 +34,8 @@ class UserService:
         
         user = domain.User.create(
             username=user_data.username,
-            password=self.hasher.hash(user_data.password),
+            password=user_data.password,
             role=user_data.role,
-            status='active',
             hasher=self.hasher
         )
         saved_user = await self.user_repo.create(user)
