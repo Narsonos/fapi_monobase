@@ -1,5 +1,5 @@
 from app.application.repositories import SessionRepository
-import app.application.intefraces as iapp
+import app.application.interfaces as iapp
 import app.application.exceptions as appexc
 import app.application.models as mapp
 

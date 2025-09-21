@@ -51,6 +51,7 @@ omit = [
     "app/main.py",
     "app/gunicorn_conf.py",
     "*/__init__.py",
+    "*/interfaces/*"
 ]
 
 [tool.coverage.report]

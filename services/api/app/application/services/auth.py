@@ -1,4 +1,4 @@
-import app.application.intefraces as iapp
+import app.application.interfaces as iapp
 import app.presentation.schemas as schemas
 import typing as t
 
