@@ -42,7 +42,7 @@ pythonpath = "."
 testpaths = ["./tests"]
 python_files = ["test_*.py", "*_test.py"]
 addopts = "-ra -v --cov=app --cov-report=term-missing"
-markers = ['exceptions', 'services', 'unit']
+markers = ['exceptions', 'services', 'models']
 
 [tool.coverage.run]
 omit = [

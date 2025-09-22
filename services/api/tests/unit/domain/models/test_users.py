@@ -1,13 +1,8 @@
 import pytest, random
 import app.domain.models as dmod
 import app.domain.exceptions as domexc
+from tests.mocks import FakeHasher
 
-class FakeHasher:
-    def hash(self, password: str) -> str:
-        return f"hashed:{password}"
-
-    def verify(self, password: str, hashed: str) -> bool:
-        return hashed == f"hashed:{password}"
 
 @pytest.fixture
 def valid_user() -> dmod.User:
@@ -22,6 +17,7 @@ def valid_user() -> dmod.User:
 def hasher() -> FakeHasher:
     return FakeHasher()
 
+@pytest.mark.models
 @pytest.mark.parametrize(
    "username, hasher, expected_error",
    [
@@ -49,7 +45,7 @@ def test_invalid_username_raises_error(username, hasher, expected_error):
         assert user.username == username
 
 
-
+@pytest.mark.models
 @pytest.mark.parametrize(
    "valid_user, hasher, password, expected_error",
    [
@@ -66,13 +62,13 @@ def test_password_length(valid_user: dmod.User, hasher: FakeHasher, password, ex
         valid_user.force_change_password(new=password, hasher=hasher)
         assert hasher.verify(password, valid_user.password_hash)
 
-@pytest.mark.unit
+@pytest.mark.models
 def test_is_admin_property(valid_user: dmod.User):
     assert valid_user.is_admin == False
     valid_user.role = dmod.Role.ADMIN
     assert valid_user.is_admin == True
 
-@pytest.mark.unit
+@pytest.mark.models
 def test_role_setter(valid_user: dmod.User):
     with pytest.raises(domexc.UserValueError):
         valid_user.set_role('12312pasodksapodadasdasdasd')
@@ -80,7 +76,7 @@ def test_role_setter(valid_user: dmod.User):
     valid_user.set_role(role)   
     assert valid_user.role == role
 
-@pytest.mark.unit
+@pytest.mark.models
 def test_status_setter(valid_user: dmod.User):
     with pytest.raises(domexc.UserValueError):
         valid_user.set_status('12312pasodksapodadasdasdasd')
@@ -88,7 +84,7 @@ def test_status_setter(valid_user: dmod.User):
     valid_user.set_status(status)   
     assert valid_user.status == status
 
-@pytest.mark.unit
+@pytest.mark.models
 def test_hash_password(hasher: FakeHasher):
     with pytest.raises(domexc.UserValueError):
         dmod.User._hash_password('1234567',hasher)
@@ -97,7 +93,7 @@ def test_hash_password(hasher: FakeHasher):
     hash = dmod.User._hash_password(password, hasher)
     assert hasher.verify(hashed=hash, password=password)
 
-@pytest.mark.unit
+@pytest.mark.models
 def test_user_creation(hasher: FakeHasher):
     data = dict(
         username = 'test',
@@ -109,7 +105,7 @@ def test_user_creation(hasher: FakeHasher):
     assert user == created_user
 
 
-
+@pytest.mark.models
 @pytest.mark.parametrize(
    "valid_user, hasher, old, new, expected_error",
    [    #valid user correct old password: 12341234

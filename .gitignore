@@ -1,4 +1,6 @@
-venv/
+.venv/
+.pytest_cache
+.coverage
 __pycache__
 .env*
 .vscode/

@@ -2,7 +2,7 @@ import pytest
 import app.domain.exceptions as domexc
 
 
-@pytest.mark.unit
+@pytest.mark.exceptions
 def test_correct_orig():
     some_exception = Exception('InnerErrorText')
     exc = domexc.ModelIntegrityError('Error text', orig=some_exception)

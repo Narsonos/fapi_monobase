@@ -4,13 +4,8 @@ import app.application.services as svc
 import app.domain.models as dmod
 import app.domain.exceptions as domexc
 import app.presentation.schemas as schemas
+from tests.mocks import FakeHasher
 
-class FakeHasher:
-    def hash(self, password: str) -> str:
-        return f"hashed:{password}"
-
-    def verify(self, password: str, hashed: str) -> bool:
-        return hashed == f"hashed:{password}"
 
 
 @pytest.fixture
@@ -28,7 +23,6 @@ def user_data():
 
 
 @pytest.mark.asyncio
-@pytest.mark.unit
 async def test_user_service_get_user(mocker: MockerFixture, hasher, user_data):
     mock_user_repo = mocker.AsyncMock()
     mock_user_repo.get_by_id.return_value = dmod.User(**user_data,password_hash='somehash',version=0)
@@ -39,7 +33,6 @@ async def test_user_service_get_user(mocker: MockerFixture, hasher, user_data):
     mock_user_repo.get_by_id.assert_called_once_with(target_id)
         
 @pytest.mark.asyncio
-@pytest.mark.unit
 async def test_user_service_list(mocker: MockerFixture, hasher, user_data):
     mock_user_repo = mocker.AsyncMock()
     mock_user_repo.list.return_value = [dmod.User(**user_data,password_hash='somehash',version=0)]
@@ -51,7 +44,6 @@ async def test_user_service_list(mocker: MockerFixture, hasher, user_data):
 
 
 @pytest.mark.asyncio
-@pytest.mark.unit
 async def test_user_service_delete(mocker: MockerFixture, hasher):
     mock_user_repo = mocker.AsyncMock()
     mock_user_repo.delete.return_value = None
@@ -65,7 +57,6 @@ async def test_user_service_delete(mocker: MockerFixture, hasher):
 
 
 @pytest.mark.asyncio
-@pytest.mark.unit
 @pytest.mark.parametrize(
    "mocker, hasher, current_user_role, current_user_id, target_user_id, target_user_exists, exc, exc_text",
    [    
@@ -98,7 +89,6 @@ async def test_user_service_admin_delete(mocker, hasher, current_user_role, curr
 
     
 @pytest.mark.asyncio
-@pytest.mark.unit
 async def test_user_service_create(mocker, hasher, user_data):
     mock_user_repo = mocker.AsyncMock()
     password = '12341234'
@@ -123,7 +113,6 @@ async def test_user_service_create(mocker, hasher, user_data):
     mock_user_repo.create.assert_called_once_with(repo_input_user)
 
 @pytest.mark.asyncio
-@pytest.mark.unit
 @pytest.mark.parametrize(
    "mocker, hasher, user_data, current_user_role, target_user_role, exc, exc_text",
    [    
@@ -172,7 +161,6 @@ async def test_user_service_admin_create(mocker, hasher, user_data, current_user
 
 
 @pytest.mark.asyncio
-@pytest.mark.unit
 @pytest.mark.parametrize(
    "mocker, hasher, user_data, old_pass,new_pass, exc, exc_text",
    [    
@@ -218,7 +206,6 @@ async def test_user_service_update(mocker, hasher, user_data, old_pass,new_pass,
 
 
 @pytest.mark.asyncio
-@pytest.mark.unit
 @pytest.mark.parametrize(
     "mocker, hasher, user_data, current_user_role, current_user_id, target_user_id, target_user_exists, edited_role, edited_status, new_pass, exc, exc_text",
     [

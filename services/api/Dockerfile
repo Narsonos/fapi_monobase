@@ -43,16 +43,15 @@ RUN pip install --no-cache-dir pipx
 RUN pipx install poetry==$POETRY_VERSION
 RUN pipx ensurepath
 
-
 WORKDIR $PYSETUP_PATH
 COPY poetry.lock pyproject.toml ./
 RUN poetry install --no-ansi --without dev --no-root
 
 
-##################################
-# Dev: Uses all dev dependencies #
-##################################
-FROM base AS dev 
+#######################################
+# Dev_base: Get all dev dependencies  #
+#######################################
+FROM builder AS dev_base 
 
 ENV FASTAPI_ENV=dev
 WORKDIR $PYSETUP_PATH
@@ -60,12 +59,23 @@ WORKDIR $PYSETUP_PATH
 #Copy Poetry and venv from builder stage
 COPY --from=builder $PYSETUP_PATH $PYSETUP_PATH
 COPY --from=builder /root/.local/bin/poetry /root/.local/bin/poetry
+#All content of Dockerfile parent directory will be copied
 COPY . .
 RUN poetry install --no-ansi --no-root
 WORKDIR /app
 
-#Allows hot reload
+##########################
+####### Test: runs tests #
+##########################
+FROM dev_base AS dev
 CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--proxy-headers"]
+
+
+###########################
+####### Dev: runs FastAPI #
+###########################
+FROM dev_base AS test
+CMD ["poetry", "run", "pytest"]
 
 ##################################
 # Prod: Minimalistic and light   #

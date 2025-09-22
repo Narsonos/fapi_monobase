@@ -1,0 +1,92 @@
+name: ${APP_NAME}
+
+services:
+  app:
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+      target: test
+    restart: always
+    depends_on:
+      - db
+    volumes:
+      - ./services/api/app:/app/app
+    environment:
+      TZ: "Europe/Moscow"
+      MODE: test
+      GIT_COMMIT: ${GIT_COMMIT}
+    env_file:
+      - .env.dev
+    networks:
+      - project-network
+
+  nginx:
+    image: nginx:1.27.0
+    restart: always
+    ports:
+      - "127.0.0.1:9092:80"
+    depends_on:
+      - app
+    volumes:
+      - ./services/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./services/nginx/upstream.conf:/etc/nginx/conf.d/upstream.conf:ro
+      - ./services/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - project-network
+
+  #POSTGRES TEMPLATE
+  #db:
+  #  container_name: ${APP_NAME}-db
+  #  image: postgres:16
+  #  restart: unless-stopped
+  #  env_file:
+  #    - .env.dev
+  #  volumes:
+  #    - db:/var/lib/postgresql/data
+  #  networks:
+  #    - project-network
+
+  #MYSQL TEMPLATE
+  db:
+    image: mysql:8.0
+    restart: always
+    env_file: 
+      - .env.dev
+    volumes:
+      - ${APP_NAME}-db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - project-network
+
+  redis:
+    image: redis:latest
+    restart: always
+    entrypoint: ["/bin/bash", "/usr/local/bin/redis-entrypoint.sh"]
+    volumes:
+      - redis:/data
+      - ./services/redis/redis.conf:/usr/local/etc/redis/redis.conf.template:ro      
+      - ./services/redis/redis-entrypoint.sh:/usr/local/bin/redis-entrypoint.sh:ro
+    env_file:
+      - .env.dev
+    healthcheck:
+      test: ["CMD", "redis-cli","-a", "$$REDIS_PASS","ping"]
+      interval: 10s
+      retries: 3
+      timeout: 3s
+    networks:
+      - project-network
+
+networks:
+  project-network:
+    name: ${APP_NAME}-net
+    driver: bridge
+
+volumes:
+  db:
+    name: ${APP_NAME}-db
+  redis:
+    name: ${APP_NAME}-redis
