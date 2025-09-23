@@ -27,7 +27,7 @@ async def db_session(db_engine: AsyncEngine) -> t.AsyncGenerator[AsyncSession, N
     session_factory = async_sessionmaker(db_engine, expire_on_commit=False)
     async with session_factory() as session:
         yield session
-        await session.rollback() # Явный rollback для надежности
+        await session.rollback() 
 
 @pytest.fixture(scope="function")
 async def uow(db_session: AsyncSession) -> t.AsyncIterator[ideps.UnitOfWork]:
@@ -36,18 +36,15 @@ async def uow(db_session: AsyncSession) -> t.AsyncIterator[ideps.UnitOfWork]:
 @pytest.fixture(scope='function')
 async def cache():
     mgr = ideps.CacheManagerType(**ideps.cache_args)
-    # Do not connect here: let the ASGI app create the connection in its own event loop
     yield mgr
-    # flush_data will ensure it runs on the loop where the client was created (if any)
     await mgr.flush_data()
 
 
 @pytest.fixture(scope='function')
 async def async_client(cache, uow):
     
-    #cant use lambda since we need to provide awaitable to fastapi
     async def override_get_cache():
-        # ensure Redis client is created on the app's event loop
+        #redis must be created by fastapi
         client = await cache.connect()
         return client
     
