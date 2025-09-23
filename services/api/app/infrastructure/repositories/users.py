@@ -125,7 +125,7 @@ class SQLAUserRepository(repo.IUserRepository):
         Returns:
             User: a created user.
         """
-        user = db.User.model_validate(user.model_dump())
+        user = db.User(**user.model_dump())
         try:
             self.session.add(user)
             await self.session.flush()
@@ -279,7 +279,6 @@ class RedisCacheUserRepository(repo.IUserRepository):
         user = await self._user_db.create(user)
         if user:
             self._uow.add_post_commit_hook(lambda: self.__cache(user))
-            self._uow.add_post_commit_hook(lambda: logger.info("POST COMMIT HOOK IN ACTION"))
         return user
 
     async def update(self, user: domain.User) -> domain.User:

@@ -101,7 +101,7 @@ def test_SOAuth_create_tokens_and_extract_data(get_valid_token_pair):
     assert decoded_payload == payload | {'exp': tokens.access_expires}
 
 
-@pytest.mark.asyncio
+
 @pytest.mark.parametrize(
     'get_full_oauth_setup, credentials, user_exists, exc',
     [
@@ -136,7 +136,7 @@ async def test_SOAuth_login_logout(get_full_oauth_setup, credentials, user_exist
 
 
 
-@pytest.mark.asyncio
+
 @pytest.mark.parametrize(
     'get_full_oauth_setup, get_valid_token_pair, credentials, user_exists, session_exists, exc',
     [
@@ -170,7 +170,7 @@ async def test_SOAuth_authenticate(get_full_oauth_setup, get_valid_token_pair, c
 
 
 
-@pytest.mark.asyncio
+
 @pytest.mark.parametrize(
     'get_full_oauth_setup, get_valid_token_pair, tokens_match, session_exists, exc',
     [

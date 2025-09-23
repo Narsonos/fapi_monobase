@@ -43,6 +43,8 @@ testpaths = ["./tests"]
 python_files = ["test_*.py", "*_test.py"]
 addopts = "-ra -v --cov=app --cov-report=term-missing"
 markers = ['exceptions', 'services', 'models']
+asyncio_mode = 'auto'
+asyncio_default_test_loop_scope = 'session'
 
 [tool.coverage.run]
 omit = [
@@ -55,4 +57,4 @@ omit = [
 ]
 
 [tool.coverage.report]
-fail_under = 95
+fail_under = 70

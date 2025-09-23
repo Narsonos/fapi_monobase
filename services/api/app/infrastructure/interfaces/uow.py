@@ -14,4 +14,8 @@ class IUnitOfWork(t.Generic[SessionType], abc.ABC):
     async def rollback(self): ...
 
     @abc.abstractmethod
-    async def add_post_commit_hook(self, coro: t.Callable): ...
+    def add_post_commit_hook(self, coro: t.Callable): ...
+
+    @abc.abstractmethod
+    async def run_hooks(self):
+        '''Vital for testing, when need to you execute hooks without committing'''

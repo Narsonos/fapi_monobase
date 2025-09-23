@@ -155,3 +155,170 @@
 2025-09-22 18:27:36,716 :[app] [APP: Startup] Startup finished!
 2025-09-22 18:27:36,716 :[app] [APP: Startup] Startup finished!
 2025-09-22 18:27:36,716 :[app] [APP: Startup] Startup finished!
+2025-09-23 14:04:47,394 :[app] [APP: Startup] Startup began...
+2025-09-23 14:04:47,394 :[app] [APP: Startup] Startup began...
+2025-09-23 14:04:47,395 :[app] [APP: Startup] Startup began...
+2025-09-23 14:04:47,396 :[app] [APP: Startup] Startup began...
+2025-09-23 14:04:59,194 :[app] [APP: Startup] Startup finished!
+2025-09-23 14:04:59,194 :[app] [APP: Startup] Startup finished!
+2025-09-23 14:04:59,194 :[app] [APP: Startup] Startup finished!
+2025-09-23 14:04:59,194 :[app] [APP: Startup] Startup finished!
+2025-09-23 22:59:44,803 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-23 22:59:44,805 :[app] POST COMMIT HOOK IN ACTION
+2025-09-23 22:59:56,830 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-23 23:04:17,410 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-23 23:04:30,502 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-23 23:06:59,694 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-23 23:07:12,209 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-23 23:08:25,744 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-23 23:08:39,596 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-23 23:18:38,294 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-23 23:18:51,974 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-23 23:20:14,887 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-23 23:20:27,496 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-23 23:27:46,952 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-23 23:27:58,961 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-23 23:31:40,869 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-23 23:31:53,032 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-23 23:34:57,802 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-23 23:35:09,817 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-23 23:44:16,780 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-23 23:44:29,061 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 00:03:59,363 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 00:04:12,551 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 00:07:41,678 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 00:07:54,352 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 00:09:43,977 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 00:09:56,644 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 00:11:39,295 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 00:11:52,769 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 00:13:46,960 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 00:14:03,169 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 00:16:17,327 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 00:16:33,911 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 00:20:24,406 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 00:20:40,904 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 00:23:02,771 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 00:23:19,124 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 00:32:54,487 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 00:35:29,664 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 00:35:45,461 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 01:12:30,528 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 01:12:43,112 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 01:37:50,562 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 01:38:03,135 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 01:38:06,476 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 281, in connect
+    await self.retry.call_with_retry(
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 697, in _connect
+    reader, writer = await asyncio.open_connection(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 48, in open_connection
+    transport, _ = await loop.create_connection(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/base_events.py", line 1083, in create_connection
+    infos = await self._ensure_resolved(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/base_events.py", line 1466, in _ensure_resolved
+    return await loop.getaddrinfo(host, port, family=family, type=type,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/base_events.py", line 905, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/socket.py", line 978, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno -2] Name or service not known
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 58, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 611, in execute_command
+    conn = self.connection or await pool.get_connection(command_name, **options)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 1064, in get_connection
+    await self.ensure_connection(connection)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 1097, in ensure_connection
+    await connection.connect()
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 289, in connect
+    raise ConnectionError(self._error_message(e))
+redis.exceptions.ConnectionError: Error -2 connecting to redis:6379. Name or service not known.
+2025-09-24 01:41:06,518 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 01:41:19,200 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 01:41:22,481 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 281, in connect
+    await self.retry.call_with_retry(
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 697, in _connect
+    reader, writer = await asyncio.open_connection(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 48, in open_connection
+    transport, _ = await loop.create_connection(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/base_events.py", line 1083, in create_connection
+    infos = await self._ensure_resolved(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/base_events.py", line 1466, in _ensure_resolved
+    return await loop.getaddrinfo(host, port, family=family, type=type,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/base_events.py", line 905, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/socket.py", line 978, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno -2] Name or service not known
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 58, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 611, in execute_command
+    conn = self.connection or await pool.get_connection(command_name, **options)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 1064, in get_connection
+    await self.ensure_connection(connection)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 1097, in ensure_connection
+    await connection.connect()
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 289, in connect
+    raise ConnectionError(self._error_message(e))
+redis.exceptions.ConnectionError: Error -2 connecting to redis:6379. Name or service not known.
+2025-09-24 01:43:38,254 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 01:43:38,255 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 58, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 01:43:38,313 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 01:43:51,572 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 01:43:51,573 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 58, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'

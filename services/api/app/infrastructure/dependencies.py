@@ -11,22 +11,35 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from redis.asyncio import Redis
 
 #Connection level
-DatabaseManager = SQLAlchemySessionManager(Config.DB_URL, Config.DB_KWARGS)
+DatabaseManagerType = SQLAlchemySessionManager
 DatabaseSessionType = AsyncSession
+DatabaseManager = DatabaseManagerType(Config.DB_URL, Config.DB_KWARGS)
 
-CacheManager =  RedisConnectionManager(host="redis",port=6379,password=Config.REDIS_PASS,decode_responses=True,db=0)
+
+CacheManagerType =  RedisConnectionManager
 CacheConnectionType = Redis
+cache_args = dict(host="redis",port=6379,password=Config.REDIS_PASS,decode_responses=True,db=0)
+CacheManager = CacheManagerType(**cache_args)
 
 UnitOfWork = db.SQLAlchemyUnitOfWork
 
-DatabaseDependency = t.Annotated[DatabaseSessionType, Depends(DatabaseManager.get_db_session)]
-CacheDependency = t.Annotated[CacheConnectionType, Depends(CacheManager.connect)]
 
+async def get_db_session():
+    async with DatabaseManager.session() as session:
+        yield session
+
+async def get_cache():
+    return await CacheManager.connect()
+
+DatabaseDependency = t.Annotated[DatabaseSessionType, Depends(get_db_session)]
+CacheDependency = t.Annotated[CacheConnectionType, Depends(get_cache)]
 
 async def get_uow(session: DatabaseDependency) -> t.AsyncIterable[UnitOfWork]:
     uow = UnitOfWork(session)
     yield uow
     await uow.commit() #Rollback is executed by SessionManager. Session is already wrapped in try/except with rollback on except, close on finally.
+
+
 
 UoWDependency = t.Annotated[UnitOfWork, Depends(get_uow)]
 

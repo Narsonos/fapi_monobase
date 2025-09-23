@@ -30,7 +30,7 @@ logger = logging.getLogger('app')
 async def get_user(
         user_service: deps.UserServiceDependency,
         user_id = t.Annotated[int, Path(description='Specifies user to return')]
-    ) -> schemas.UserDTO:
+    ) -> schemas.UserDTO | None:
     '''Returns a user specified by user_id'''    
     return await user_service.get_user(user_id)
     
@@ -59,7 +59,7 @@ async def create_user_for_admins(
     ) -> schemas.UserDTO:
 
     try:
-        return await user_service.admin_create(current_user, new_user_data)
+        return JSONResponse(await user_service.admin_create(current_user, new_user_data), 201)
     except domexc.UserIntegrityError as e:
         raise HTTPException(status.HTTP_409_CONFLICT, {"error": str(e)})
     except domexc.ActionNotAllowedForRole as e:
@@ -83,10 +83,10 @@ async def update_user(
     try:
         if not current_user.is_admin:
             model = schemas.PublicUserUpdateModel.model_validate(data)
-            return await user_service.update(current_user, model)
+            return JSONResponse(await user_service.update(current_user, model))
         else:
             model = schemas.PrivateUserUpdateModel.model_validate(data)
-            return await user_service.admin_update(current_user, user_id, model) 
+            return JSONResponse(await user_service.admin_update(current_user, user_id, model)) 
     except domexc.UserDoesNotExist as e:
         raise HTTPException(status.HTTP_404_NOT_FOUND, {"error": str(e)})
     except domexc.UserIntegrityError as e:
@@ -109,9 +109,10 @@ async def delete_user(
     try:
         if current_user.is_admin:
             await user_service.admin_delete(current_user, user_id)
-            return JSONResponse({"msg": "User deleted successfully"})
+            return JSONResponse({"msg": "User deleted successfully"}, 204)
         else:
             await user_service.delete(current_user)
+            return JSONResponse({"msg": "User deleted successfully"}, 204)
     except domexc.ActionNotAllowedForRole as e:
         raise HTTPException(status.HTTP_403_FORBIDDEN, {"error": str(e)})
     except domexc.UserDoesNotExist as e:

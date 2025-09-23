@@ -65,11 +65,6 @@ class SQLAlchemySessionManager(mgrs.SessionManagerInterface[AsyncConnection, Asy
         finally:
             await session.close() 
 
-    async def get_db_session(self):
-        """Extenral interface for the sessionmaker. Used for FastAPI dependency"""
-        async with self.session() as session:
-            yield session
-
 
     async def wait_for_startup(self, attempts:int = 5, interval_sec: int = 5):
         """Sends SELECT 1 to a DB and waits till response with retries"""
@@ -94,7 +89,10 @@ class SQLAlchemySessionManager(mgrs.SessionManagerInterface[AsyncConnection, Asy
         async with self._engine.begin() as conn:
             await conn.run_sync(sqlm.SQLModel.metadata.create_all)
 
-
+    async def flush_data(self):
+        logger.info('[DB] Flush_all called -> Dropping all tables.')
+        async with self._engine.begin() as conn:
+            await conn.run_sync(sqlm.SQLModel.metadata.drop_all)
 
 
 

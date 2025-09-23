@@ -21,12 +21,13 @@ class ConnectionManagerInterface(t.Generic[ConnectionType], ABC):
     async def initialize_data_structures(self):
         '''Creates all data structures, if there are any to create'''
 
+    @abstractmethod
+    async def flush_data(self):
+        '''Drops all data'''
+
+
 class SessionManagerInterface(ConnectionManagerInterface[ConnectionType], t.Generic[ConnectionType, SessionType], ABC):
     @abstractmethod
     async def session(self, **kwargs) -> SessionType: 
         '''Must return a context manager -> async with self.session() as session'''
-
-    @abstractmethod
-    async def get_db_session(self) -> SessionType: 
-        '''Must use this context manager to safely pass the session and close it after'''
     

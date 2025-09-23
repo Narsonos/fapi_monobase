@@ -22,7 +22,7 @@ def user_data():
     )
 
 
-@pytest.mark.asyncio
+
 async def test_user_service_get_user(mocker: MockerFixture, hasher, user_data):
     mock_user_repo = mocker.AsyncMock()
     mock_user_repo.get_by_id.return_value = dmod.User(**user_data,password_hash='somehash',version=0)
@@ -32,7 +32,7 @@ async def test_user_service_get_user(mocker: MockerFixture, hasher, user_data):
     assert user == schemas.UserDTO.model_validate(user_data)
     mock_user_repo.get_by_id.assert_called_once_with(target_id)
         
-@pytest.mark.asyncio
+
 async def test_user_service_list(mocker: MockerFixture, hasher, user_data):
     mock_user_repo = mocker.AsyncMock()
     mock_user_repo.list.return_value = [dmod.User(**user_data,password_hash='somehash',version=0)]
@@ -43,7 +43,7 @@ async def test_user_service_list(mocker: MockerFixture, hasher, user_data):
     mock_user_repo.list.assert_called_once_with(1,1,None,'and')
 
 
-@pytest.mark.asyncio
+
 async def test_user_service_delete(mocker: MockerFixture, hasher):
     mock_user_repo = mocker.AsyncMock()
     mock_user_repo.delete.return_value = None
@@ -56,7 +56,7 @@ async def test_user_service_delete(mocker: MockerFixture, hasher):
     mock_user_repo.delete.assert_called_once_with(current_user.id)
 
 
-@pytest.mark.asyncio
+
 @pytest.mark.parametrize(
    "mocker, hasher, current_user_role, current_user_id, target_user_id, target_user_exists, exc, exc_text",
    [    
@@ -88,7 +88,7 @@ async def test_user_service_admin_delete(mocker, hasher, current_user_role, curr
         mock_user_repo.delete.assert_called_once_with(target_user_exists)
 
     
-@pytest.mark.asyncio
+
 async def test_user_service_create(mocker, hasher, user_data):
     mock_user_repo = mocker.AsyncMock()
     password = '12341234'
@@ -112,7 +112,7 @@ async def test_user_service_create(mocker, hasher, user_data):
     assert result == schemas.UserDTO.model_validate(created_user,from_attributes=True)
     mock_user_repo.create.assert_called_once_with(repo_input_user)
 
-@pytest.mark.asyncio
+
 @pytest.mark.parametrize(
    "mocker, hasher, user_data, current_user_role, target_user_role, exc, exc_text",
    [    
@@ -160,7 +160,7 @@ async def test_user_service_admin_create(mocker, hasher, user_data, current_user
         mock_user_repo.create.assert_called_once_with(repo_input_user)
 
 
-@pytest.mark.asyncio
+
 @pytest.mark.parametrize(
    "mocker, hasher, user_data, old_pass,new_pass, exc, exc_text",
    [    
@@ -205,7 +205,7 @@ async def test_user_service_update(mocker, hasher, user_data, old_pass,new_pass,
         mock_user_repo.get_by_id.assert_called_once_with(current_user.id)
 
 
-@pytest.mark.asyncio
+
 @pytest.mark.parametrize(
     "mocker, hasher, user_data, current_user_role, current_user_id, target_user_id, target_user_exists, edited_role, edited_status, new_pass, exc, exc_text",
     [

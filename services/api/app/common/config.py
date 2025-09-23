@@ -28,6 +28,7 @@ class Config():
 
     #Redis
     REDIS_PASS = os.getenv("REDIS_PASS")
+    REDIS_URL = f'redis://:{REDIS_PASS}@redis:6379/0'
     USER_CACHE_TTL_SECONDS = int(os.getenv("USER_CACHE_TTL_SECONDS", "300"))
 
     #MySQL Template
