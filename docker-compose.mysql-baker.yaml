@@ -1,0 +1,24 @@
+#Run with the command
+#docker compose -f .\docker-compose.mysql-baker.yaml --env-file ./.env.test build
+
+version: '3.8'
+services:
+  db_init:
+    image: prebaked-mysql:8.0
+    build:
+      context: ./mysql_builder
+      dockerfile: Dockerfile
+      args:
+        - MYSQL_ROOT_PASSWORD_ARG
+        - MYSQL_USER_ARG
+        - MYSQL_PASSWORD_ARG
+        - MYSQL_DATABASE_ARG
+
+    container_name: mysql_init_container
+    env_file:
+      - ./.env.test
+    volumes:
+      - bake_mysql_data:/var/lib/mysql
+
+volumes:
+  bake_mysql_data:

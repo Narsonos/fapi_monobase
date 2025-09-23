@@ -8,7 +8,8 @@ services:
       target: test
     restart: always
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       - ./services/api/app:/app/app
     environment:
@@ -27,24 +28,21 @@ services:
   #  restart: unless-stopped
   #  env_file:
   #    - .env.test
-  #  volumes:
-  #    - db:/var/lib/postgresql/data
   #  networks:
   #    - project-network
 
   #MYSQL TEMPLATE
   db:
-    image: mysql:8.0
+    image: prebaked-mysql:8.0
     restart: always
+    command: --default-authentication-plugin=caching_sha2_password
     env_file: 
       - .env.test
-    volumes:
-      - db:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 30s
+      test: ["CMD-SHELL", "mysql -h localhost --user=root --password=$$MYSQL_PASSWORD --execute='SELECT 1' $$MYSQL_DATABASE"]
+      interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 20
     networks:
       - project-network
 
@@ -53,7 +51,6 @@ services:
     restart: always
     entrypoint: ["/bin/bash", "/usr/local/bin/redis-entrypoint.sh"]
     volumes:
-      - redis:/data
       - ./services/redis/redis.conf:/usr/local/etc/redis/redis.conf.template:ro      
       - ./services/redis/redis-entrypoint.sh:/usr/local/bin/redis-entrypoint.sh:ro
     env_file:
@@ -71,8 +68,4 @@ networks:
     name: ${APP_NAME}-net
     driver: bridge
 
-volumes:
-  db:
-    name: ${APP_NAME}-db
-  redis:
-    name: ${APP_NAME}-redis
+
