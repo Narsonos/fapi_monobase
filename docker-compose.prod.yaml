@@ -55,6 +55,7 @@ services:
       - .env
     volumes:
       - ${APP_NAME}-db:/var/lib/mysql
+    command: --default-authentication-plugin=caching_sha2_password
     healthcheck:
       test: ["CMD-SHELL", "mysql --user=$$MYSQL_USER --password=$$MYSQL_PASSWORD --execute='SELECT 1' $$MYSQL_DATABASE"]
       interval: 30s
