@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from app.common.config import Config
 import app.common.logs as logs
 import app.infrastructure.dependencies as idep
-from app.application.dependencies import UserRepoDependency, PasswordHasher, CurrentUserDependency
+import app.application.dependencies as adep
 import app.application.exceptions as appexc
 import app.presentation.routers as routers
 import app.presentation.schemas as schemas
@@ -49,7 +49,7 @@ async def lifespan(app: FastAPI):
         cache = idep.CacheManager.connect()
         uow = idep.UnitOfWork(session)
         repo = idep.UserRepository(connection=cache, user_db_repo=db, uow=uow)
-        await repo.ensure_admin_exists(PasswordHasher())
+        await repo.ensure_admin_exists(idep.PasswordHasherType())
 
     logger.info(f'[APP: Startup] Startup finished!')
     yield
@@ -94,7 +94,7 @@ async def auth_exception_handler(request, exc: appexc.AuthBaseException):
 ########################################
 
 @app.get("/me")
-async def whoami(current_user:CurrentUserDependency) -> schemas.UserDTO:
+async def whoami(current_user:adep.CurrentUserDependency) -> schemas.UserDTO:
     return current_user
 
 

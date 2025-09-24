@@ -5,9 +5,10 @@ import app.infrastructure.db as db
 from app.infrastructure.cache.redis_manager import RedisConnectionManager
 from app.infrastructure.db.sqla_manager import SQLAlchemySessionManager
 import app.infrastructure.repositories as repos
+import app.infrastructure.security as security
 from app.common.config import Config
 
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
 #Connection level
@@ -22,7 +23,8 @@ cache_args = dict(host="redis",port=6379,password=Config.REDIS_PASS,decode_respo
 CacheManager = CacheManagerType(**cache_args)
 
 UnitOfWork = db.SQLAlchemyUnitOfWork
-
+AuthStrategyType = security.StatefulOAuthStrategy
+PasswordHasherType = security.BCryptHasher
 
 async def get_db_session():
     async with DatabaseManager.session() as session:

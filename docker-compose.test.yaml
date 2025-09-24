@@ -6,12 +6,13 @@ services:
       context: ./services/api
       dockerfile: Dockerfile
       target: test
-    restart: always
+
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - ./services/api/app:/app/app
+      - ./services/api/tests:/app/tests
     environment:
       TZ: "Europe/Moscow"
       MODE: test

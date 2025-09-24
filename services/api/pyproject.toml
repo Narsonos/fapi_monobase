@@ -53,8 +53,9 @@ omit = [
     "app/main.py",
     "app/gunicorn_conf.py",
     "*/__init__.py",
-    "*/interfaces/*"
+    "*/interfaces/*",
+    "*/dependencies.py"
 ]
 
 [tool.coverage.report]
-fail_under = 70
+fail_under = 95

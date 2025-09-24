@@ -2,21 +2,20 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import typing as t
 
-from app.infrastructure.dependencies import UserRepoDependency, SessionRepoDependency
+import app.infrastructure.dependencies as ideps
 import app.application.services as services
-import app.infrastructure.security as security
 import app.presentation.schemas as schemas
 
-async def get_auth_service(user_repo: UserRepoDependency, session_repo: SessionRepoDependency):
-    strategy = security.StatefulOAuthStrategy(session_repo, user_repo, PasswordHasher())
+async def get_auth_service(user_repo: ideps.UserRepoDependency, session_repo: ideps.SessionRepoDependency):
+    #use a matching service here
+    strategy = ideps.AuthStrategyType(session_repo, user_repo, ideps.PasswordHasherType())
     return services.StatefulOAuthService(strategy)
 
-async def get_user_service(user_repo: UserRepoDependency):
-    return services.UserService(user_repo, PasswordHasher())
+async def get_user_service(user_repo: ideps.UserRepoDependency):
+    return services.UserService(user_repo, ideps.PasswordHasherType())
 
 
 
-PasswordHasher = security.BCryptHasher
 OAuthServiceDependency = t.Annotated[services.StatefulOAuthService, Depends(get_auth_service)]
 OAuthFormData = t.Annotated[OAuth2PasswordRequestForm, Depends()]
 

@@ -322,3 +322,894 @@ Traceback (most recent call last):
     await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
           ^^^^^^^^^^^^^^^
 AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:18:06,954 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:18:06,954 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:18:07,102 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:18:23,720 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:18:23,721 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:18:50,323 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:18:50,324 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:19:09,994 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:19:09,995 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:19:24,854 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:19:24,855 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:19:38,462 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:19:38,462 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:19:50,854 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:19:50,855 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:20:03,586 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:20:03,586 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:20:17,101 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:20:17,102 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:20:30,880 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:20:30,881 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:20:47,894 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:20:47,895 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:21:00,061 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:21:00,062 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:21:12,059 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:21:12,060 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:21:24,585 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:21:24,585 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:21:36,768 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:21:36,769 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:21:48,120 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:21:48,120 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:22:00,859 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:22:00,860 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:22:12,475 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:22:12,476 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:22:23,834 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:22:23,835 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:22:36,110 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:22:36,110 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:22:48,741 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:22:48,741 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:23:00,252 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:23:00,252 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:23:12,795 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:23:12,795 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:23:12,854 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:23:25,100 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:23:25,101 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:23:36,784 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:23:36,785 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:23:48,949 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:23:48,950 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:24:00,852 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:24:00,852 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:24:13,491 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:24:13,491 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:24:24,742 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:24:24,742 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:24:35,902 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:24:35,903 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:24:47,983 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:24:47,983 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:24:59,492 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:24:59,492 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:25:11,675 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:25:11,675 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:25:24,928 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:25:24,928 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:25:41,737 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:25:41,738 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:26:05,058 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:26:05,058 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:26:39,690 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:26:39,691 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:27:40,616 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:27:40,616 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:28:50,522 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:28:50,523 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:28:50,579 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:30:00,048 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:30:00,049 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:31:09,898 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:31:09,899 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:32:20,012 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:32:20,013 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:33:30,429 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:33:30,430 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:34:41,098 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:34:41,099 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:34:41,154 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:34:53,713 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:34:53,713 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:35:05,490 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:35:05,490 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:35:17,851 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:35:17,852 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:35:30,186 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:35:30,187 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:35:42,136 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:35:42,136 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:35:53,661 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:35:53,661 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:36:07,128 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:36:07,129 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:36:23,493 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:36:23,493 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:36:46,548 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:36:46,548 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:37:22,152 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:37:22,152 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:38:23,947 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:38:23,948 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:39:33,471 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:39:33,471 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:40:43,133 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:40:43,134 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:40:43,190 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:41:52,742 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:41:52,742 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:43:02,750 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:43:02,750 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:44:12,471 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:44:12,471 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:45:22,982 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:45:22,983 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:46:32,215 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:46:32,215 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:46:32,270 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:47:42,296 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:47:42,296 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:48:51,742 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:48:51,742 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:50:02,066 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:50:02,067 :[app.uow] Exception while executing post-commit coroutine hook
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 52, in run_hooks
+    await result
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:51:11,547 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 43, in run_hooks
+    hook_coroutine = hook_callable()
+                     ^^^^^^^^^^^^^^^
+TypeError: 'tuple' object is not callable
+2025-09-24 21:51:13,287 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 43, in run_hooks
+    hook_coroutine = hook_callable()
+                     ^^^^^^^^^^^^^^^
+TypeError: 'tuple' object is not callable
+2025-09-24 21:52:22,601 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:52:22,601 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 40, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:52:22,661 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:53:32,212 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:53:32,213 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 40, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 21:54:42,956 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 39, in run_hooks
+    hook_coroutine = hook_callable()
+                     ^^^^^^^^^^^^^^^
+TypeError: 'coroutine' object is not callable
+2025-09-24 21:55:53,227 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 39, in run_hooks
+    hook_coroutine = hook_callable()
+                     ^^^^^^^^^^^^^^^
+TypeError: 'coroutine' object is not callable
+2025-09-24 21:57:02,856 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 39, in run_hooks
+    hook_coroutine = hook_callable()
+                     ^^^^^^^^^^^^^^^
+TypeError: 'coroutine' object is not callable
+2025-09-24 21:58:12,333 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 39, in run_hooks
+    hook_coroutine = hook_callable()
+                     ^^^^^^^^^^^^^^^
+TypeError: 'coroutine' object is not callable
+2025-09-24 21:58:12,387 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 21:59:22,733 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 39, in run_hooks
+    hook_coroutine = hook_callable()
+                     ^^^^^^^^^^^^^^^
+TypeError: 'coroutine' object is not callable
+2025-09-24 22:01:11,293 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 39, in run_hooks
+    hook_coroutine = hook_callable()
+                     ^^^^^^^^^^^^^^^
+TypeError: 'coroutine' object is not callable
+2025-09-24 22:01:11,347 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:01:23,815 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 39, in run_hooks
+    hook_coroutine = hook_callable()
+                     ^^^^^^^^^^^^^^^
+TypeError: 'coroutine' object is not callable
+2025-09-24 22:07:46,462 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 42, in run_hooks
+    hook_coroutine = hook_factory()
+                     ^^^^^^^^^^^^^^
+TypeError: 'coroutine' object is not callable
+2025-09-24 22:07:46,515 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:08:00,118 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 42, in run_hooks
+    hook_coroutine = hook_factory()
+                     ^^^^^^^^^^^^^^
+TypeError: 'coroutine' object is not callable
+2025-09-24 22:09:06,137 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:09:06,138 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 44, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 22:09:06,193 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:09:17,578 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:09:17,578 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 44, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 22:10:45,780 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:10:45,781 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 22:10:57,469 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:10:57,470 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 22:11:08,336 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:11:08,337 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 22:11:20,794 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:11:20,795 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 22:16:19,549 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:16:19,550 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 22:16:19,605 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:18:52,232 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:18:52,233 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 22:22:44,488 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:22:44,488 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 22:22:44,549 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:24:15,379 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:24:15,379 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 22:24:15,442 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:29:49,743 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:29:49,743 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 22:29:49,803 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:39:16,155 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:39:16,155 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 22:39:16,208 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:39:40,894 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:39:40,894 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 22:39:40,947 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:42:31,620 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:42:31,621 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 22:42:31,676 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:47:12,793 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:47:12,793 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 22:47:12,851 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:49:35,503 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:49:35,503 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 22:49:35,558 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:59:43,356 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 22:59:43,356 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 22:59:43,437 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 23:32:33,285 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 23:32:33,285 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RedisConnectionManager' object has no attribute 'set'
+2025-09-24 23:32:33,462 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 23:35:04,445 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 23:35:04,446 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'coroutine' object has no attribute 'set'
+2025-09-24 23:35:04,498 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 23:36:17,108 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-24 23:39:00,468 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 00:04:21,687 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 00:06:55,171 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 00:09:51,327 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 00:12:48,409 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 01:13:45,864 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 01:14:47,726 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 01:16:58,063 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 01:20:34,102 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 01:23:49,383 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 01:25:23,633 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 01:27:36,499 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 01:32:29,116 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 01:44:27,090 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 01:45:21,093 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 01:46:11,511 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 02:16:25,094 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 02:23:48,150 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 02:23:49,930 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 02:23:49,937 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 02:24:52,471 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 02:36:31,757 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 02:38:18,335 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 02:38:32,931 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 02:43:33,771 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 02:43:34,762 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 02:43:34,769 :[app] [CACHE: USERS] Caching user id=1, username=test

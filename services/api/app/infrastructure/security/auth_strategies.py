@@ -54,7 +54,6 @@ class StatefulOAuthStrategy(iapp.IAuthStrategy, iapp.ITokenMixin, iapp.IPassword
         except jwt.InvalidTokenError as e:
             raise appexc.CredentialsException() from e
 
-
     def __create_token(self, payload: dict, expires_delta: dt.timedelta, refresh: bool = False) -> tuple[str, float]:
         secret = self.refresh_secret if refresh else self.jwt_secret
         expiration_time = (dt.datetime.now(dt.timezone.utc) + expires_delta).timestamp()

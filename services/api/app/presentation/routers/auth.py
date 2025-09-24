@@ -42,7 +42,7 @@ async def logout(auth_service: appdeps.OAuthServiceDependency, token: appdeps.OA
     return JSONResponse({"msg":"Logged out successfully!"})
 
 
-@router.post("/refresh", responses={401: {"description":"Logged out or expired/wrong token"}},description='Send refresh token in Authorization header as "Bearer [token]"')
+@router.get("/refresh", responses={401: {"description":"Logged out or expired/wrong token"}},description='Send refresh token in Authorization header as "Bearer [token]"')
 async def refresh(auth_service: appdeps.OAuthServiceDependency, token: appdeps.OAuthToken) -> schemas.TokenResponse:
     tokens = await auth_service.refresh(refresh_token=token)
     return tokens

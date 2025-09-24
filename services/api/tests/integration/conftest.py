@@ -8,6 +8,10 @@ import app.application.dependencies as adeps
 import app.main as main
 from app.common.config import Config
 
+import logging
+logger = logging.getLogger('app')
+
+
 @pytest.fixture(scope="session")
 async def db_engine() -> t.AsyncGenerator[AsyncEngine, None]:
     engine = create_async_engine(Config.DB_URL, **Config.DB_KWARGS)
@@ -26,8 +30,12 @@ async def setup_database(db_engine: AsyncEngine):
 async def db_session(db_engine: AsyncEngine) -> t.AsyncGenerator[AsyncSession, None]:
     session_factory = async_sessionmaker(db_engine, expire_on_commit=False)
     async with session_factory() as session:
-        yield session
-        await session.rollback() 
+        try:
+            yield session
+        except Exception as e:
+            print(f'Exception caught in db_session fixture: {e}')
+        finally:
+            await session.rollback() 
 
 @pytest.fixture(scope="function")
 async def uow(db_session: AsyncSession) -> t.AsyncIterator[ideps.UnitOfWork]:
@@ -37,7 +45,9 @@ async def uow(db_session: AsyncSession) -> t.AsyncIterator[ideps.UnitOfWork]:
 async def cache():
     mgr = ideps.CacheManagerType(**ideps.cache_args)
     yield mgr
+    conn = await mgr.connect()
     await mgr.flush_data()
+
 
 
 @pytest.fixture(scope='function')
@@ -60,3 +70,6 @@ async def async_client(cache, uow):
         
     del main.app.dependency_overrides[ideps.CacheDependency]
     del main.app.dependency_overrides[ideps.UoWDependency]
+
+
+

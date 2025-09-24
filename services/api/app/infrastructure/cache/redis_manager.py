@@ -17,13 +17,12 @@ class RedisConnectionManager(mgrs.ConnectionManagerInterface[Redis]):
         self._loop: asyncio.AbstractEventLoop | None = None
 
     async def connect(self) -> Redis:
-        if self.client is None:
-            self.client = Redis(**self._redis_kwargs)
-            try:
-                self._loop = asyncio.get_running_loop()
-            except RuntimeError:
-                # no running loop (shouldn't happen in normal async use), leave None
-                self._loop = None
+        self.client = Redis(**self._redis_kwargs)
+        try:
+            self._loop = asyncio.get_running_loop()
+        except RuntimeError:
+            # no running loop (shouldn't happen in normal async use), leave None
+            self._loop = None
         return self.client
     
     async def close(self):
@@ -68,8 +67,7 @@ class RedisConnectionManager(mgrs.ConnectionManagerInterface[Redis]):
     
     async def flush_data(self):
         if not self.client:
-            return None
-
+            raise exc.StorageNotInitialzied(f'Redis client not initialized! Value={self.client} Try to call .connect() first')
         # If we're on the same loop where client was created, call directly.
         try:
             current_loop = asyncio.get_running_loop()

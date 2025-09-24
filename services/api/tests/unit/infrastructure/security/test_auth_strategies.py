@@ -2,6 +2,7 @@ import pytest, jwt, datetime as dt, uuid, pydantic as p, typing as t
 from pytest_mock import MockerFixture
 import app.infrastructure.security as isec
 from app.common.config import Config
+from tests.helpers.tokens import OAuthTokenizer
 import app.application.exceptions as appexc
 import app.domain.exceptions as domexc
 import app.presentation.schemas as schemas
@@ -72,7 +73,14 @@ def get_valid_token_pair():
             jwt_secret=JWT_SECRET,
             refresh_secret=REFRESH_SECCRET
         )
-        tokens = strat._StatefulOAuthStrategy__create_a_pair_of_tokens(payload)
+        tokenizer = OAuthTokenizer(
+            refresh_secret=strat.refresh_secret,
+            jwt_secret=strat.jwt_secret,
+            algorithm=strat.algorithm,
+            access_expires_mins=strat.access_expires_mins,
+            refresh_expires_hours=strat.refresh_expires_hours,
+        )
+        tokens = tokenizer.create_a_pair_of_tokens(payload)
         return tokens
     return _inner
 
@@ -89,15 +97,24 @@ def test_SOAuth_create_tokens_and_extract_data(get_valid_token_pair):
     payload = {'session_id': '1'}
     
     tokens: schemas.TokenResponse = get_valid_token_pair(payload)
-    outdated_token, expiration_time = strat._StatefulOAuthStrategy__create_token(payload, expires_delta=dt.timedelta(microseconds=0))
+
+    # Create an immediately-expired token using tokenizer
+    tokenizer = OAuthTokenizer(
+        refresh_secret=strat.refresh_secret,
+        jwt_secret=strat.jwt_secret,
+        algorithm=strat.algorithm,
+        access_expires_mins=strat.access_expires_mins,
+        refresh_expires_hours=strat.refresh_expires_hours,
+    )
+    outdated_token, expiration_time = tokenizer.create_token(payload, expires_delta=dt.timedelta(microseconds=0))
 
     with pytest.raises(appexc.CredentialsException):
-        strat._StatefulOAuthStrategy__exctract_token_data('asdasdasda')
+        tokenizer.exctract_token_data('asdasdasda', refresh=False)
 
     with pytest.raises(appexc.TokenExpiredException):
-        strat._StatefulOAuthStrategy__exctract_token_data(outdated_token)
+        tokenizer.exctract_token_data(outdated_token, refresh=False)
 
-    decoded_payload = strat._StatefulOAuthStrategy__exctract_token_data(tokens.access_token)
+    decoded_payload = tokenizer.exctract_token_data(tokens.access_token, refresh=False)
     assert decoded_payload == payload | {'exp': tokens.access_expires}
 
 
@@ -128,7 +145,14 @@ async def test_SOAuth_login_logout(get_full_oauth_setup, credentials, user_exist
         suite.mock_sess_repo.create.assert_awaited_once()
 
         await suite.strat.logout(credentials={'token': tokens.access_token})
-        data=suite.strat._StatefulOAuthStrategy__exctract_token_data(tokens.access_token)
+        tokenizer = OAuthTokenizer(
+            refresh_secret=suite.strat.refresh_secret,
+            jwt_secret=suite.strat.jwt_secret,
+            algorithm=suite.strat.algorithm,
+            access_expires_mins=suite.strat.access_expires_mins,
+            refresh_expires_hours=suite.strat.refresh_expires_hours,
+        )
+        data = tokenizer.exctract_token_data(tokens.access_token, refresh=False)
         suite.mock_sess_repo.delete.assert_called_once_with(data['session_id'])
         
         with pytest.raises(appexc.CredentialsException):
