@@ -45,11 +45,11 @@ async def lifespan(app: FastAPI):
     
     #Default_admin
     async with idep.DatabaseManager.session() as session:
-        db = idep.UserDB(session)
-        cache = idep.CacheManager.connect()
-        uow = idep.UnitOfWork(session)
-        repo = idep.UserRepository(connection=cache, user_db_repo=db, uow=uow)
-        await repo.ensure_admin_exists(idep.PasswordHasherType())
+        async with idep.CacheManager.connect() as cache:
+            db = idep.UserDB(session)
+            uow = idep.UnitOfWork(session)
+            repo = idep.UserRepository(connection=cache, user_db_repo=db, uow=uow)
+            await repo.ensure_admin_exists(idep.PasswordHasherType())
 
     logger.info(f'[APP: Startup] Startup finished!')
     yield

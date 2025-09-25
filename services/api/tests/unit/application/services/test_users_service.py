@@ -1,5 +1,6 @@
 import pytest, typing as t
 from pytest_mock import MockerFixture
+import pytest
 import app.application.services as svc
 import app.domain.models as dmod
 import app.domain.exceptions as domexc
@@ -23,6 +24,7 @@ def user_data():
 
 
 
+@pytest.mark.asyncio
 async def test_user_service_get_user(mocker: MockerFixture, hasher, user_data):
     mock_user_repo = mocker.AsyncMock()
     mock_user_repo.get_by_id.return_value = dmod.User(**user_data,password_hash='somehash',version=0)
@@ -33,6 +35,7 @@ async def test_user_service_get_user(mocker: MockerFixture, hasher, user_data):
     mock_user_repo.get_by_id.assert_called_once_with(target_id)
         
 
+@pytest.mark.asyncio
 async def test_user_service_list(mocker: MockerFixture, hasher, user_data):
     mock_user_repo = mocker.AsyncMock()
     mock_user_repo.list.return_value = [dmod.User(**user_data,password_hash='somehash',version=0)]
@@ -44,6 +47,7 @@ async def test_user_service_list(mocker: MockerFixture, hasher, user_data):
 
 
 
+@pytest.mark.asyncio
 async def test_user_service_delete(mocker: MockerFixture, hasher):
     mock_user_repo = mocker.AsyncMock()
     mock_user_repo.delete.return_value = None
@@ -67,6 +71,7 @@ async def test_user_service_delete(mocker: MockerFixture, hasher):
    ],
    indirect=['mocker','hasher']
 )
+@pytest.mark.asyncio
 async def test_user_service_admin_delete(mocker, hasher, current_user_role, current_user_id, target_user_id, target_user_exists, exc, exc_text):
     mock_user_repo = mocker.AsyncMock()
     mock_user_repo.delete.return_value = None
@@ -89,6 +94,7 @@ async def test_user_service_admin_delete(mocker, hasher, current_user_role, curr
 
     
 
+@pytest.mark.asyncio
 async def test_user_service_create(mocker, hasher, user_data):
     mock_user_repo = mocker.AsyncMock()
     password = '12341234'
@@ -123,6 +129,7 @@ async def test_user_service_create(mocker, hasher, user_data):
    ],
    indirect=['mocker','hasher','user_data']
 )
+@pytest.mark.asyncio
 async def test_user_service_admin_create(mocker, hasher, user_data, current_user_role, target_user_role, exc, exc_text):
     mock_user_repo = mocker.AsyncMock()
     password = '12341234'
@@ -171,6 +178,7 @@ async def test_user_service_admin_create(mocker, hasher, user_data, current_user
    ],
    indirect=['mocker','hasher','user_data']
 )
+@pytest.mark.asyncio
 async def test_user_service_update(mocker, hasher, user_data, old_pass,new_pass, exc, exc_text):
     mock_user_repo = mocker.AsyncMock()
     new_username = 'newname'
@@ -218,6 +226,7 @@ async def test_user_service_update(mocker, hasher, user_data, old_pass,new_pass,
     ],
     indirect=['mocker', 'hasher', 'user_data'],
 )
+@pytest.mark.asyncio
 async def test_user_service_admin_update(
     mocker,
     hasher,

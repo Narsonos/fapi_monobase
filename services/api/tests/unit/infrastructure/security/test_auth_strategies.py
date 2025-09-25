@@ -1,5 +1,8 @@
 import pytest, jwt, datetime as dt, uuid, pydantic as p, typing as t
 from pytest_mock import MockerFixture
+import pytest
+
+
 import app.infrastructure.security as isec
 from app.common.config import Config
 from tests.helpers.tokens import OAuthTokenizer
@@ -98,7 +101,6 @@ def test_SOAuth_create_tokens_and_extract_data(get_valid_token_pair):
     
     tokens: schemas.TokenResponse = get_valid_token_pair(payload)
 
-    # Create an immediately-expired token using tokenizer
     tokenizer = OAuthTokenizer(
         refresh_secret=strat.refresh_secret,
         jwt_secret=strat.jwt_secret,
@@ -130,6 +132,7 @@ def test_SOAuth_create_tokens_and_extract_data(get_valid_token_pair):
     ],
     indirect=['get_full_oauth_setup']
 )
+@pytest.mark.asyncio
 async def test_SOAuth_login_logout(get_full_oauth_setup, credentials, user_exists: bool, exc):
     suite = get_full_oauth_setup(user_exists)
     #test hasher property along the way
@@ -172,6 +175,7 @@ async def test_SOAuth_login_logout(get_full_oauth_setup, credentials, user_exist
     ],
     indirect=['get_full_oauth_setup','get_valid_token_pair']
 )
+@pytest.mark.asyncio
 async def test_SOAuth_authenticate(get_full_oauth_setup, get_valid_token_pair, credentials, user_exists: bool, session_exists:bool, exc):
     suite: SOAuthTestSuite = get_full_oauth_setup(user_exists)
     if credentials == 'valid':
@@ -205,6 +209,7 @@ async def test_SOAuth_authenticate(get_full_oauth_setup, get_valid_token_pair, c
     ],
     indirect=['get_full_oauth_setup','get_valid_token_pair']
 )
+@pytest.mark.asyncio
 async def test_SOAuth_refresh(get_full_oauth_setup, get_valid_token_pair, tokens_match: bool, session_exists:bool, exc):
     suite: SOAuthTestSuite = get_full_oauth_setup(True)
     payload = {'session_id':'some_uuid'}

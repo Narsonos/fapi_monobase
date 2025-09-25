@@ -31,7 +31,8 @@ async def get_db_session():
         yield session
 
 async def get_cache():
-    return await CacheManager.connect()
+    async with CacheManager.connect() as connection:
+        yield connection
 
 DatabaseDependency = t.Annotated[DatabaseSessionType, Depends(get_db_session)]
 CacheDependency = t.Annotated[CacheConnectionType, Depends(get_cache)]

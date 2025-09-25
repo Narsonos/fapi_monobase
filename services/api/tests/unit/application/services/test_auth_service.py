@@ -9,6 +9,7 @@ from fastapi import HTTPException
 
 
 
+@pytest.mark.asyncio
 async def test_auth_service_authenticate(mocker):
 	mock_strategy = mocker.AsyncMock()
 	# prepare domain user returned by strategy
@@ -24,6 +25,7 @@ async def test_auth_service_authenticate(mocker):
 
 
 
+@pytest.mark.asyncio
 async def test_authenticate_raises_propagates(mocker):
 	mock_strategy = mocker.AsyncMock()
 	mock_strategy.authenticate.side_effect = domexc.UserDoesNotExist('no')
@@ -33,6 +35,7 @@ async def test_authenticate_raises_propagates(mocker):
 
 
 
+@pytest.mark.asyncio
 async def test_stateful_oauth_login_logout_and_refresh(mocker):
 	mock_strategy = mocker.AsyncMock()
 	mock_strategy.login.return_value = schemas.TokenResponse(access_token='at', refresh_token='rt', access_expires=1.0, refresh_expires=2.0)
@@ -58,6 +61,7 @@ async def test_stateful_oauth_login_logout_and_refresh(mocker):
 
 
 
+@pytest.mark.asyncio
 async def test_login_raises_propagates(mocker):
 	mock_strategy = mocker.AsyncMock()
 	mock_strategy.login.side_effect = domexc.ActionNotAllowedForRole('no')
@@ -67,6 +71,7 @@ async def test_login_raises_propagates(mocker):
 
 
 
+@pytest.mark.asyncio
 async def test_refresh_raises_propagates(mocker):
 	mock_strategy = mocker.AsyncMock()
 	# the real strategy raises app-level HTTP exceptions for invalid/expired tokens

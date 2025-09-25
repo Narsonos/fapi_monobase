@@ -6,17 +6,15 @@ import app.application.models as amod
 import app.infrastructure.security as security
 from tests.helpers.tokens import OAuthTokenizer
 import pytest
+from tests.integration.conftest import build_sess_repo,build_user_repo
 
-
-
-
-async def test_login(async_client, uow, cache):
+@pytest.mark.asyncio
+async def test_login(async_client, cache_client, uow):
     username = 'test'
     password = '123123123'
 
-    cache_client = await cache.connect()
-    user_db = ideps.UserDB(uow.session)
-    user_repo = ideps.UserRepository(user_db, cache_client, uow)
+    user_repo = await build_user_repo(uow, cache_client)
+
     user = dmod.User.create(username='test', password='123123123', role='user', hasher=ideps.PasswordHasherType())
     await user_repo.create(user)
     await uow.commit()
@@ -25,18 +23,21 @@ async def test_login(async_client, uow, cache):
     assert response.status_code == 200
     assert schemas.TokenResponse.model_validate(response.json())
 
+@pytest.mark.asyncio
 async def test_login_user_not_exists(async_client):
     response = await async_client.post('/auth/login', data={'username':'username', 'password':'password'})
     assert response.status_code == 404
 
-async def test_logout(async_client, cache):
-    cache_client = await cache.connect()
-    sess_repo = ideps.SessionRepository(cache_client)
+@pytest.mark.asyncio
+async def test_logout(async_client, cache_client):
     session = amod.RotatingTokenSession(
         user_id=1,
         roles=['user'],
         refresh_token='sometoken'
     )
+
+    sess_repo = await build_sess_repo(cache_client)
+
     await sess_repo.create(session, 3600)
     stored_session = await sess_repo.get_session(session.id)
     assert isinstance(stored_session, amod.RotatingTokenSession)
@@ -62,15 +63,15 @@ async def test_logout(async_client, cache):
     assert sess_after is None
 
 
-async def test_refresh(async_client, cache):
-    cache_client = await cache.connect()
-    sess_repo = ideps.SessionRepository(cache_client)
-
+@pytest.mark.asyncio
+async def test_refresh(async_client, cache_client):
     session = amod.RotatingTokenSession(
         user_id=1,
         roles=['user'],
         refresh_token='this_value_is_replaced_below'
     )
+
+    sess_repo = await build_sess_repo(cache_client)
 
     hasher = ideps.PasswordHasherType()
     strat = ideps.AuthStrategyType(session_repo=None, user_repo=None, password_hasher=hasher)

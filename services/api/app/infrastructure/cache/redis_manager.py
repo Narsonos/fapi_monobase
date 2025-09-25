@@ -1,9 +1,9 @@
 from app.common.config import Config
 import app.infrastructure.exceptions as exc
 import app.infrastructure.interfaces as mgrs
-from redis.asyncio.client import Redis
+from redis.asyncio import ConnectionPool, Redis
 
-import logging, asyncio
+import logging, asyncio, contextlib, typing as t
 
 
 
@@ -11,51 +11,47 @@ import logging, asyncio
 logger = logging.getLogger('app.storage')
 
 class RedisConnectionManager(mgrs.ConnectionManagerInterface[Redis]):
-    def __init__(self, **redis_kwargs):
+    def __init__(self, cache_pool=True, **redis_kwargs):
         self._redis_kwargs = redis_kwargs
-        self.client: Redis | None = None
-        self._loop: asyncio.AbstractEventLoop | None = None
+        self._pool = ConnectionPool(**redis_kwargs)
+        self._cache_pool = cache_pool
 
-    async def connect(self) -> Redis:
-        self.client = Redis(**self._redis_kwargs)
+    @contextlib.asynccontextmanager
+    async def connect(self) -> t.AsyncIterator[Redis]:
+        if self._cache_pool or self._pool is None:
+            self._pool = ConnectionPool(**self._redis_kwargs)
+        client = Redis(connection_pool=self._pool)
         try:
-            self._loop = asyncio.get_running_loop()
-        except RuntimeError:
-            # no running loop (shouldn't happen in normal async use), leave None
-            self._loop = None
-        return self.client
+            yield client
+        except Exception as e:
+            raise exc.CustomStorageException(f'Redis got exception: {e}')
+        finally:
+            await client.aclose()
     
     async def close(self):
-        if self.client:
-            # ensure we close on the loop where client was created
-            if self._loop is None:
-                await self.client.aclose()
-            else:
-                if asyncio.get_event_loop() is self._loop:
-                    await self.client.aclose()
-                else:
-                    fut = asyncio.run_coroutine_threadsafe(self.client.aclose(), self._loop)
-                    await asyncio.wrap_future(fut)
-            self.client = None
-            self._loop = None
+        if self._pool:
+            logger.info('[Storage: Redis] Closing connection pool!')
+            await self._pool.disconnect(inuse_connections=True)
+            self._pool = None
+
 
     async def wait_for_startup(self, attempts:int = 5, interval_sec: int = 5):
-        retries = 0
-        redis = await self.connect()
-        while retries < attempts:
-            try:
-                pong = await redis.ping()
-                if pong:
-                    logger.info("[WAIT FOR REDIS] PONG received -> Redis is ready!")
-                    return
-            except Exception as e:
-                logger.debug(e)
-                logger.info(f"[WAIT FOR REDIS] Redis not ready yet, retrying ({retries}/{attempts})...")
-                retries += 1
-                await asyncio.sleep(interval_sec)
+            retries = 0
+            while retries < attempts:
+                try:
+                    async with self.connect() as redis:
+                        pong = await redis.ping()
+                        if pong:
+                            logger.info("[WAIT FOR REDIS] PONG received -> Redis is ready!")
+                            return
+                except Exception as e:
+                    logger.debug(e)
+                    logger.info(f"[WAIT FOR REDIS] Redis not ready yet, retrying ({retries}/{attempts})...")
+                    retries += 1
+                    await asyncio.sleep(interval_sec)
 
-        logger.error(f"[WAIT FOR REDIS] Redis failed to respond after {attempts} attempts")
-        raise exc.StorageBootError(f"Redis failed to boot within {retries * interval_sec} sec!")
+            logger.error(f"[WAIT FOR REDIS] Redis failed to respond after {attempts} attempts")
+            raise exc.StorageBootError(f"Redis failed to boot within {retries * interval_sec} sec!")
 
 
     async def initialize_data_structures(self):
@@ -66,17 +62,7 @@ class RedisConnectionManager(mgrs.ConnectionManagerInterface[Redis]):
         return None
     
     async def flush_data(self):
-        if not self.client:
-            raise exc.StorageNotInitialzied(f'Redis client not initialized! Value={self.client} Try to call .connect() first')
-        # If we're on the same loop where client was created, call directly.
-        try:
-            current_loop = asyncio.get_running_loop()
-        except RuntimeError:
-            current_loop = None
-
-        if self._loop is None or current_loop is self._loop:
-            await self.client.flushall()
-        else:
-            # schedule flushall on the original loop and await completion
-            fut = asyncio.run_coroutine_threadsafe(self.client.flushall(), self._loop)
-            await asyncio.wrap_future(fut)
+        if not self._pool:
+            raise exc.StorageNotInitialzied(f'Redis pool closed! Value={self._pool}. Recreate the manage or pool')
+        async with self.connect() as redis:
+            await redis.flushall()

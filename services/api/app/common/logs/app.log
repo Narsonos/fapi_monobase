@@ -1213,3 +1213,910 @@ AttributeError: 'coroutine' object has no attribute 'set'
 2025-09-25 02:43:33,771 :[app] [CACHE: USERS] Caching user id=1, username=test
 2025-09-25 02:43:34,762 :[app] [CACHE: USERS] Caching user id=2, username=admin
 2025-09-25 02:43:34,769 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 02:53:34,660 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 02:54:29,871 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 03:06:01,192 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 03:06:29,429 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 14:23:05,665 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 14:26:53,089 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 14:32:06,615 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 14:47:36,597 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 14:59:20,540 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 15:01:00,547 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 15:45:14,012 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 15:45:14,020 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'async_generator' object has no attribute 'set'
+2025-09-25 15:45:14,183 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 15:47:22,212 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 15:55:54,596 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:00:11,097 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:00:11,098 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 616, in execute_command
+    return await conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 590, in _send_command_parse_response
+    return await self.parse_response(conn, command_name, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 637, in parse_response
+    response = await connection.read_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 549, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 90, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/base.py", line 219, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+RuntimeError: Task <Task pending name='Task-10' coro=<test_login() running at /app/tests/integration/presentation/test_api_auth.py:18> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending> attached to a different loop
+2025-09-25 16:00:11,167 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:03:22,596 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:03:22,597 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 616, in execute_command
+    return await conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 590, in _send_command_parse_response
+    return await self.parse_response(conn, command_name, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 637, in parse_response
+    response = await connection.read_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 549, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 90, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/base.py", line 219, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+RuntimeError: Task <Task pending name='Task-10' coro=<test_login() running at /app/tests/integration/presentation/test_api_auth.py:18> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending> attached to a different loop
+2025-09-25 16:03:22,658 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:05:50,890 :[app] [CACHE: USERS] Caching user id=1, username=admin
+2025-09-25 16:16:26,975 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:16:26,976 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 616, in execute_command
+    return await conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 590, in _send_command_parse_response
+    return await self.parse_response(conn, command_name, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 637, in parse_response
+    response = await connection.read_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 549, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 90, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/base.py", line 219, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+RuntimeError: Task <Task pending name='Task-10' coro=<test_login() running at /app/tests/integration/presentation/test_api_auth.py:18> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending> attached to a different loop
+2025-09-25 16:16:27,140 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:17:53,062 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:17:53,063 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 616, in execute_command
+    return await conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 590, in _send_command_parse_response
+    return await self.parse_response(conn, command_name, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 637, in parse_response
+    response = await connection.read_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 549, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 90, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/base.py", line 219, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+RuntimeError: Task <Task pending name='Task-10' coro=<test_login() running at /app/tests/integration/presentation/test_api_auth.py:18> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending> attached to a different loop
+2025-09-25 16:17:53,126 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:25:14,080 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:25:14,081 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 616, in execute_command
+    return await conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 590, in _send_command_parse_response
+    return await self.parse_response(conn, command_name, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 637, in parse_response
+    response = await connection.read_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 549, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 90, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/base.py", line 219, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+RuntimeError: Task <Task pending name='Task-10' coro=<test_login() running at /app/tests/integration/presentation/test_api_auth.py:18> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending> attached to a different loop
+2025-09-25 16:25:14,136 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:26:35,197 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:26:35,198 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 616, in execute_command
+    return await conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 590, in _send_command_parse_response
+    return await self.parse_response(conn, command_name, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 637, in parse_response
+    response = await connection.read_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 549, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 90, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/base.py", line 219, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+RuntimeError: Task <Task pending name='Task-11' coro=<test_login() running at /app/tests/integration/presentation/test_api_auth.py:18> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending> attached to a different loop
+2025-09-25 16:26:35,254 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:31:24,354 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:31:24,355 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 616, in execute_command
+    return await conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 590, in _send_command_parse_response
+    return await self.parse_response(conn, command_name, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 637, in parse_response
+    response = await connection.read_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 549, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 90, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/base.py", line 219, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+RuntimeError: Task <Task pending name='Task-11' coro=<test_login() running at /app/tests/integration/presentation/test_api_auth.py:18> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending> attached to a different loop
+2025-09-25 16:31:24,412 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:35:12,078 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:35:12,079 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 616, in execute_command
+    return await conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 590, in _send_command_parse_response
+    return await self.parse_response(conn, command_name, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 637, in parse_response
+    response = await connection.read_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 549, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 90, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/base.py", line 219, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+RuntimeError: Task <Task pending name='Task-10' coro=<test_login() running at /app/tests/integration/presentation/test_api_auth.py:18> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending> attached to a different loop
+2025-09-25 16:35:12,138 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:35:27,805 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:35:27,806 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 616, in execute_command
+    return await conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 590, in _send_command_parse_response
+    return await self.parse_response(conn, command_name, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 637, in parse_response
+    response = await connection.read_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 549, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 90, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/base.py", line 219, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+RuntimeError: Task <Task pending name='Task-10' coro=<test_login() running at /app/tests/integration/presentation/test_api_auth.py:18> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending> attached to a different loop
+2025-09-25 16:35:27,863 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:36:35,554 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:36:35,555 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 616, in execute_command
+    return await conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 590, in _send_command_parse_response
+    return await self.parse_response(conn, command_name, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 637, in parse_response
+    response = await connection.read_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 549, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 90, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/base.py", line 219, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+RuntimeError: Task <Task pending name='Task-10' coro=<test_login() running at /app/tests/integration/presentation/test_api_auth.py:18> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending> attached to a different loop
+2025-09-25 16:36:35,612 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:40:11,354 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:40:11,355 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 616, in execute_command
+    return await conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 590, in _send_command_parse_response
+    return await self.parse_response(conn, command_name, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 637, in parse_response
+    response = await connection.read_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 549, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 90, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/base.py", line 219, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+RuntimeError: Task <Task pending name='Task-10' coro=<test_login() running at /app/tests/integration/presentation/test_api_auth.py:18> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending> attached to a different loop
+2025-09-25 16:40:11,411 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:54:26,440 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:54:26,441 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 616, in execute_command
+    return await conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 590, in _send_command_parse_response
+    return await self.parse_response(conn, command_name, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 637, in parse_response
+    response = await connection.read_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 549, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 90, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/base.py", line 219, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+RuntimeError: Task <Task pending name='Task-9' coro=<test_login() running at /app/tests/integration/presentation/test_api_auth.py:20> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending> attached to a different loop
+2025-09-25 16:54:26,599 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 16:54:28,095 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 16:54:28,096 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 616, in execute_command
+    return await conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 590, in _send_command_parse_response
+    return await self.parse_response(conn, command_name, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 637, in parse_response
+    response = await connection.read_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 549, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 90, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/base.py", line 219, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+RuntimeError: Task <Task pending name='Task-65' coro=<test_get_user() running at /app/tests/integration/presentation/test_api_users.py:35> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending> attached to a different loop
+2025-09-25 16:54:28,102 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 17:10:56,669 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 17:10:58,564 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 17:10:58,564 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 549, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 90, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/base.py", line 219, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+RuntimeError: Task <Task pending name='Task-78' coro=<test_get_user() running at /app/tests/integration/presentation/test_api_users.py:35> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending> attached to a different loop
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 616, in execute_command
+    return await conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 590, in _send_command_parse_response
+    return await self.parse_response(conn, command_name, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 637, in parse_response
+    response = await connection.read_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 569, in read_response
+    await self.disconnect(nowait=True)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 425, in disconnect
+    self._writer.close()  # type: ignore[union-attr]
+    ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 358, in close
+    return self._transport.close()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/selector_events.py", line 1213, in close
+    super().close()
+  File "/usr/local/lib/python3.12/asyncio/selector_events.py", line 875, in close
+    self._loop.call_soon(self._call_connection_lost, None)
+  File "/usr/local/lib/python3.12/asyncio/base_events.py", line 799, in call_soon
+    self._check_closed()
+  File "/usr/local/lib/python3.12/asyncio/base_events.py", line 545, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+2025-09-25 17:10:58,574 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 17:20:55,491 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 17:20:57,120 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 17:20:57,120 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 549, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 90, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/base.py", line 219, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+RuntimeError: Task <Task pending name='Task-78' coro=<test_get_user() running at /app/tests/integration/presentation/test_api_users.py:35> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending> attached to a different loop
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 616, in execute_command
+    return await conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 590, in _send_command_parse_response
+    return await self.parse_response(conn, command_name, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 637, in parse_response
+    response = await connection.read_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 569, in read_response
+    await self.disconnect(nowait=True)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 425, in disconnect
+    self._writer.close()  # type: ignore[union-attr]
+    ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 358, in close
+    return self._transport.close()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/selector_events.py", line 1213, in close
+    super().close()
+  File "/usr/local/lib/python3.12/asyncio/selector_events.py", line 875, in close
+    self._loop.call_soon(self._call_connection_lost, None)
+  File "/usr/local/lib/python3.12/asyncio/base_events.py", line 799, in call_soon
+    self._check_closed()
+  File "/usr/local/lib/python3.12/asyncio/base_events.py", line 545, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+2025-09-25 17:20:57,130 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 17:24:39,631 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 17:24:41,320 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 17:24:41,321 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 549, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 90, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/base.py", line 219, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+RuntimeError: Task <Task pending name='Task-78' coro=<test_get_user() running at /app/tests/integration/presentation/test_api_users.py:35> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending> attached to a different loop
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 616, in execute_command
+    return await conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 590, in _send_command_parse_response
+    return await self.parse_response(conn, command_name, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 637, in parse_response
+    response = await connection.read_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 569, in read_response
+    await self.disconnect(nowait=True)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 425, in disconnect
+    self._writer.close()  # type: ignore[union-attr]
+    ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 358, in close
+    return self._transport.close()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/selector_events.py", line 1213, in close
+    super().close()
+  File "/usr/local/lib/python3.12/asyncio/selector_events.py", line 875, in close
+    self._loop.call_soon(self._call_connection_lost, None)
+  File "/usr/local/lib/python3.12/asyncio/base_events.py", line 799, in call_soon
+    self._check_closed()
+  File "/usr/local/lib/python3.12/asyncio/base_events.py", line 545, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+2025-09-25 17:24:41,330 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 17:28:00,265 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 17:28:02,088 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 17:28:02,089 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 549, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 90, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/base.py", line 219, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+RuntimeError: Task <Task pending name='Task-69' coro=<test_get_user() running at /app/tests/integration/presentation/test_api_users.py:35> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending> attached to a different loop
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 616, in execute_command
+    return await conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 590, in _send_command_parse_response
+    return await self.parse_response(conn, command_name, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 637, in parse_response
+    response = await connection.read_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 569, in read_response
+    await self.disconnect(nowait=True)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 425, in disconnect
+    self._writer.close()  # type: ignore[union-attr]
+    ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 358, in close
+    return self._transport.close()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/selector_events.py", line 1213, in close
+    super().close()
+  File "/usr/local/lib/python3.12/asyncio/selector_events.py", line 875, in close
+    self._loop.call_soon(self._call_connection_lost, None)
+  File "/usr/local/lib/python3.12/asyncio/base_events.py", line 799, in call_soon
+    self._check_closed()
+  File "/usr/local/lib/python3.12/asyncio/base_events.py", line 545, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+2025-09-25 17:28:02,098 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 17:42:18,850 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 17:42:20,369 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 17:42:20,374 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 17:44:48,619 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 17:44:50,029 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 17:44:50,068 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 17:51:11,332 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 17:51:12,710 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 17:51:12,760 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 17:52:27,337 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 17:52:28,706 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 17:52:28,728 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 17:56:41,200 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 17:56:42,593 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 17:56:42,645 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 18:01:33,540 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 18:01:34,671 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 18:03:50,228 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 18:03:52,078 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 18:03:52,084 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 18:05:29,286 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 18:05:30,635 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 18:05:30,682 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 18:09:46,004 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 18:09:46,646 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 18:10:40,632 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 18:10:40,633 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 616, in execute_command
+    return await conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 590, in _send_command_parse_response
+    return await self.parse_response(conn, command_name, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 637, in parse_response
+    response = await connection.read_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 549, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 90, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/base.py", line 219, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+RuntimeError: Task <Task pending name='Task-8' coro=<test_login() running at /app/tests/integration/presentation/test_api_auth.py:20> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending> attached to a different loop
+2025-09-25 18:10:40,689 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 18:10:42,410 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 18:10:42,411 :[app] Exception while executing post-commit hook.
+Traceback (most recent call last):
+  File "/app/app/infrastructure/db/sqla_uow.py", line 36, in run_hooks
+    await hook_coroutine
+  File "/app/app/infrastructure/repositories/users.py", line 220, in __cache
+    await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 616, in execute_command
+    return await conn.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 590, in _send_command_parse_response
+    return await self.parse_response(conn, command_name, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/client.py", line 637, in parse_response
+    response = await connection.read_response()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/asyncio/connection.py", line 549, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 82, in read_response
+    response = await self._read_response(disable_decoding=disable_decoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/resp2.py", line 90, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/.venv/lib/python3.12/site-packages/redis/_parsers/base.py", line 219, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/local/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+RuntimeError: Task <Task pending name='Task-66' coro=<test_get_user() running at /app/tests/integration/presentation/test_api_users.py:35> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending> attached to a different loop
+2025-09-25 18:10:42,441 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 18:12:29,075 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 18:12:30,186 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 18:16:40,462 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 18:16:41,635 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 18:16:41,657 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 18:17:49,779 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 18:17:51,252 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 18:17:51,299 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 18:20:01,378 :[app] [CACHE: USERS] Caching user id=1, username=test
+2025-09-25 18:20:02,469 :[app] [CACHE: USERS] Caching user id=2, username=admin
+2025-09-25 18:20:02,497 :[app] [CACHE: USERS] Caching user id=1, username=test
