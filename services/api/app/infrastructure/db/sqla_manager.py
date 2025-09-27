@@ -21,7 +21,7 @@ logger = logging.getLogger('app.storage')
 
 class SQLAlchemySessionManager(mgrs.SessionManagerInterface[AsyncConnection, AsyncSession]):
     """DBSessionManager - credit to: Thomas's Aitken article at Medium.com
-    Spawns Async sessions and connections to a database using SQLAlchemy and ensures they're closed/rolled back properly
+    Spawns AsyncSessions and AsyncConnections to a database using SQLAlchemy and ensures they're closed/rolled back properly
     """
 
     def __init__(self, host: str, engine_kwargs: dict[str,t.Any] = {}):
@@ -30,7 +30,7 @@ class SQLAlchemySessionManager(mgrs.SessionManagerInterface[AsyncConnection, Asy
 
     async def close(self) -> None:
         if self._engine is None:
-            raise exc.StorageNotInitialzied("[DB Manager] DatabaseSessionManager is not initizalized!")
+            raise exc.StorageNotInitialzied("[DB Manager] DatabaseSessionManager is closed already!")
         await self._engine.dispose()
         self._engine = None 
         self._sessionmaker = None
@@ -68,7 +68,8 @@ class SQLAlchemySessionManager(mgrs.SessionManagerInterface[AsyncConnection, Asy
 
     async def wait_for_startup(self, attempts:int = 5, interval_sec: int = 5):
         """Sends SELECT 1 to a DB and waits till response with retries"""
-
+        if self._engine is None:
+            raise exc.StorageNotInitialzied("[DB Manager] DatabaseSessionManager is not initizalized!")
         retries = 0
         async with self.session() as session:
             while retries < attempts:
@@ -85,11 +86,15 @@ class SQLAlchemySessionManager(mgrs.SessionManagerInterface[AsyncConnection, Asy
             raise exc.StorageBootError(f"Database failed to boot within {retries*interval_sec}sec!")
 
     async def initialize_data_structures(self):
+        if self._engine is None:
+            raise exc.StorageNotInitialzied("[DB Manager] DatabaseSessionManager is not initizalized!")
         logger.info('[INIT DB] Configuring models for versioning...')
         async with self._engine.begin() as conn:
             await conn.run_sync(sqlm.SQLModel.metadata.create_all)
 
     async def flush_data(self):
+        if self._engine is None:
+            raise exc.StorageNotInitialzied("[DB Manager] DatabaseSessionManager is not initizalized!")
         logger.info('[DB] Flush_all called -> Dropping all tables.')
         async with self._engine.begin() as conn:
             await conn.run_sync(sqlm.SQLModel.metadata.drop_all)

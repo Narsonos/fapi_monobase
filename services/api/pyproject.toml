@@ -17,7 +17,6 @@ dependencies = [
     "tzlocal==5.3",
     "pytz==2025.1",
     "sqlalchemy==2.0.38",
-    "aiomysql==0.2.0",
     "sqlmodel==0.0.24",
     "redis==5.2.1",
     "pyjwt==2.10.1",
@@ -28,6 +27,7 @@ dependencies = [
     "pytest-cov (>=7.0.0,<8.0.0)",
     "pytest-mock (>=3.15.1,<4.0.0)",
     "pytest-asyncio (>=1.2.0,<2.0.0)",
+    "aiomysql (>=0.2.0,<0.3.0)",
 ]
 
 [tool.poetry.group.dev.dependencies]
@@ -45,6 +45,7 @@ addopts = "-ra -v --cov=app --cov-report=term-missing"
 markers = ['exceptions', 'services', 'models']
 asyncio_mode = 'strict'
 asyncio_default_test_loop_scope = 'session'
+asyncio_default_fixture_loop_scope = "session"
 
 [tool.coverage.run]
 omit = [
@@ -54,7 +55,8 @@ omit = [
     "app/gunicorn_conf.py",
     "*/__init__.py",
     "*/interfaces/*",
-    "*/dependencies.py"
+    "*/dependencies.py",
+    "app/presentation/exception_handlers.py"
 ]
 
 [tool.coverage.report]

@@ -6,7 +6,7 @@ import app.application.models as amod
 import app.infrastructure.security as security
 from tests.helpers.tokens import OAuthTokenizer
 import pytest
-from tests.integration.conftest import build_sess_repo,build_user_repo
+from tests.helpers.users import build_sess_repo,build_user_repo
 
 @pytest.mark.asyncio
 async def test_login(async_client, cache_client, uow):

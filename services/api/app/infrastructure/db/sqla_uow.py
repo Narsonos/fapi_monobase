@@ -9,7 +9,6 @@ logger = logging.getLogger('app')
 class SQLAlchemyUnitOfWork(iabc.IUnitOfWork[AsyncSession]):
     def __init__(self, session: AsyncSession):
         self._session = session
-        # Храним именно "фабрики" корутин
         self._post_commit_hooks: list[t.Callable[[], t.Awaitable[t.Any]]] = []
 
     @property
@@ -34,7 +33,7 @@ class SQLAlchemyUnitOfWork(iabc.IUnitOfWork[AsyncSession]):
             try:
                 hook_coroutine = hook_factory()
                 await hook_coroutine
-            except Exception:
-                logger.exception("Exception while executing post-commit hook.")
+            except Exception as e:
+                logger.exception(f"[UoW] Exception while executing post-commit hook. Exception: {e}")
 
         self._post_commit_hooks.clear()

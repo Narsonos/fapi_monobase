@@ -52,12 +52,12 @@ async def test_user_service_delete(mocker: MockerFixture, hasher):
     mock_user_repo = mocker.AsyncMock()
     mock_user_repo.delete.return_value = None
     service = svc.UserService(mock_user_repo, hasher)
-
     current_user = mocker.MagicMock(spec=schemas.UserDTO )
     current_user.id = 1
+    mock_user_repo.get_by_id.return_value = current_user
 
     rs = await service.delete(current_user)
-    mock_user_repo.delete.assert_called_once_with(current_user.id)
+    mock_user_repo.delete.assert_called_once_with(current_user)
 
 
 
@@ -92,7 +92,7 @@ async def test_user_service_admin_delete(mocker, hasher, current_user_role, curr
         await service.admin_delete(current_user, target_user_id)
         mock_user_repo.delete.assert_called_once_with(target_user_exists)
 
-    
+     
 
 @pytest.mark.asyncio
 async def test_user_service_create(mocker, hasher, user_data):

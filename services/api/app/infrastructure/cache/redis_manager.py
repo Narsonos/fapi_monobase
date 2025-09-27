@@ -2,7 +2,7 @@ from app.common.config import Config
 import app.infrastructure.exceptions as exc
 import app.infrastructure.interfaces as mgrs
 from redis.asyncio import ConnectionPool, Redis
-
+from redis.exceptions import RedisError
 import logging, asyncio, contextlib, typing as t
 
 
@@ -23,8 +23,8 @@ class RedisConnectionManager(mgrs.ConnectionManagerInterface[Redis]):
         client = Redis(connection_pool=self._pool)
         try:
             yield client
-        except Exception as e:
-            raise exc.CustomStorageException(f'Redis got exception: {e}')
+        except RedisError as e:
+            raise exc.CustomStorageException(f'Redis got exception!') from e
         finally:
             await client.aclose()
     
@@ -44,7 +44,7 @@ class RedisConnectionManager(mgrs.ConnectionManagerInterface[Redis]):
                         if pong:
                             logger.info("[WAIT FOR REDIS] PONG received -> Redis is ready!")
                             return
-                except Exception as e:
+                except exc.CustomStorageException as e:
                     logger.debug(e)
                     logger.info(f"[WAIT FOR REDIS] Redis not ready yet, retrying ({retries}/{attempts})...")
                     retries += 1
@@ -56,13 +56,17 @@ class RedisConnectionManager(mgrs.ConnectionManagerInterface[Redis]):
 
     async def initialize_data_structures(self):
         """
-        Optional initialization of key structures.
+        Initialization of key structures.
         Example: setting default counters, roles, or TTL keys.
+        Not used so far, but usage is considered very possible in the future.
         """
         return None
     
-    async def flush_data(self):
+    async def flush_data(self, conn: Redis = None):
         if not self._pool:
             raise exc.StorageNotInitialzied(f'Redis pool closed! Value={self._pool}. Recreate the manage or pool')
-        async with self.connect() as redis:
-            await redis.flushall()
+        if conn:
+            await conn.flushall()
+            return 
+        async with self.connect() as conn:
+            await conn.flushall()

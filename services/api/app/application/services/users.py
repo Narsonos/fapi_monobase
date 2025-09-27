@@ -96,7 +96,10 @@ class UserService:
         return schemas.UserDTO.model_validate(user, from_attributes=True) if user else None
     
     async def delete(self, current_user: schemas.UserDTO) -> None:
-        await self.user_repo.delete(current_user.id)
+        user = await self.user_repo.get_by_id(current_user.id)
+        if not user:
+            raise domexc.UserDoesNotExist('User with the provided ID does not exist!')
+        await self.user_repo.delete(user)
     
     async def admin_delete(self, current_user: schemas.UserDTO, user_id: int):
         if not current_user.is_admin:

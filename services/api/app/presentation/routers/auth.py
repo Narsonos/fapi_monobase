@@ -28,11 +28,7 @@ router = APIRouter(
     description='If credentials are valid - returns a pair of tokens, each can be used in Authorization header as "Bearer [token]"')
 async def login(auth_service: appdeps.OAuthServiceDependency, form_data: appdeps.OAuthFormData) -> schemas.TokenResponse:
     credentials = {"username": form_data.username, "password": form_data.password}
-    try:
-        result = await auth_service.login(credentials)
-    except domexc.UserDoesNotExist as e:
-        return JSONResponse({"error": str(e)}, status.HTTP_404_NOT_FOUND)
-    return result
+    return await auth_service.login(credentials)
 
 
 @router.get("/logout", description='Invalidates your token')

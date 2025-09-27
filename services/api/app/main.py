@@ -12,6 +12,7 @@ import app.application.dependencies as adep
 import app.application.exceptions as appexc
 import app.presentation.routers as routers
 import app.presentation.schemas as schemas
+import app.presentation.exception_handlers as exch
 import app.domain.exceptions as domexc
 
 #Misc
@@ -75,19 +76,7 @@ app = FastAPI(
 
 app.include_router(routers.AuthRouter)
 app.include_router(routers.UserRouter)
-
-
-
-@app.exception_handler(appexc.AuthBaseException)
-async def auth_exception_handler(request, exc: appexc.AuthBaseException):
-    mapping = {
-        appexc.CredentialsException: 401,
-        appexc.InvalidTokenError: 401,
-        appexc.TokenExpiredException: 401,
-        appexc.LoggedOutException: 403,
-    }
-    status = mapping.get(type(exc), 500)
-    return JSONResponse({"detail": str(exc)}, status_code=status)
+exch.register_exception_handlers(app)
 
 ########################################
 #        GETTING USER PROFILE          #

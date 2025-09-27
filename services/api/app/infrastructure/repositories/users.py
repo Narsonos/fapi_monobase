@@ -59,7 +59,7 @@ class SQLAUserRepository(repo.IUserRepository):
             error_code, msg = error.orig.args
             if error_code == 1062 and 'username' in msg:
                 raise domexc.UserAlreadyExists(f"Another user with this username already exists") from error
-            if error_code == 1062 and 'id' in msg:
+            if error_code == 1062 and '__users__.PRIMARY' in msg:
                 raise domexc.UserAlreadyExists(f"Another user with this id already exists") from error
         raise domexc.UserIntegrityError("Action causes integrity constraint violation for User model. Cancelled", orig=error.orig)
 
@@ -171,9 +171,10 @@ class SQLAUserRepository(repo.IUserRepository):
         Returns:
             None.
         """
-        user = db.User.model_validate(user)
-        await self.session.delete(user)
-        await self.session.commit()
+        if user.id is None:
+            raise ValueError('User object does not contain ID. Fetch the object first, then pass it here.')
+        await self.session.execute(sqlm.delete(db.User).where(db.User.id==user.id))
+        await self.session.flush()
 
     async def ensure_admin_exists(self, hasher: domsvc.IPasswordHasher):
         admins = await self.list(limit=1, filters=schemas.UserFilterSchema(role="admin"))
@@ -246,7 +247,7 @@ class RedisCacheUserRepository(repo.IUserRepository):
             logger.debug(f'[CACHE: USERS] get_by_username => HIT username={username}')
             try:
                 return domain.User.model_validate_json(raw)
-            except Exception:
+            except p.ValidationError:
                 logger.debug(f'[CACHE: USERS] cache record for username={username} contains corrupt data. Fallback - querying DB')
 
         user = await self._user_db.get_by_username(username)
@@ -269,7 +270,7 @@ class RedisCacheUserRepository(repo.IUserRepository):
                 data = json.loads(raw)
                 return [domain.User.model_validate(item) for item in data]
             except Exception:
-                pass
+                logger.debug(f'[CACHE: USERS] cache record for user_list hash={full_hash} contains corrupt data. Fallback - querying DB')
         users = await self._user_db.list(limit=limit, offset=offset, filters=filters, filter_mode=filter_mode)
         logger.debug(f'[CACHE: USERS] list => MISS {key} - priming')
         await self._redis.set(key, json.dumps([u.model_dump() for u in users]), ex=USER_CACHE_TTL_SECONDS)

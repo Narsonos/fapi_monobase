@@ -12,6 +12,10 @@ import typing as t
 import pydantic as p
 
 
+########################################
+#                Setup                 #
+########################################
+
 router = APIRouter(
     prefix="/users",
     tags = ["users"],
@@ -25,6 +29,7 @@ logger = logging.getLogger('app')
 ########################################
 #             USER CRUD                #
 ########################################
+
 
 @router.get('/{user_id}')
 async def get_user(
@@ -48,22 +53,19 @@ async def get_users(
     return await user_service.list(limit,offset,filters,filter_mode)
 
 @router.post("", responses= {
-    200: {"description":"Created successfully"},
-    409: {"description":"User already exists"},
-    403: {"description":"Returned when NON-Admin accesses this endpoint"}
-    })
+        201: {"description":"Created successfully"},
+        409: {"description":"User already exists"},
+        403: {"description":"Returned when NON-Admin accesses this endpoint"},
+    },status_code=status.HTTP_201_CREATED,
+)
 async def create_user_for_admins(
         user_service: deps.UserServiceDependency,
         current_user: deps.CurrentUserDependency,
         new_user_data: schemas.PrivateUserCreationModel,
     ) -> schemas.UserDTO:
 
-    try:
-        return JSONResponse(await user_service.admin_create(current_user, new_user_data), 201)
-    except domexc.UserIntegrityError as e:
-        raise HTTPException(status.HTTP_409_CONFLICT, {"error": str(e)})
-    except domexc.ActionNotAllowedForRole as e:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, {"error": str(e)})
+    return await user_service.admin_create(current_user, new_user_data)
+
 
 
 @router.patch("/{user_id}", description="Update a user. Provide only those fields in 'edited user' that need to be changed.",responses= {
@@ -83,40 +85,29 @@ async def update_user(
     try:
         if not current_user.is_admin:
             model = schemas.PublicUserUpdateModel.model_validate(data)
-            return JSONResponse(await user_service.update(current_user, model))
+            return await user_service.update(current_user, model)
         else:
             model = schemas.PrivateUserUpdateModel.model_validate(data)
-            return JSONResponse(await user_service.admin_update(current_user, user_id, model)) 
-    except domexc.UserDoesNotExist as e:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, {"error": str(e)})
-    except domexc.UserIntegrityError as e:
-        raise HTTPException(status.HTTP_409_CONFLICT, {"error": str(e)})
-    except domexc.ActionNotAllowedForRole as e:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, {"error": str(e)})
+            return await user_service.admin_update(current_user, user_id, model)
     except p.ValidationError as e:
         raise RequestValidationError(e.errors())
 
 
 @router.delete('/{user_id}', responses= {
-    200: {"description":"User successfully deleted"},
+    200: {"description":"User deleted successfully"},
     502: {"description":"Failed to delete user"},
-    })
+}, status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
     user_service: deps.UserServiceDependency,
     current_user: deps.CurrentUserDependency,
     user_id: t.Annotated[int | None, Path(description='If you are ADMIN, pass id of a user to delete. For regular users - ignored.')],
     ) -> JSONResponse:
-    try:
-        if current_user.is_admin:
-            await user_service.admin_delete(current_user, user_id)
-            return JSONResponse({"msg": "User deleted successfully"}, 204)
-        else:
-            await user_service.delete(current_user)
-            return JSONResponse({"msg": "User deleted successfully"}, 204)
-    except domexc.ActionNotAllowedForRole as e:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, {"error": str(e)})
-    except domexc.UserDoesNotExist as e:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, {'error': str(e)})
+    if current_user.is_admin:
+        await user_service.admin_delete(current_user, user_id)
+    else:
+        await user_service.delete(current_user)
+    return {"msg": "User deleted successfully"}
+
 
 
 
