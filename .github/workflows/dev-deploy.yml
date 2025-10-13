@@ -49,8 +49,6 @@ jobs:
 
       - name: Setup docker
         uses: docker/setup-docker-action@v4
-        with:
-          version: 28
           
       - name: Run test compose
         run: docker compose -f ./${{ env.TEST_COMPOSE_PATH}} up --build --abort-on-container-exit --exit-code-from ${{ env.COMPOSE_APP_SERVICE_NAME}}
