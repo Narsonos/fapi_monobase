@@ -188,16 +188,23 @@ jobs:
           EOF
 
 
-      - name: Copy project_files
-        uses: appleboy/scp-action@v0.1.7
+      - uses: easingthemes/ssh-deploy@v5.1.0
         with:
-          host: ${{ secrets.PROD_SSH_DEPLOY_HOST }}
-          username: root
-          key: ${{ secrets.PROD_SSH_DEPLOY_KEY }}
-          source: "./"
-          target: ${{ env.PROD_SSH_DEPLOY_TARGET_PATH }}
-        
-      
+          SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_DEPLOY_KEY }}
+          ARGS: "-rlgoDzvc --delete --inplace"
+          REMOTE_HOST: ${{ secrets.PROD_SSH_DEPLOY_HOST }}
+          REMOTE_USER: ${{ secrets.PROD_SSH_DEPLOY_USERNAME }}
+          SOURCE: "./"
+          TARGET: "${{ env.PROD_SSH_DEPLOY_TARGET_PATH }}"
+          SCRIPT_AFTER: |
+            sudo chown -R ${{ secrets.PROD_SSH_DEPLOY_USERNAME }}:${{ secrets.PROD_SSH_DEPLOY_USERNAME }} ${{ secrets.PROD_SSH_DEPLOY_USERNAME }}
+
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/download/v4.16.1/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
+
+
       - uses: docker/setup-docker-action@v4
 
       - name: lowercase
@@ -206,6 +213,15 @@ jobs:
         run: |
           echo "IMAGE_BASE=${IMAGE_BASE@L}" >> "${GITHUB_ENV}"
 
-      - name: Running blue-green deploy script...
-        run: |
-          python deploy_blue_green.py --project_name=${{ env.SERVICE_NAME }}
+      - name: Run deploy script
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.PROD_SSH_DEPLOY_HOST }}
+          username: ${{ secrets.PROD_SSH_DEPLOY_USERNAME }}
+          key: ${{ secrets.PROD_SSH_DEPLOY_KEY }}
+          envs: IMAGE_BASE
+          script: |
+            set -e
+            cd ${{ env.PROD_SSH_DEPLOY_TARGET_PATH }}
+
+            python3 deploy_blue_green.py --project_name="${{ env.SERVICE_NAME }}"

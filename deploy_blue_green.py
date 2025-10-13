@@ -16,6 +16,7 @@ class DeploymentConfig(p.BaseModel):
     project_name: str = p.Field(default=args.project_name)
     compose_path: p.FilePath
     upstream_conf: p.FilePath
+    env_path: p.FilePath | None = None
     services: list[TargetService]
 
 
@@ -167,14 +168,14 @@ class DeploymentJob:
 
     def run_new_app(self, build_whole_compose=False):
         if build_whole_compose:
-            DeploymentJob.run(f'docker compose -f {self.config.compose_path} up -d --build --no-recreate')
+            DeploymentJob.run(f'docker compose {f"--env-path={self.config.env_path}" if self.config.env_path else None} -f {self.config.compose_path} up -d --build --no-recreate')
         else:
             services_sub = ''
             scale_sub = ''
             for service in self.config.services:
                 services_sub += f'{service.name} '
                 scale_sub += f'--scale {service.name}=2 '
-            command = f'docker compose -f {self.config.compose_path} up {services_sub.strip()} -d --no-recreate {scale_sub.strip()}'
+            command = f'docker compose {f"--env-path={self.config.env_path}" if self.config.env_path else None} -f {self.config.compose_path} up {services_sub.strip()} -d --no-recreate {scale_sub.strip()}'
             DeploymentJob.run(command)
         asyncio.run(self.wait_and_rename_all_services())
 
