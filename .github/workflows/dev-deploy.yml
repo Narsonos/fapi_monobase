@@ -219,5 +219,7 @@ jobs:
           envs: IMAGE_BASE
           script: |
             set -e
+            echo "🔐 Logging in to GHCR..."
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
             cd ${{ env.PROD_SSH_DEPLOY_TARGET_PATH }}
             python3 -u deploy_blue_green.py --project_name="${{ env.SERVICE_NAME }}"
