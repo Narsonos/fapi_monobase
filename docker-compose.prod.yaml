@@ -22,7 +22,7 @@ services:
 
 
   celery_worker:
-    image: ${IMAGE_BASE}-celery:${GIT_COMMIT:-latest}
+    image: ${IMAGE_BASE}-celery_worker:${GIT_COMMIT:-latest}
     restart: unless-stopped
     depends_on:
       db:
@@ -45,7 +45,7 @@ services:
       loki.label.env: prod
 
   celery_beat:
-    image: ${IMAGE_BASE}-celery-beat:${GIT_COMMIT:-latest}
+    image: ${IMAGE_BASE}-celery_beat:${GIT_COMMIT:-latest}
     restart: unless-stopped
     depends_on:
       db:

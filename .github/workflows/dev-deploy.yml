@@ -5,7 +5,7 @@ on:
 
 env:
   SERVICE_NAME: userauth_service                      #basically, project name
-  COMPOSE_APP_SERVICES: app,celery,celery-beat        #the names of the services that are to built in building stage
+  COMPOSE_APP_SERVICES: app,celery_worker,celery_beat        #the names of the services that are to built in building stage
   COMPOSE_APP_SERVICE_NAME: app                       #the name ofo the app service in compose files
   PROD_COMPOSE_PATH: ./docker-compose.prod.yaml       #path to prod compose from project root
   TEST_COMPOSE_PATH: ./docker-compose.test.yaml       #path to test compose from project root
