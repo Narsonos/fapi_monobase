@@ -12,7 +12,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
-
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
     environment:
       TZ: "Europe/Moscow"
       MODE: prod
@@ -39,6 +44,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "celery", "-A", "app.infrastructure.dependencies:_celery", "status"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     volumes:
       - ./services/api/app:/app/app
     environment:
@@ -69,6 +80,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "celery"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     volumes:
       - ./services/api/app:/app/app
     environment:
