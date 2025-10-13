@@ -17,7 +17,7 @@ class CustomJsonFormatter(JsonFormatter):
 
 
 class OTLPJsonFormatter(CustomJsonFormatter):
-    def __init__(self, trace_provider=None, **kwargs): 
+    def __init__(self,*args, trace_provider=None, **kwargs): 
         '''Such an init with DI provides us an easy way to test this class witout OT'''
         super().__init__(**kwargs)
         self._trace_provider = trace_provider or trace
