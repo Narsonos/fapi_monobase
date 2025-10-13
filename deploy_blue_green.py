@@ -109,7 +109,7 @@ class DeploymentJob:
 
     @staticmethod
     def run(command):
-        result = subprocess.run(command, capture_output=True, text=True)
+        result = subprocess.run(command, capture_output=True, text=True, shell=True)
         if result.returncode != 0:
             raise CommandFailed(command, result.returncode, result.stderr)
         return result
