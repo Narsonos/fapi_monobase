@@ -109,16 +109,11 @@ jobs:
           for service in "${SERVICES[@]}"; do
             echo "🚀 Building image for service: $service"
             docker compose --env-file=./.env -f "${{ env.DEV_COMPOSE_PATH }}" build "$service"
-            IMAGE_ID=$(docker compose -f "${{ env.DEV_COMPOSE_PATH }}" images -q "$service")
-            if [ -z "$IMAGE_ID" ]; then
-              echo "ERROR: Failed to get image ID!"
-              exit 1
-            fi
 
             SHA_TAG="${IMAGE_BASE}-${service}:${{ github.sha }}"
             LATEST_TAG="${IMAGE_BASE}-${service}:latest"
 
-            echo "🏷️ Tagging $IMAGE_ID as:"
+            echo "🏷️ Tagging image as:"
             echo "   - $SHA_TAG"
             echo "   - $LATEST_TAG"
             docker tag "$LATEST_TAG" "$SHA_TAG"
