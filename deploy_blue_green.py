@@ -156,7 +156,7 @@ class DeploymentJob:
                 return m[0]
 
 
-    async def wait_and_rename_single_service(self, service, retries=5, interval_s=3):
+    async def wait_and_rename_single_service(self, service, retries=20, interval_s=5):
         container_name = self.find_latest_scale(service)
 
         if not container_name:
