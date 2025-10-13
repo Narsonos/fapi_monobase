@@ -191,7 +191,7 @@ jobs:
       - name: Copy project_files
         uses: appleboy/scp-action@v1
         with:
-          host:     ${{ secrets.PROD_SSH_DEPLOY_HOST }}
+          host: ${{ secrets.PROD_SSH_DEPLOY_HOST }}
           username: ${{ secrets.PROD_SSH_DEPLOY_USERNAME }}
           key: ${{ secrets.PROD_SSH_DEPLOY_KEY }}
           source: "../${{ github.repository.name }}"
