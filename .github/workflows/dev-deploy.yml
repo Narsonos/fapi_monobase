@@ -194,7 +194,7 @@ jobs:
           host: ${{ secrets.PROD_SSH_DEPLOY_HOST }}
           username: root
           key: ${{ secrets.PROD_SSH_DEPLOY_KEY }}
-          source: "../${{ github.repository.name }}"
+          source: "./"
           target: ${{ env.PROD_SSH_DEPLOY_TARGET_PATH }}
         
       
