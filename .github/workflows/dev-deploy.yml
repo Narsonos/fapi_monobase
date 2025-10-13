@@ -133,6 +133,7 @@ jobs:
               docker push "$LATEST_TAG" >>"push_${service}.log" 2>&1
               echo "✅ $service pushed successfully!"
             ) &
+            PUSH_PIDS[$service]=$!
           done
           EXIT_CODE=0
           for service in "${!PUSH_PIDS[@]}"; do
