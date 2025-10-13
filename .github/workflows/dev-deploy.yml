@@ -196,6 +196,9 @@ jobs:
           REMOTE_USER: ${{ secrets.PROD_SSH_DEPLOY_USERNAME }}
           SOURCE: "./"
           TARGET: "${{ env.PROD_SSH_DEPLOY_TARGET_PATH }}"
+          SCRIPT_BEFORE: |
+            whoami
+            ls -al
           SCRIPT_AFTER: |
             sudo chown -R ${{ secrets.PROD_SSH_DEPLOY_USERNAME }}:${{ secrets.PROD_SSH_DEPLOY_USERNAME }} ${{ env.PROD_SSH_DEPLOY_TARGET_PATH }}
 
