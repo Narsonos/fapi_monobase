@@ -12,8 +12,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - ./services/api/app:/app/app
+
     environment:
       TZ: "Europe/Moscow"
       MODE: prod
@@ -117,7 +116,7 @@ services:
       test: ["CMD-SHELL", "mysql --user=$$MYSQL_USER --password=$$MYSQL_PASSWORD --execute='SELECT 1' $$MYSQL_DATABASE"]
       interval: 5s
       timeout: 5s
-      retries: 30
+      retries: 40
       start_period: 30s
     networks:
       - project-network
