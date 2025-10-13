@@ -10,7 +10,6 @@ env:
   PROD_COMPOSE_PATH: ./docker-compose.prod.yaml       #path to prod compose from project root
   TEST_COMPOSE_PATH: ./docker-compose.test.yaml       #path to test compose from project root
   DEV_COMPOSE_PATH: ./docker-compose.build.yaml   #path to dev (build) compose from project root
-
   BAKED_MYSQL_PASSWORD: 123123123
   BAKED_MYSQL_USER: test
 
@@ -21,6 +20,7 @@ jobs:
   test:
     name: Run tests
     runs-on: ubuntu-latest
+    if: ${{ vars.SKIP_TESTS != 'true' }}
     steps:
       - name: Clone repo and setup Docker
         uses: actions/checkout@v4
@@ -91,9 +91,13 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-docker-action@v4
 
-      - name: Building and refreshing GHCR prod image
-        env:
+      - name: lowercase
+        env: 
           IMAGE_BASE: ghcr.io/${{ github.repository_owner }}/${{ env.SERVICE_NAME }}
+        run: |
+          echo "IMAGE_BASE=${IMAGE_BASE@L}" >> "${GITHUB_ENV}"
+
+      - name: Building and refreshing GHCR prod image
         run: |
           set -e
           echo "Building Docker image for ${{ env.SERVICE_NAME }} - [${{ env.COMPOSE_APP_SERVICES }}]"
@@ -203,8 +207,12 @@ jobs:
       
       - uses: docker/setup-docker-action@v4
 
-      - name: Running blue-green deploy script...
-        env:
+      - name: lowercase
+        env: 
           IMAGE_BASE: ghcr.io/${{ github.repository_owner }}/${{ env.SERVICE_NAME }}
+        run: |
+          echo "IMAGE_BASE=${IMAGE_BASE@L}" >> "${GITHUB_ENV}"
+
+      - name: Running blue-green deploy script...
         run: |
           python deploy_blue_green.py --project_name=${{ env.SERVICE_NAME }}
