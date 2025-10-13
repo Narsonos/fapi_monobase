@@ -172,6 +172,8 @@ class DeploymentJob:
                 break
             await asyncio.sleep(interval_s)
         else:
+            rs = self.run(f"docker logs {container_name}")
+            print(f'Container logs:\n{rs.stdout}')
             raise ManualStop(f"App container {container_name} failed to become healthy")
         new_name = f'{self.config.project_name}-{service}_{self.next_color}'
         self.run(f'docker rename {container_name} "{new_name}"')
