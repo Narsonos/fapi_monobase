@@ -219,5 +219,4 @@ jobs:
           script: |
             set -e
             cd ${{ env.PROD_SSH_DEPLOY_TARGET_PATH }}
-            pip install pydantic
             python3 deploy_blue_green.py --project_name="${{ env.SERVICE_NAME }}"
