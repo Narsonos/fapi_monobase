@@ -65,14 +65,14 @@ RUN poetry install --no-ansi --no-root
 WORKDIR /app
 
 ##########################
-####### Test: runs tests #
+####### Dev: runs FastAPI #
 ##########################
 FROM dev_base AS dev
-CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--proxy-headers"]
+CMD ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--proxy-headers"]
 
 
 ###########################
-####### Dev: runs FastAPI #
+####### Test: runs tests #
 ###########################
 FROM dev_base AS test
 CMD ["poetry", "run", "pytest"]
@@ -80,7 +80,7 @@ CMD ["poetry", "run", "pytest"]
 ##################################
 # Prod: Minimalistic and light   #
 ##################################
-FROM base AS prod
+FROM base AS prod_base
 
 ENV FASTAPI_ENV=prod
 WORKDIR /app
@@ -89,4 +89,10 @@ COPY --from=builder $VENV_PATH $VENV_PATH
 COPY ./app /app/
 
 ENV PATH="$PYSETUP_PATH/.venv/bin:$PATH"
+
+
+FROM prod_base AS prod
 CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "main:app", "-c", "gunicorn_conf.py"]
+
+FROM prod_base AS celery
+CMD ["celery", "--help"]

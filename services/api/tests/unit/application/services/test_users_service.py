@@ -1,17 +1,17 @@
 import pytest, typing as t
 from pytest_mock import MockerFixture
-import pytest
 import app.application.services as svc
 import app.domain.models as dmod
 import app.domain.exceptions as domexc
 import app.presentation.schemas as schemas
-from tests.mocks import FakeHasher
+from tests.mocks import FakeHasher, AsyncHasherAdapter
 
 
 
 @pytest.fixture
-def hasher() -> FakeHasher:
-    return FakeHasher()
+def hasher() -> AsyncHasherAdapter:
+    # tests expect an async-compatible hasher now
+    return AsyncHasherAdapter(FakeHasher())
 
 @pytest.fixture
 def user_data():
@@ -105,7 +105,7 @@ async def test_user_service_create(mocker, hasher, user_data):
     )
     created_user = dmod.User(
         **user_data,
-        password_hash=hasher.hash(password),
+        password_hash=await hasher.hash(password),
         version=0
     )
     repo_input_user = dmod.User.model_copy(created_user)
@@ -148,7 +148,7 @@ async def test_user_service_admin_create(mocker, hasher, user_data, current_user
     )
     created_user = dmod.User(
         **user_data,
-        password_hash=hasher.hash(password),
+        password_hash=await hasher.hash(password),
         version=0
     )
     repo_input_user = dmod.User.model_copy(created_user)
@@ -189,12 +189,12 @@ async def test_user_service_update(mocker, hasher, user_data, old_pass,new_pass,
         new_password=new_pass
     )
 
-    domain_model_before_changes = dmod.User(**user_data, password_hash=hasher.hash(old_pass), version=1)
+    domain_model_before_changes = dmod.User(**user_data, password_hash=await hasher.hash(old_pass), version=1)
     domain_model_after_changes = dmod.User.model_copy(domain_model_before_changes)
     domain_model_after_changes.username = new_username
     
     if old_pass and new_pass:
-        domain_model_after_changes.change_password(old_pass, new_pass, hasher)
+        await domain_model_after_changes.change_password(old_pass, new_pass, hasher)
     
     domain_updated_model = dmod.User.model_copy(domain_model_after_changes)
     domain_updated_model.version += 1
@@ -252,7 +252,7 @@ async def test_user_service_admin_update(
 
     target_user = None
     if target_user_exists:
-        target_user = dmod.User(**user_data, password_hash=hasher.hash('initpass'), version=1)
+        target_user = dmod.User(**user_data, password_hash=await hasher.hash('initpass'), version=1)
 
     edited_user = schemas.PrivateUserUpdateModel(
         username='newname',
@@ -262,7 +262,7 @@ async def test_user_service_admin_update(
     )
 
     if target_user and new_pass:
-        target_user.force_change_password(new_pass, hasher=hasher)
+        await target_user.force_change_password(new_pass, hasher=hasher)
 
     expected = None
     if target_user:

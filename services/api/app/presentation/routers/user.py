@@ -36,8 +36,10 @@ async def get_user(
         user_service: deps.UserServiceDependency,
         user_id = t.Annotated[int, Path(description='Specifies user to return')]
     ) -> schemas.UserDTO | None:
-    '''Returns a user specified by user_id'''    
-    return await user_service.get_user(user_id)
+    '''Returns a user specified by user_id'''  
+    if user:=await user_service.get_user(user_id):
+        return user
+    raise domexc.UserDoesNotExist('Requested user does not exist!')
     
 @router.get('')
 async def get_users(

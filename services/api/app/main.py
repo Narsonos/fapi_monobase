@@ -1,30 +1,26 @@
 #Fastapi/Asyncio
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 import asyncio
 from contextlib import asynccontextmanager
 
 #Project files
 from app.common.config import Config
-import app.common.logs as logs
+import app.infrastructure.telemetry.logs as logs
 import app.infrastructure.dependencies as idep
+import app.infrastructure.telemetry as tel
+import app.infrastructure.telemetry.metrics as metrics
 import app.application.dependencies as adep
-import app.application.exceptions as appexc
 import app.presentation.routers as routers
 import app.presentation.schemas as schemas
 import app.presentation.exception_handlers as exch
-import app.domain.exceptions as domexc
-
 #Misc
 import datetime
 import tzlocal # type: ignore
 import os
 
-#Logging
-import logging
-import loguru # type: ignore
-
-
+#Logging/Tracing/Metrics
+import logging, traceback
 
 
 
@@ -50,7 +46,13 @@ async def lifespan(app: FastAPI):
             db = idep.UserDB(session)
             uow = idep.UnitOfWork(session)
             repo = idep.UserRepository(connection=cache, user_db_repo=db, uow=uow)
+            logger.info('[APP: Startup] Ensuring admin exists ... ')
             await repo.ensure_admin_exists(idep.PasswordHasherType())
+            await session.commit()
+
+    #Setting up
+    logger.info('[APP: Startup] Setting up metrics refreshing tasks')
+    await metrics.create_async_metrics_refresh_tasks()
 
     logger.info(f'[APP: Startup] Startup finished!')
     yield
@@ -61,6 +63,7 @@ async def lifespan(app: FastAPI):
 
 logs.init_loggers()
 logger = logging.getLogger('app')
+
 
 app = FastAPI(
     title = f'{Config.APP_NAME} commit {Config.GIT_COMMIT}',
@@ -74,9 +77,17 @@ app = FastAPI(
     root_path=f"/{Config.APP_NAME}"
 )
 
+
+
 app.include_router(routers.AuthRouter)
 app.include_router(routers.UserRouter)
 exch.register_exception_handlers(app)
+
+#OTEL: middleware must be below routers!!!
+if Config.MODE != "test":
+    metrics.register_middlewares(app)
+    telemetry_exporter = tel.setup_opentelemetry(app)
+
 
 ########################################
 #        GETTING USER PROFILE          #
@@ -131,7 +142,6 @@ async def initiate_shutdown():
 import signal
 signal.signal(signal.SIGINT, lambda sig, frame: handle_shutdown_signal())
 signal.signal(signal.SIGTERM, lambda sig, frame: handle_shutdown_signal())
-# система завершения работы
 
 @app.middleware("http")
 async def add_logging_middleware(request: Request, call_next):
@@ -140,11 +150,24 @@ async def add_logging_middleware(request: Request, call_next):
         active_requests += 1
 
         response = await call_next(request)
+        logger.info({
+            "method": request.method,
+            "path":request.url.path,
+            "status": response.status_code,
+            "client": request.client.host
 
+        })
         return response
         
     except Exception as e:
-        loguru.logger.exception(e)
+        logger.error({
+            "method": request.method,
+            "path":request.url.path,
+            "status": "exception",
+            "client": request.client.host,
+            "exc_info": traceback.format_exc()
+
+        })
         return JSONResponse(
             status_code=500,
             content={'successful':False,'detail':'Необработанная ошибка'}
@@ -179,3 +202,9 @@ def check(request: Request):
 
     }
     return JSONResponse(content=response)
+
+
+
+@app.get("/raise500")
+def raise500(request: Request):
+    return JSONResponse({},500)

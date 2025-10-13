@@ -1,0 +1,20 @@
+global: 
+  scrape_interval: 10s
+  scrape_timeout: 8s
+  evaluation_interval: 10s
+
+  query_log_file: /var/lib/prometheus/query.log
+  scrape_failure_log_file: /var/lib/prometheus/scrape_fail.log
+
+
+
+rule_files:
+  ['/etc/prometheus/rules/*.yml']
+
+scrape_config_files:
+  ['/etc/prometheus/scrape_configs/*.yml']
+
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets: ['alertmanager:9000']

@@ -1,0 +1,26 @@
+route:
+  receiver: telegram-notifications
+  group_by: ['alertname', 'instance'] 
+  group_wait: 15s
+  group_interval: 15m
+  repeat_interval: 1h
+  
+
+receivers:
+  - name: telegram-notifications
+    telegram_configs:
+      - bot_token: 7853679368:AAHiAa2J5drZ6kHiC0GIIpI0HIQwZ7Ap5xg
+        chat_id: -4961181784 
+        parse_mode: "HTML"
+        message: |
+          🚨 <b>Alert Manager Notification</b>
+
+          🏷 <b>Общее имя:</b> {{ .CommonLabels.alertname }}
+          🔗 <b>Источник:</b> {{ .CommonLabels.instance }} {{ .CommonLabels.exported_job }}
+          📝 <b>Описание:</b> {{ .CommonAnnotations.summary }}
+        
+          <b>События:</b>{{ range .Alerts }}
+          - <b>{{ if eq .Status "resolved" }} ✅ Снят {{ else }} ⚠️ Сработал {{end}}{{ .Labels.alertname }}</b>:{{ .Annotations.description }}
+            ⏱️ <b>Когда:</b> {{ .StartsAt }}
+            ⚡ Серьезность: {{ .Labels.severity }}
+          {{ end }}

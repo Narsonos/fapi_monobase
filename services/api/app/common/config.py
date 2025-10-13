@@ -1,4 +1,4 @@
-import os
+import os, shutil
 import ssl
 
 #For PostgreSQL
@@ -15,6 +15,7 @@ class Config():
     BASE_URL_LOCAL = f"http://{UVICORN_HOST}:{UVICORN_PORT}" #Utilized by telegram proxy mechanisms
     GIT_COMMIT = os.getenv("GIT_COMMIT", "[commit hash unknown]")
     MODE = os.getenv("MODE", "Local build")
+    JSON_LOGS = 1
 
     #Security settings
     DEFAULT_ADMIN_USERNAME = os.getenv("DEFAULT_ADMIN_USERNAME", "admin")
@@ -27,8 +28,9 @@ class Config():
     LOCK_TIME = 60 #TTL for locks. I.e. in 60s the lock is considered as deadlock => gets auto-unlocked.
 
     #Redis
+    REDIS_DB = 0
     REDIS_PASS = os.getenv("REDIS_PASS")
-    REDIS_URL = f'redis://:{REDIS_PASS}@redis:6379/0'
+    REDIS_URL = f'redis://:{REDIS_PASS}@redis:6379/{REDIS_DB}'
     USER_CACHE_TTL_SECONDS = int(os.getenv("USER_CACHE_TTL_SECONDS", "300"))
 
     #MySQL Template
@@ -54,6 +56,25 @@ class Config():
         'echo': False,
     }
 
+    #OpenTelemetry
+    OTEL_GRPC_ENDPOINT = 'host.docker.internal:9017'
+    OTEL_SERVICE_NAME = 'user_auth'
+    
 
 
 
+class CeleryConfig:
+    broker_url = f"{Config.REDIS_URL.removesuffix(f'/{Config.REDIS_DB}')}/{Config.REDIS_DB+1}"
+    result_backend = f"{Config.REDIS_URL.removesuffix(f'/{Config.REDIS_DB}')}/{Config.REDIS_DB+2}"
+    task_serializer = "json"
+    accept_content = ["json"]
+    result_serializer = "json"
+    timezone = "UTC"
+    enable_utc = True
+    beat_schedule = {
+        'periodic_task-every-minute': {
+            'task': 'periodic_task',
+            'schedule': 60.0,  # или timedelta(seconds=60)
+            'args': (),
+        },
+    }

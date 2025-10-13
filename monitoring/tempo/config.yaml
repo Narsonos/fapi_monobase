@@ -1,0 +1,29 @@
+
+server:
+  http_listen_port: 9000
+  grpc_listen_port: 9001
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc: #localhost by default, so we need to use explicit address as docs say
+          endpoint: "0.0.0.0:4317"
+        http:
+          endpoint: "0.0.0.0:4318"
+
+
+
+ingester:
+  lifecycler:
+    ring:
+      replication_factor: 1
+      kvstore:
+        store: inmemory
+
+
+storage:
+  trace:
+    backend: local
+    local:
+      path: /tmp/tempo/traces 

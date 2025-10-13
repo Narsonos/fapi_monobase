@@ -2,11 +2,12 @@ name: ${APP_NAME}
 
 services:
   app:
+    image: ${IMAGE_BASE:-default}-app:${GIT_COMMIT:-none}
     build:
       context: ./services/api
       dockerfile: Dockerfile
-      target: test
-    restart: always
+      target: dev
+    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
@@ -14,16 +15,79 @@ services:
       - ./services/api/app:/app/app
     environment:
       TZ: "Europe/Moscow"
-      MODE: test
+      MODE: dev
       GIT_COMMIT: ${GIT_COMMIT}
     env_file:
       - .env.dev
     networks:
       - project-network
+    labels:
+      loki.label.service_name: user_auth
+      loki.label.service_type: api
+      loki.label.env: dev
+
+
+  celery_worker:
+    image: ${IMAGE_BASE:-default}-celery:${GIT_COMMIT:-none}
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+      target: celery
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/api/app:/app/app
+    environment:
+      TZ: "Europe/Moscow"
+      MODE: dev
+      GIT_COMMIT: ${GIT_COMMIT}
+      CELERY_WORKER_CONCURRENCY: 4
+    env_file:
+      - .env.dev
+    networks:
+      - project-network
+    command: celery -A app.infrastructure.dependencies:_celery worker --loglevel=info -P prefork -E
+    labels:
+      loki.label.service_name: user_auth
+      loki.label.service_type: tasks
+      loki.label.env: dev
+
+
+  celery_beat:
+    image: ${IMAGE_BASE:-default}-celery-beat:${GIT_COMMIT:-none}
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+      target: celery
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/api/app:/app/app
+    environment:
+      TZ: "Europe/Moscow"
+      MODE: dev
+      GIT_COMMIT: ${GIT_COMMIT}
+    env_file:
+      - .env.dev
+    networks:
+      - project-network
+    command: celery -A app.infrastructure.dependencies:_celery beat --loglevel=info
+    labels:
+      loki.label.service_name: user_auth
+      loki.label.service_type: tasks
+      loki.label.env: dev
 
   nginx:
     image: nginx:1.27.0
-    restart: always
+    restart: unless-stopped
     ports:
       - "127.0.0.1:9092:80"
     depends_on:
@@ -34,6 +98,11 @@ services:
       - ./services/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
       - project-network
+    labels:
+      loki.label.service_name: user_auth
+      loki.label.service_type: nginx
+      loki.label.env: dev
+
 
   #POSTGRES TEMPLATE
   #db:
@@ -50,22 +119,29 @@ services:
   #MYSQL TEMPLATE
   db:
     image: mysql:8.0
-    restart: always
+    restart: unless-stopped
+    command: --default-authentication-plugin=caching_sha2_password
     env_file: 
       - .env.dev
     volumes:
-      - ${APP_NAME}-db:/var/lib/mysql
+      - db:/var/lib/mysql
     healthcheck:
       test: ["CMD-SHELL", "mysql --user=$$MYSQL_USER --password=$$MYSQL_PASSWORD --execute='SELECT 1' $$MYSQL_DATABASE"]
-      interval: 30s
+      interval: 5s
       timeout: 5s
-      retries: 3
+      retries: 30
+      start_period: 30s
     networks:
       - project-network
+    labels:
+      loki.label.service_name: user_auth
+      loki.label.service_type: db
+      loki.label.env: dev
+
 
   redis:
     image: redis:latest
-    restart: always
+    restart: unless-stopped
     entrypoint: ["/bin/bash", "/usr/local/bin/redis-entrypoint.sh"]
     volumes:
       - redis:/data
@@ -80,6 +156,58 @@ services:
       timeout: 3s
     networks:
       - project-network
+    labels:
+      loki.label.service_name: user_auth
+      loki.label.service_type: cache
+      loki.label.env: dev
+
+###for UNIX systems
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    command:
+      - '--path.rootfs=/' #just for example
+      - '--web.listen-address=:9000'
+      - '--collector.hwmon'
+    #volumes:
+    #  - './:/host:ro,rslave'
+    networks:
+      - project-network
+    restart: unless-stopped
+    pid: host
+    labels:
+      loki.label.service_name: user_auth
+      loki.label.service_type: node
+      loki.label.env: dev
+
+  k6:
+    image: grafana/k6:latest
+    env_file:
+      - .env.dev
+    volumes:
+      - ./services/k6/scripts:/scripts
+    command: run /scripts/test_main.js
+    networks:
+      - project-network
+    labels:
+      loki.label.service_name: user_auth
+      loki.label.service_type: load_tests
+      loki.label.env: dev
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./services/promtail/config.yml:/etc/promtail/config.yml:ro
+    command: 
+      - '--config.file=/etc/promtail/config.yml'
+    networks:
+      - project-network
+    labels:
+      loki.label.service_name: user_auth
+      loki.label.service_type: log_collector
+      loki.label.env: dev
+
 
 networks:
   project-network:
@@ -91,3 +219,5 @@ volumes:
     name: ${APP_NAME}-db
   redis:
     name: ${APP_NAME}-redis
+  prometheus-shared:
+    name: ${APP_NAME}-prometheus-shared

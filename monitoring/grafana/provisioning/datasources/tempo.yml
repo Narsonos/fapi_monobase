@@ -1,0 +1,29 @@
+apiVersion: 1
+
+datasources:
+  - name: Tempo
+    type: tempo
+    uid: tempo-provisioned
+    access: proxy
+    url: http://tempo:9000
+    isDefault: false
+    editable: true
+    jsonData:
+      maxTraces: 500      
+      traceType: otlp   
+
+      tracesToLogs:
+        datasourceUid: 'loki-provisioned' 
+        tags: [] 
+        spanStartTimeShift: '0s' 
+        spanEndTimeShift: '0s'   
+        filterByTraceID: true
+        filterBySpanID: true
+
+      tracesToMetrics:
+        datasourceUid: 'prometheus-provisioned' 
+        spanStartTimeShift: '-2m' 
+        spanEndTimeShift: '2m'    
+        tags: [] 
+
+      

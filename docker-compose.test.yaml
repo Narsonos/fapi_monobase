@@ -6,7 +6,6 @@ services:
       context: ./services/api
       dockerfile: Dockerfile
       target: test
-
     depends_on:
       db:
         condition: service_healthy
@@ -22,6 +21,59 @@ services:
     networks:
       - project-network
 
+  celery_worker:
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+      target: celery
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/api/app:/app/app
+    environment:
+      TZ: "Europe/Moscow"
+      MODE: test
+      GIT_COMMIT: ${GIT_COMMIT}
+      CELERY_WORKER_CONCURRENCY: 4
+    env_file:
+      - .env.test
+    networks:
+      - project-network
+    command: celery -A app.infrastructure.dependencies:_celery worker --loglevel=info -P prefork -E
+
+
+  celery_beat:
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+      target: celery
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/api/app:/app/app
+    environment:
+      TZ: "Europe/Moscow"
+      MODE: test
+      GIT_COMMIT: ${GIT_COMMIT}
+    env_file:
+      - .env.test
+    networks:
+      - project-network
+    command: celery -A app.infrastructure.dependencies:_celery beat --loglevel=info
+
+
+
+
+
+      
   #POSTGRES TEMPLATE
   #db:
   #  container_name: ${APP_NAME}-db
@@ -34,7 +86,7 @@ services:
 
   #MYSQL TEMPLATE
   db:
-    image: prebaked-mysql:8.0
+    image: ghcr.io/narsonos/prebaked-mysql:8.0
     restart: always
     command: --default-authentication-plugin=caching_sha2_password
     env_file: 

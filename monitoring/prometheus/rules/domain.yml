@@ -1,0 +1,32 @@
+groups:
+- name: UserAuthDomain
+  interval: 1m
+  rules:
+  - record: userauth:exported_job:failed_logins:ratio:5m
+    expr: sum by(exported_job) (increase(auth_logins_total{status="failure"}[5m])) / clamp_min(userauth:logins_total:5m,1)
+
+  - record: userauth:exported_job:logins_total:5m
+    expr: sum by (exported_job)(increase(auth_logins_total[5m]))
+
+- name: UserAuthApp-alerts
+  rules:
+  - alert: LoginsCount
+    expr: increase(auth_logins_total{status="success"}[1m]) > 0
+    for: 15s
+    labels:
+      severity: info
+    annotations:
+      summary: "Обнаружены попытки логина!"
+      description: "Число входов за последнюю минуту: {{ printf \"%.0f\" $value }}"
+
+  - alert: BruteForceAttempt
+    expr: userauth:failed_logins:5m > 0.8 and userauth:logins_total:5m > 100
+    for: 15s
+    labels:
+      severity: warn
+    annotations:
+      summary: "Обнаружена попытка брутфорса!"
+      description: "За последние 5 минут произошло более 100 попыток входа - 80% провальные. Возможен брутфорс!"
+
+
+      

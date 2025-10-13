@@ -2,17 +2,20 @@ from app.application.repositories import SessionRepository
 import app.application.interfaces as iapp
 import app.application.exceptions as appexc
 import app.application.models as mapp
-
+import app.infrastructure.interfaces as iabc
 import app.domain.repositories as repos
 import app.domain.exceptions as domexc
 import app.domain.models as mdom
 import app.domain.services as domsvc
 
+
+from app.infrastructure.telemetry.traces import TracerType
 from app.common.config import Config
 from app.presentation.schemas import TokenResponse
 
 import typing as t
 import jwt, uuid, datetime as dt
+
 
 
 class StatefulOAuthStrategy(iapp.IAuthStrategy, iapp.ITokenMixin, iapp.IPasswordMixin, iapp.ILoginLogoutMixin):
@@ -21,7 +24,7 @@ class StatefulOAuthStrategy(iapp.IAuthStrategy, iapp.ITokenMixin, iapp.IPassword
         self,
         session_repo: SessionRepository,
         user_repo: repos.IUserRepository,
-        password_hasher: domsvc.IPasswordHasher,
+        password_hasher: domsvc.IPasswordHasherAsync,
         *,
         refresh_secret: t.Optional[str] = None,
         jwt_secret: t.Optional[str] = None,
@@ -54,6 +57,7 @@ class StatefulOAuthStrategy(iapp.IAuthStrategy, iapp.ITokenMixin, iapp.IPassword
         except jwt.InvalidTokenError as e:
             raise appexc.CredentialsException() from e
 
+    @TracerType.traced
     def __create_token(self, payload: dict, expires_delta: dt.timedelta, refresh: bool = False) -> tuple[str, float]:
         secret = self.refresh_secret if refresh else self.jwt_secret
         expiration_time = (dt.datetime.now(dt.timezone.utc) + expires_delta).timestamp()
@@ -80,7 +84,7 @@ class StatefulOAuthStrategy(iapp.IAuthStrategy, iapp.ITokenMixin, iapp.IPassword
         )
 
     @property
-    def hasher(self) -> domsvc.IPasswordHasher:
+    def hasher(self) -> domsvc.IPasswordHasherAsync:
         return self._hasher
 
     async def login(self, credentials: dict) -> TokenResponse:
@@ -94,8 +98,9 @@ class StatefulOAuthStrategy(iapp.IAuthStrategy, iapp.ITokenMixin, iapp.IPassword
         if not user:
             raise domexc.UserDoesNotExist("User does not exist!")
         
-        if not self._hasher.verify(password, user.password_hash):
-            raise appexc.CredentialsException("Bad password given for this username!")
+        with TracerType.start_span('login_password_verifying'):
+            if not await self._hasher.verify(password, user.password_hash):
+                raise appexc.CredentialsException("Bad password given for this username!")
         
         session_id = str(uuid.uuid4())
         tokens = self.__create_a_pair_of_tokens(dict(session_id=session_id))

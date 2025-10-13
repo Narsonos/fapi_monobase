@@ -21,11 +21,11 @@ class LoginLogoutMixin(t.Generic[TLoginReturn]):
         await self.auth_strategy.logout(session_id)
 
 class PasswordServiceMixin:
-    def verify_password(self, password:str, password_hash: str) -> bool:
-        return self.auth_strategy.verify_password(password, password_hash)
+    async def verify_password(self, password:str, password_hash: str) -> bool:
+        return await self.auth_strategy.verify_password(password, password_hash)
 
-    def hash_password(self, password: str) -> str:
-        return self.auth_strategy.hash_password(password)
+    async def hash_password(self, password: str) -> str:
+        return await self.auth_strategy.hash_password(password)
 
 
 class TokenServiceMixin:
@@ -42,7 +42,6 @@ class StatefulOAuthService(
     TokenServiceMixin
 ):
     """Полноценный сервис для stateful/stateful OAuth2."""
-
 
 class PasswordAuthService(AuthService, PasswordServiceMixin):
     """Сервис для BasicAuth или похожих схем."""

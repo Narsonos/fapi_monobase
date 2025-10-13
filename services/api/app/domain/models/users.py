@@ -1,7 +1,7 @@
 import typing as t
 import pydantic as p
 from enum import Enum
-from app.domain.services import IPasswordHasher
+from app.domain.services import IPasswordHasherAsync
 import app.domain.exceptions as domexc
 
 class Role(str, Enum):
@@ -29,10 +29,10 @@ class User(p.BaseModel):
         return v
 
     @staticmethod
-    def _hash_password(password: str, hasher: IPasswordHasher):
+    async def _hash_password(password: str, hasher: IPasswordHasherAsync):
         if len(password) < 8:
             raise domexc.UserValueError(f"Minimal password length is 8 symbols. Your length: {len(password)}")
-        return hasher.hash(password)
+        return await hasher.hash(password)
 
 
     @property
@@ -50,8 +50,8 @@ class User(p.BaseModel):
         self.role = role        
     
     @staticmethod
-    def create(username: str, password: str, role: Role, hasher: IPasswordHasher):
-        password_hash = User._hash_password(password, hasher)
+    async def create(username: str, password: str, role: Role, hasher: IPasswordHasherAsync):
+        password_hash = await User._hash_password(password, hasher)
         return User(
             username=username.lower(),
             password_hash=password_hash,
@@ -59,15 +59,15 @@ class User(p.BaseModel):
             status=Status.ACTIVE
         )
     
-    def change_password(self,old:str, new:str, hasher: IPasswordHasher):
-        if not hasher.verify(old, self.password_hash):
+    async def change_password(self,old:str, new:str, hasher: IPasswordHasherAsync):
+        if not await hasher.verify(old, self.password_hash):
             raise domexc.UserValueError("Old password invalid")
-        if hasher.verify(new, self.password_hash):
+        if await hasher.verify(new, self.password_hash):
             raise domexc.UserValueError(f'New password must not match the old one. Use different password.')
-        self.password_hash = self._hash_password(new, hasher)
+        self.password_hash = await self._hash_password(new, hasher)
 
-    def force_change_password(self, new: str, hasher: IPasswordHasher):
-        self.password_hash = self._hash_password(new, hasher)
+    async def force_change_password(self, new: str, hasher: IPasswordHasherAsync):
+        self.password_hash = await self._hash_password(new, hasher)
 
     
 

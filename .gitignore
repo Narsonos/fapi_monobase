@@ -7,3 +7,5 @@ __pycache__
 
 *.log
 todo.txt
+data/
+services/tg-alert/config.yaml

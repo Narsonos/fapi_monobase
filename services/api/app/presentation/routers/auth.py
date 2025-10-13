@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 #Project files
 import app.presentation.schemas as schemas
 import app.application.dependencies as appdeps
-import app.domain.exceptions as domexc
+import app.domain.exceptions as domexc, app.application.exceptions as appexc, app.common.exceptions as exc
 
 #Pydantic/Typing
 import typing as t
@@ -28,7 +28,12 @@ router = APIRouter(
     description='If credentials are valid - returns a pair of tokens, each can be used in Authorization header as "Bearer [token]"')
 async def login(auth_service: appdeps.OAuthServiceDependency, form_data: appdeps.OAuthFormData) -> schemas.TokenResponse:
     credentials = {"username": form_data.username, "password": form_data.password}
-    return await auth_service.login(credentials)
+    try:
+        tokens = await auth_service.login(credentials)
+    except appexc.CredentialsException as e:
+        raise e    
+    return tokens
+        
 
 
 @router.get("/logout", description='Invalidates your token')

@@ -8,30 +8,31 @@ import logging, asyncio, contextlib, typing as t
 
 
 
-logger = logging.getLogger('app.storage')
+logger = logging.getLogger('app')
 
 class RedisConnectionManager(mgrs.ConnectionManagerInterface[Redis]):
-    def __init__(self, cache_pool=True, **redis_kwargs):
+    def __init__(self, **redis_kwargs):
         self._redis_kwargs = redis_kwargs
         self._pool = ConnectionPool(**redis_kwargs)
-        self._cache_pool = cache_pool
+        self._client: Redis | None = None
 
     @contextlib.asynccontextmanager
     async def connect(self) -> t.AsyncIterator[Redis]:
-        if self._cache_pool or self._pool is None:
+        if self._pool is None:
             self._pool = ConnectionPool(**self._redis_kwargs)
-        client = Redis(connection_pool=self._pool)
+        if self._client is None:
+            self._client = Redis(connection_pool=self._pool)
         try:
-            yield client
+            yield self._client
         except RedisError as e:
-            raise exc.CustomStorageException(f'Redis got exception!') from e
-        finally:
-            await client.aclose()
+            raise exc.CustomStorageException("Redis got exception!") from e
     
     async def close(self):
+        if self._client:
+            await self._client.aclose()
+            self._client = None
         if self._pool:
-            logger.info('[Storage: Redis] Closing connection pool!')
-            await self._pool.disconnect(inuse_connections=True)
+            await self._pool.disconnect()
             self._pool = None
 
 

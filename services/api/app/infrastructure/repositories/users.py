@@ -176,12 +176,13 @@ class SQLAUserRepository(repo.IUserRepository):
         await self.session.execute(sqlm.delete(db.User).where(db.User.id==user.id))
         await self.session.flush()
 
-    async def ensure_admin_exists(self, hasher: domsvc.IPasswordHasher):
+    async def ensure_admin_exists(self, hasher: domsvc.IPasswordHasherAsync):
         admins = await self.list(limit=1, filters=schemas.UserFilterSchema(role="admin"))
         if not admins:
+            password_hash = await hasher.hash(DEFAULT_ADMIN_PASSWORD)
             default_admin = domain.User(
                 username=DEFAULT_ADMIN_USERNAME,
-                password_hash=hasher.hash(DEFAULT_ADMIN_PASSWORD),
+                password_hash=password_hash,
                 role="admin",
                 status="active"
             )
@@ -217,10 +218,11 @@ class RedisCacheUserRepository(repo.IUserRepository):
             await self.__clear_userlist_cache()
 
     async def __cache(self, user:domain.User):
-        logger.info(f'[CACHE: USERS] Caching user id={user.id}, username={user.username}')
-        await self._redis.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
-        await self._redis.set(f'user:username:{user.username}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
-        
+        async with self._redis.pipeline() as pipe:
+            logger.info(f'[CACHE: USERS] Caching user id={user.id}, username={user.username}')
+            pipe.set(f'user:{user.id}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+            pipe.set(f'user:username:{user.username}', user.model_dump_json(), ex=USER_CACHE_TTL_SECONDS)
+            await pipe.execute()
 
 
 
@@ -279,6 +281,7 @@ class RedisCacheUserRepository(repo.IUserRepository):
     async def create(self, user: domain.User) -> domain.User:
         user = await self._user_db.create(user)
         if user:
+            self._uow.add_post_commit_hook(lambda: self.__invalidate_cache(user.id))
             self._uow.add_post_commit_hook(lambda: self.__cache(user))
         return user
 
@@ -291,7 +294,6 @@ class RedisCacheUserRepository(repo.IUserRepository):
 
 
     async def delete(self, user: domain.User) -> None:
-        # fetch user to know username and remove both keys
         await self._user_db.delete(user)
         self._uow.add_post_commit_hook(lambda: self.__invalidate_cache(user.id))
 

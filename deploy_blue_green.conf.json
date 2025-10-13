@@ -1,0 +1,18 @@
+{
+  "compose_path": "./docker-compose.prod.yaml",
+  "upstream_conf": "./services/nginx/upstream.conf",
+  "services": [
+    {
+      "name": "app",
+      "is_upstream": true
+    },
+    {
+      "name": "celery",
+      "is_upstream": true
+    },
+    {
+      "name": "celery-beat",
+      "is_upstream": true
+    }
+  ]
+}

@@ -10,11 +10,6 @@ from tests.helpers.users import build_sess_repo, build_user_repo, create_user, c
 username, password = 'admin', 'password'
 
 
-
-
-
-
-
 async def valid_tokens(username, password,user_repo, sess_repo):
     auth_start = ideps.AuthStrategyType(user_repo=user_repo, session_repo=sess_repo, password_hasher=ideps.PasswordHasherType())
     tokens = await auth_start.login(dict(username=username, password=password))
@@ -33,7 +28,7 @@ async def test_get_user(async_client, uow, cache_client):
     assert user.id == 555
     
     response = await async_client.get(f'/users/1111')
-    assert response.json() is None
+    assert response.json().get('detail') is not None #returns a json with user does not exist message
     none = await user_repo.get_by_id(1111) #nonexistent id
     assert none is None
     

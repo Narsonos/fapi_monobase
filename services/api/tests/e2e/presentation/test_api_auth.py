@@ -15,7 +15,7 @@ async def test_login(async_client, cache_client, uow):
 
     user_repo = await build_user_repo(uow, cache_client)
 
-    user = dmod.User.create(username='test', password='123123123', role='user', hasher=ideps.PasswordHasherType())
+    user =  await dmod.User.create(username='test', password='123123123', role='user', hasher=ideps.PasswordHasherType())
     await user_repo.create(user)
     await uow.commit()
 

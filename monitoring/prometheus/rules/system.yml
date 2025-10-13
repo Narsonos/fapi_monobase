@@ -1,0 +1,100 @@
+groups:
+- name: System
+  interval: 1m
+  rules:
+    - record: sys:instance:cpu_load:percent:5m
+      expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+
+    - record: sys:instance_cpu:cpu_load:percent:5m
+      expr: 100 - (avg by(instance, cpu) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+
+
+
+    - record: sys:instance:ram_load:percent:5m
+      expr:  100-(avg_over_time(node_memory_MemAvailable_bytes[5m])/node_memory_MemTotal_bytes) * 100
+  
+    - record: sys:instance_mountpoint:storage_free:percent
+      expr: sum by(instance, mountpoint) (
+          (
+            node_filesystem_free_bytes{fstype!~"tmpfs|overlay|squashfs|devtmpfs"} /
+            node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs|devtmpfs"}
+          ) * 100
+        )
+
+    - record: sys:instance_mountpoint:storage_total:mb
+      expr: sum by (instance, mountpoint)
+            (node_filesystem_size_bytes{fstype!~"overlay|squashfs|devtmpfs"}) / 10^6
+
+    - record: sys:instance_mountpoint:storage_used:mb
+      expr: sum by (instance, mountpoint)(
+              node_filesystem_size_bytes{fstype!~"overlay|squashfs|devtmpfs"}
+            - node_filesystem_free_bytes{fstype!~"overlay|squashfs|devtmpfs"}
+            ) / 10^6
+
+
+
+
+    - record: sys:instance:disk_load:percent:5m
+      expr: avg by(instance) (rate(node_disk_io_time_seconds_total[5m]) * 100)
+
+    - record: sys:instance:disk_read:kb:5m
+      expr: sum by (instance) (rate(node_disk_read_bytes_total[5m])/10^4) 
+      
+    - record: sys:instance:disk_written:kb:5m
+      expr: sum by (instance) (rate(node_disk_written_bytes_total[5m])/10^4) 
+
+    - record: sys:instance:net_in:mbs:5m
+      expr: sum(rate(node_network_receive_bytes_total{device!~"lo|veth.*"}[5m])) by (instance)/10^6
+
+    - record: sys:instance:net_out:mbs:5m
+      expr: sum(rate(node_network_transmit_bytes_total{device!~"lo|veth.*"}[5m])) by (instance)/10^6
+
+    - record: sys:instance:net_loss_in:pps:5m
+      expr: sum(rate(node_network_receive_drop_total{device!~"lo|veth.*"}[5m])) by (instance)
+
+    - record: sys:instance:net_loss_out:pps:5m
+      expr: sum(rate(node_network_transmit_drop_total{device!~"lo|veth.*"}[5m])) by (instance)
+
+    - record: sys:instance:net_err_in:eps:5m
+      expr: sum(rate(node_network_receive_errs_total{device!~"lo|veth.*"}[5m])) by (instance)
+
+    - record: sys:instance:net_err_out:eps:5m
+      expr: sum(rate(node_network_transmit_errs_total{device!~"lo|veth.*"}[5m])) by (instance)
+
+
+- name: System-alerts
+  rules:
+  - alert: CpuOver90
+    expr: sys:instance:cpu_load:percent:5m > 90
+    for: 5m
+    labels:
+      severity: warn
+    annotations:
+      summary: "Высокая загрузка CPU на {{ $labels.instance }}"
+      description: "Средняя нагрузка на CPU за последние 5 мин превысила 90%. Значение: {{ printf \"%.1f\" $value }}."
+  
+  - alert: RamOver90
+    expr: sys:instance:ram_load:percent:5m > 90
+    for: 5m
+    labels:
+      severity: warn
+    annotations:
+      summary: "Высокая загрузка RAM на {{ $labels.instance }}"
+      description: "Средняя загрузка RAM за последние 5 мин превысила 90%. Значение: {{ printf \"%.1f\" $value }}."
+
+  - alert: DiskSpaceLow
+    expr: sys:instance-mountpoint:storage_free:percent < 10
+    labels:
+      severity: warn
+    annotations:
+      summary: "Заканчивается место на {{ $labels.instance }}: {{ $labels.mountpoint }}"
+      description: "На {{ $labels.instance }} ({{ $labels.mountpoint }}) свободно {{ printf \"%.1f\" $value }}%."
+
+  - alert: DiskLoadOver90
+    expr: sys:instance:disk_load:percent:5m > 90
+    for: 5m
+    labels:
+      severity: warn
+    annotations:
+      summary: "Диск на {{ $labels.instance }} под нагрузкой!"
+      description: "Нагрузка на диск более 90% на потяжении 5мин. Значение: {{ printf \"%.1f\" $value }}."

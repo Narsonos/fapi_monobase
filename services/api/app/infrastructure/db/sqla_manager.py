@@ -12,7 +12,7 @@ import asyncio
 import contextlib
 import logging
 
-logger = logging.getLogger('app.storage')
+logger = logging.getLogger('app')
 
 
 

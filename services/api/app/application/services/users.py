@@ -11,14 +11,14 @@ logger = logging.getLogger('app')
 
 class UserService:
 
-    def __init__(self, user_repo: repos.IUserRepository, password_hasher: services.IPasswordHasher) -> None:
+    def __init__(self, user_repo: repos.IUserRepository, password_hasher: services.IPasswordHasherAsync) -> None:
         self.user_repo = user_repo
         self.hasher = password_hasher
 
  
     async def create(self, user_data: schemas.PublicUserCreationModel) -> schemas.UserDTO:
         'Used by users to signup'
-        user = domain.User.create(
+        user = await domain.User.create(
             username=user_data.username,
             password=user_data.password,
             role='user',
@@ -32,7 +32,7 @@ class UserService:
         if not current_user.is_admin:
             raise domexc.ActionNotAllowedForRole("This action is allowed for admins only.")
         
-        user = domain.User.create(
+        user = await domain.User.create(
             username=user_data.username,
             password=user_data.password,
             role=user_data.role,
@@ -51,7 +51,7 @@ class UserService:
         if (edited_user.old_password or edited_user.new_password):
             if not (edited_user.old_password and edited_user.new_password):
                 raise domexc.UserValueError("Either both password fields must be provided, or no password fields at all.")
-            current_user.change_password(old = edited_user.old_password, new = edited_user.new_password, hasher = self.hasher)
+            await current_user.change_password(old = edited_user.old_password, new = edited_user.new_password, hasher = self.hasher)
 
         current_user = await self.user_repo.update(current_user)
         return schemas.UserDTO.model_validate(current_user, from_attributes=True)
@@ -74,7 +74,7 @@ class UserService:
             target_user.username = edited_user.username
 
         if edited_user.new_password:
-            target_user.force_change_password(edited_user.new_password, hasher=self.hasher)
+            await target_user.force_change_password(edited_user.new_password, hasher=self.hasher)
 
         if edited_user.role:
             target_user.set_role(edited_user.role)

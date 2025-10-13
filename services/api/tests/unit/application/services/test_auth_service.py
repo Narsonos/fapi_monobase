@@ -74,24 +74,22 @@ async def test_login_raises_propagates(mocker):
 @pytest.mark.asyncio
 async def test_refresh_raises_propagates(mocker):
 	mock_strategy = mocker.AsyncMock()
-	# the real strategy raises app-level HTTP exceptions for invalid/expired tokens
 	mock_strategy.refresh.side_effect = appexc.TokenExpiredException()
 	service = svc.StatefulOAuthService(mock_strategy)
 	with pytest.raises(HTTPException):
 		await service.refresh('rt-bad')
 
-
-def test_password_mixin_hash_and_verify(mocker):
-	mock_strategy = mocker.MagicMock()
+@pytest.mark.asyncio
+async def test_password_mixin_hash_and_verify(mocker):
+	mock_strategy = mocker.AsyncMock()
 	mock_strategy.hash_password.return_value = 'hash:mypw'
 	mock_strategy.verify_password.return_value = True
 
 	service = svc.PasswordAuthService(mock_strategy)
 	pw = 'mypw'
-	hashed = service.hash_password(pw)
+	hashed = await service.hash_password(pw)
 	assert hashed == 'hash:mypw'
-	assert service.verify_password(pw, hashed) is True
-	# ensure delegation was to underlying strategy
+	assert await service.verify_password(pw, hashed) is True
 	mock_strategy.hash_password.assert_called_once_with(pw)
 	mock_strategy.verify_password.assert_called_once_with(pw, hashed)
 

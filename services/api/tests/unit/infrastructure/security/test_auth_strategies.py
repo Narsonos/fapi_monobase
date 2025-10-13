@@ -23,6 +23,22 @@ class FakeHasher:
         return hashed == f"hashed:{password}"
 
 
+class AsyncFakeHasher:
+    """Async adapter for FakeHasher used in this test module.
+
+    Some code (domain model/User.create) now expects an async hasher.
+    This adapter delegates to the sync FakeHasher but exposes async methods.
+    """
+    def __init__(self, sync_hasher: FakeHasher | None = None):
+        self._sync = sync_hasher or FakeHasher()
+
+    async def hash(self, password: str) -> str:
+        return self._sync.hash(password)
+
+    async def verify(self, password: str, hashed: str) -> bool:
+        return self._sync.verify(password, hashed)
+
+
 class SOAuthTestSuite(p.BaseModel):
     user: dmod.User | None
     mock_user_repo: t.Any
@@ -58,7 +74,7 @@ def get_full_oauth_setup(mocker,user_data):
         strat = isec.StatefulOAuthStrategy(
             session_repo=mock_sess_repo,
             user_repo=mock_user_repo,
-            password_hasher=FakeHasher(),
+            password_hasher=AsyncFakeHasher(FakeHasher()),
             jwt_secret=JWT_SECRET,
             refresh_secret=REFRESH_SECCRET
         )
@@ -72,7 +88,7 @@ def get_valid_token_pair():
         strat = isec.StatefulOAuthStrategy(
             user_repo=None,
             session_repo=None,
-            password_hasher=FakeHasher(),
+            password_hasher=AsyncFakeHasher(FakeHasher()),
             jwt_secret=JWT_SECRET,
             refresh_secret=REFRESH_SECCRET
         )
@@ -88,8 +104,8 @@ def get_valid_token_pair():
     return _inner
 
 
-
-def test_SOAuth_create_tokens_and_extract_data(get_valid_token_pair):
+@pytest.mark.asyncio
+async def test_SOAuth_create_tokens_and_extract_data(get_valid_token_pair):
     strat = isec.StatefulOAuthStrategy(
         session_repo=None,
         user_repo=None,
@@ -111,10 +127,10 @@ def test_SOAuth_create_tokens_and_extract_data(get_valid_token_pair):
     outdated_token, expiration_time = tokenizer.create_token(payload, expires_delta=dt.timedelta(microseconds=0))
 
     with pytest.raises(appexc.CredentialsException):
-        tokenizer.exctract_token_data('asdasdasda', refresh=False)
+        await strat.authenticate({'token':'3123123123123'})
 
     with pytest.raises(appexc.TokenExpiredException):
-        tokenizer.exctract_token_data(outdated_token, refresh=False)
+        await strat.authenticate({'token':outdated_token})
 
     decoded_payload = tokenizer.exctract_token_data(tokens.access_token, refresh=False)
     assert decoded_payload == payload | {'exp': tokens.access_expires}
@@ -136,7 +152,7 @@ def test_SOAuth_create_tokens_and_extract_data(get_valid_token_pair):
 async def test_SOAuth_login_logout(get_full_oauth_setup, credentials, user_exists: bool, exc):
     suite = get_full_oauth_setup(user_exists)
     #test hasher property along the way
-    assert isinstance(suite.strat.hasher, FakeHasher)
+    assert isinstance(suite.strat.hasher, AsyncFakeHasher)
     if exc:
         with pytest.raises(exc):
             await suite.strat.login(credentials)

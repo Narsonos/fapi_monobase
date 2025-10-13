@@ -1,0 +1,83 @@
+groups:
+- name: API
+  interval: 30s
+  rules:
+
+  - record: api:exported_job:rps:1m
+    expr: sum by (exported_job) (rate(http_requests_total[1m]))
+
+  - record: api:response_size:p99:bytes:5m
+    expr: histogram_quantile(0.99, sum(rate(http_server_response_size_bytes_bucket[5m])) by (le))
+
+  - record: api:exported_job:latency:p95:ms:1m
+    expr: histogram_quantile(0.99, sum(rate(http_server_duration_milliseconds_bucket[1m])) by (le, exported_job))
+
+  - record: api:exported_job_target_method:latency:p95:ms:30s
+    expr: histogram_quantile(0.95, sum(rate(http_server_duration_milliseconds_bucket[30s])) by (le, exported_job, http_target, http_method))
+
+  - record: api:exported_job:latency:p99:ms:1m
+    expr: histogram_quantile(0.99, sum(rate(http_server_duration_milliseconds_bucket[1m])) by (le, exported_job))
+
+  - record: api:exported_job_target_method:latency:ms:30s   
+    expr: sum(increase(http_server_duration_milliseconds_sum[30s])) by (exported_job, http_target, http_method)
+          /
+          sum(increase(http_server_duration_milliseconds_count[30s])) by (exported_job, http_target, http_method)
+
+  - record: api:exported_job:http500:percent:1m
+    expr: sum by (exported_job) (increase(http_requests_total{status_code=~"5.."}[1m]))
+          /
+          sum by (exported_job) (increase(http_requests_total[1m]))
+  
+  - record: api:exported_job_target_method:500:percent:12h #use with topk
+    expr:
+            sum(rate(http_requests_total{status_code=~"5.."}[12h])) by (instnace, http_target, http_method)
+            /
+            sum(rate(http_requests_total[12h])) by (exported_job , http_target, http_method)
+          
+
+  - record: api:exported_job:responses_ratio:percent:5m
+    expr: sum by (status_code, exported_job) (rate(http_requests_total[5m])) / ignoring(status_code, exported_job) group_left sum(rate(http_requests_total[5m]))
+
+  - record: api:exported_job:requests_size:bytes:1m
+    expr: sum by (exported_job)(rate(http_server_request_size_bytes_sum[1m]))
+
+  - record: api:exported_job:response_size:bytes:1m
+    expr: sum by (exported_job)(rate(http_server_response_size_bytes_sum[1m]))
+
+- name: API-alerts
+  rules:
+  - alert: High5xxRate
+    expr: userauth:http500:rate:5m > 0.05 #3err/min
+    for: 2m
+    labels:
+      severity: crit
+    annotations:
+      summary: "Высокая частота 5xx в {{ $labels.exported_job }}"
+      description: "Частота 5хх превысила 3 ошибки в минуту. Значение: {{ printf \"%.2f\" $value }}."
+
+  - alert: HighLatencyP95
+    expr: userauth:latency:p95:ms:5m > 1000
+    for: 5m
+    labels:
+      severity: warn
+    annotations:
+      summary: "Высокая задержка в {{ $labels.exported_job }}"
+      description: "P95 времени ответа превышает 1с. Значение: {{ printf \"%.2f\" $value }}s."
+
+  - alert: TooManyInFlightRequests
+    expr: sum(http_server_active_requests) by (exported_job) > 100
+    for: 1m
+    labels:
+      severity: warn
+    annotations:
+      summary: "Перегрузка приложения {{ $labels.exported_job }}"
+      description: "В обработке более 100 одновременных запросов."
+  
+  - alert: LargeResponseSize
+    expr: userauth:response_size:p99:bytes:5m > 5*(2^20)
+    for: 5m
+    labels:
+      severity: warn
+    annotations:
+      summary: "Слишком большие ответы на {{ $labels.exported_job }}"
+      description: "P99 размера ответа превысил 5MB."

@@ -1,107 +1,190 @@
-# Controls when the action will run.
+name: CI/CD
+
 on:
   workflow_dispatch:
 
 env:
-  COMPOSE_CONF: "./docker-compose.dev.yaml"
-  UPDATE_SCRIPT: "zero-downtime-nginx-scale.py"
-  APP_PORT: "8000"
-  SERVICE_NAME: "app"
-  NGINX_SERVICE_NAME: "nginx"
+  SERVICE_NAME: userauth_service                      #basically, project name
+  COMPOSE_APP_SERVICES: app,celery,celery-beat        #the names of the services that are to built in building stage
+  COMPOSE_APP_SERVICE_NAME: app                       #the name ofo the app service in compose files
+  PROD_COMPOSE_PATH: ./docker-compose.prod.yaml       #path to prod compose from project root
+  TEST_COMPOSE_PATH: ./docker-compose.test.yaml       #path to test compose from project root
+  DEV_COMPOSE_PATH: ./docker-compose.dev-local.yaml   #path to dev (build) compose from project root
 
-  MODE: "dev"
+  BAKED_MYSQL_PASSWORD: 123123123
+  BAKED_MYSQL_USER: test
 
+  PROD_SSH_DEPLOY_TARGET_PATH: /srv
+  
+  
 jobs:
-  deploy:
+  test:
+    name: Run tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Clone repo and setup Docker
+        uses: actions/checkout@v4
+        with: 
+          sparse-checkout: |
+            ${{ env.TEST_COMPOSE_PATH}}
+            services
+          #needs .env.test
 
-      - name: Prepare Deployment Files
+      - name: Create a .env file. #Enter
         run: |
-          mkdir deploy
-          ls -lia
-          cp ${{ env.COMPOSE_CONF }} deploy/
-          cp ${{ env.UPDATE_SCRIPT }} deploy/
-          cp -r services deploy/
+          cat <<EOF > .env.test
+          #---------------Application envs are below-------------
+          APP_NAME=${{ env.SERVICE_NAME }}
+          DEFAULT_ADMIN_PASSWORD=${{ secrets.DEFAULT_ADMIN_PASSWORD}}
+          SECRET=${{ secrets.SECRET }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          REFRESH_SECRET=${{ secrets.REFRESH_SECRET }}
+          MYSQL_ROOT_PASSWORD=${{ env.BAKED_MYSQL_PASSWORD }}
+          MYSQL_USER=${{ env.BAKED_MYSQL_USER }}
+          MYSQL_PASSWORD=${{ env.BAKED_MYSQL_PASSWORD }}
+          MYSQL_DATABASE=${{ env.BAKED_MYSQL_USER }}
+          REDIS_PASS=${{ secrets.REDIS_PASS }}
+          #-------------------------------------------------------
+          EOF
 
-
-      #update_var creates file if not exists so we must be good ig
-      - name: Update .env file with environment variables
-        run: |
-          update_var() {
-            local file=$1 var=$2 value=$3
-            [ -f "$file" ] || touch "$file" 
-            grep -q "^$var=" "$file" && \
-              sed -i "s|^$var=.*|$var=$value|" "$file" || \
-              echo "$var=$value" >> "$file"
-          }
-
-          update_var deploy/.env MODE "'${{ env.MODE }}'"
-          update_var deploy/.env GIT_COMMIT "'$(git rev-parse --short "$GITHUB_SHA")'"
-
-          update_var deploy/.env JWT_SECRET "'${{ secrets.JWT_SECRET }}'"
-          update_var deploy/.env REFRESH_SECRET "'${{ secrets.JWT_SECRET }}'"
-
-          update_var deploy/.env REDIS_PASS "'${{secrets.REDIS_PASS}}'"
-
-          update_var deploy/.env MYSQL_ROOT_PASSWORD "'${{secrets.MYSQL_ROOT_PASSWORD}}'"
-          update_var deploy/.env MYSQL_USER "'${{secrets.MYSQL_USER}}'"
-          update_var deploy/.env MYSQL_PASSWORD "'${{secrets.MYSQL_PASSWORD}}'"
-          update_var deploy/.env MYSQL_DATABASE "'${{secrets.MYSQL_DATABASE}}'"
-        #update_var deploy/.env POSTGRES_USER 
-        #update_var deploy/.env POSTGRES_PASSWORD 
-        #update_var deploy/.env POSTGRES_DB 
+      - name: Setup docker
+        uses: docker/setup-docker-action@v4
+        with:
+          version: 28
           
-
-      - name: Deploy
-        uses: easingthemes/ssh-deploy@v5.1.0
+      - name: Run test compose
+        run: docker compose -f ./${{ env.TEST_COMPOSE_PATH}} up --build --abort-on-container-exit --exit-code-from ${{ env.COMPOSE_APP_SERVICE_NAME}}
+  
+  build:
+    name: Build prod
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
         with:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rlgoDzvc --delete --inplace"
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          SOURCE: "deploy/"
-          TARGET: "${{ secrets.DEV_REMOTE_TARGET }}"
-          EXCLUDE: "services/api/hfcache/"
-          SCRIPT_AFTER: |
-            sudo chown -R ${{ secrets.REMOTE_USER }}:${{ secrets.REMOTE_USER }} ${{ secrets.DEV_REMOTE_TARGET }}
+          sparse-checkout: |
+            ${{ env.DEV_COMPOSE_PATH }}
+            services/api
+          #it also needs .env!
 
-      - name: Install yq
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v4
+
+      - name: Building and refreshing GHCR prod image
+        env:
+          IMAGE_BASE: ghcr.io/${{ github.repository_owner }}/${{ env.SERVICE_NAME }}
         run: |
-          sudo wget https://github.com/mikefarah/yq/releases/download/v4.16.1/yq_linux_amd64 -O /usr/bin/yq
-          sudo chmod +x /usr/bin/yq
+          set -e
+          echo "Building Docker image for ${{ env.SERVICE_NAME }} - [${{ env.COMPOSE_APP_SERVICES }}]"
+          IFS=',' read -ra SERVICES <<< "${{ env.COMPOSE_APP_SERVICES }}"
 
-      - name: Extract name from docker-compose
+          echo "🔐 Logging in to GHCR..."
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
+      
+          PUSH_TASKS=()
+          for service in "${SERVICES[@]}"; do
+            echo "🚀 Building image for service: $service"
+            docker compose -f "${{ env.DEV_COMPOSE_PATH }}"" build "$service"
+            IMAGE_ID=$(docker compose -f "${{ env.DEV_COMPOSE_PATH }}" images -q "$service")
+            if [ -z "$IMAGE_ID" ]; then
+              echo "ERROR: Failed to get image ID!"
+              exit 1
+            fi
+
+            SHA_TAG="${IMAGE_BASE}-${service}:${{ github.sha }}"
+            LATEST_TAG="${IMAGE_BASE}-${service}:latest"
+
+            echo "🏷️ Tagging $IMAGE_ID as:"
+            echo "   - $SHA_TAG"
+            echo "   - $LATEST_TAG"
+            docker tag "$IMAGE_ID" "$SHA_TAG"
+            docker tag "$IMAGE_ID" "$LATEST_TAG"
+
+            echo "✅ Image for $service is ready to push."
+            PUSH_TASKS+=("$service")
+            echo
+          done
+          echo "📤 Starting parallel pushes..."
+
+          for service in "${PUSH_TASKS[@]}"; do
+            (
+              SHA_TAG="${IMAGE_BASE}-${service}:${{ github.sha }}"
+              LATEST_TAG="${IMAGE_BASE}-${service}:latest"
+              echo "➡️ Pushing $service ..."
+              docker push "$SHA_TAG" >"push_${service}.log" 2>&1
+              docker push "$LATEST_TAG" >>"push_${service}.log" 2>&1
+              echo "✅ $service pushed successfully!"
+            ) &
+          done
+          EXIT_CODE=0
+          for service in "${!PUSH_PIDS[@]}"; do
+            wait ${PUSH_PIDS[$service]} || EXIT_CODE=1
+            if [ $EXIT_CODE -ne 0 ]; then
+              echo "❌ Push failed for service: $service. Logs:"
+              cat "push_${service}.log"
+            fi
+          done
+
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "⚠️ Some pushes failed."
+            exit 1
+          fi
+
+          echo "🎉 All images pushed successfully!"
+
+
+  
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: build
+    env:
+      SSH_DEPLOY_TARGET_PATH: /srv/${{github.repository.name}}
+  
+    steps:
+      - uses: actions/checkout@v4
+        with: 
+          sparse-checkout: |
+            ${{ env.PROD_COMPOSE_PATH }}
+            services
+            deploy_blue_green.py
+            deploy_blue_green.conf.json
+
+          #needs .env
+
+      - name: Create a .env file. #Enter
         run: |
-          IMAGE_NAME=$(yq e '.name' ${{ env.COMPOSE_CONF }})
-          LOCAL_NETWORK=$(yq e '.services.${{ env.NGINX_SERVICE_NAME }}.networks[0]' ${{ env.COMPOSE_CONF }})
-          NGINX_CONTAINER_NAME=$(yq e '.services.${{ env.NGINX_SERVICE_NAME }}.container_name' ${{ env.COMPOSE_CONF }})
-          echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_ENV
-          echo "LOCAL_NETWORK=${LOCAL_NETWORK}" >> $GITHUB_ENV
-          echo "NGINX_CONTAINER_NAME=${NGINX_CONTAINER_NAME}" >> $GITHUB_ENV
+          cat <<EOF > .env
+          #---------------Application envs are below-------------
+          APP_NAME=${{ env.SERVICE_NAME }}
+          DEFAULT_ADMIN_PASSWORD=${{ secrets.DEFAULT_ADMIN_PASSWORD}}
+          SECRET=${{ secrets.SECRET }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          REFRESH_SECRET=${{ secrets.REFRESH_SECRET }}
+          MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_USER=${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
+          REDIS_PASS=${{ secrets.REDIS_PASS }}
+          #-------------------------------------------------------
+          EOF
 
-      - name: Start zero-downtime-update
-        uses: appleboy/ssh-action@v1.0.3
+
+      - name: Copy project_files
+        uses: appleboy/scp-action@v1
         with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: IMAGE_NAME,IMAGE_TAG,NGINX_CONTAINER_NAME,LOCAL_NETWORK
-          script: |
-            set -e
-            cd ${{ secrets.DEV_REMOTE_TARGET }}
+          host:     ${{ secrets.PROD_SSH_DEPLOY_HOST }}
+          username: ${{ secrets.PROD_SSH_DEPLOY_USERNAME }}
+          key: ${{ secrets.PROD_SSH_DEPLOY_KEY }}
+          source: "../${{ github.repository.name }}"
+          target: ${{ env.PROD_SSH_DEPLOY_TARGET_PATH }}
+        
+      
+      - uses: docker/setup-docker-action@v4
 
-            CMD="python3 ${{ env.UPDATE_SCRIPT }} \
-              --config-file ${{ env.COMPOSE_CONF }} \
-              --app-port ${{ env.APP_PORT }} \
-              --service-name ${{ env.SERVICE_NAME }} \
-              --project-name $IMAGE_NAME \
-              --nginx-container-name $NGINX_CONTAINER_NAME \
-              --local-network $LOCAL_NETWORK \
-              --only-restart \
-              --build"
-
-            $CMD
-
-            echo "$CMD" > command.txt
+      - name: Running blue-green deploy script...
+        env:
+          IMAGE_BASE: ghcr.io/${{ github.repository_owner }}/${{ env.SERVICE_NAME }}
+        run: |
+          python deploy_blue_green.py --project_name=${{ env.SERVICE_NAME }}

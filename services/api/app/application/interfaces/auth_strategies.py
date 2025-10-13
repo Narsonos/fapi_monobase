@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from app.domain.models import User
-from app.domain.services import IPasswordHasher
+from app.domain.services import IPasswordHasherAsync
 import app.presentation.schemas as schemas
 import typing as t
 
@@ -25,14 +25,14 @@ class ILoginLogoutMixin(ABC):
 class IPasswordMixin(ABC):
     @property
     @abstractmethod
-    def hasher(self) -> IPasswordHasher:
+    def hasher(self) -> IPasswordHasherAsync:
         return self.hasher
 
-    def hash_password(self, password: str) -> str:
-        return self.hasher.hash(password)
+    async def hash_password(self, password: str) -> str:
+        return await self.hasher.hash(password)
 
-    def verify_password(self, password: str, password_hash: str) -> bool:
-        return self.hasher.verify(password, password_hash)
+    async def verify_password(self, password: str, password_hash: str) -> bool:
+        return await self.hasher.verify(password, password_hash)
 
 class ITokenMixin(ABC):
     @abstractmethod
