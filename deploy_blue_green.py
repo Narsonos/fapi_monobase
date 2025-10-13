@@ -6,7 +6,7 @@ parser.add_argument("--project_name", type=str, required=True, help="Specifies p
 args=parser.parse_args()
 
 
-@dc.ataclass
+@dc.dataclass
 class TargetService:
     name: str
     is_upstream: bool

@@ -157,7 +157,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     env:
-      PROD_SSH_DEPLOY_TARGET_PATH: "/srv/${{ github.repository.name }}"
+      PROD_SSH_DEPLOY_TARGET_PATH: "/srv/${{ github.event.repository.name }}"
     steps:
       - uses: actions/checkout@v4
         with: 
