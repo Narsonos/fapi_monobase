@@ -1,5 +1,5 @@
 import subprocess, json, os, time, typing as t, argparse, re, asyncio, sys, dataclasses as dc, pathlib
-import traceback
+import traceback, collections as c
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--project_name", type=str, required=True, help="Specifies project name")
@@ -109,10 +109,38 @@ class DeploymentJob:
 
     @staticmethod
     def run(command):
-        result = subprocess.run(command, capture_output=True, text=True, shell=True)
-        if result.returncode != 0:
-            raise CommandFailed(command, result.returncode, result.stderr)
-        return result
+        """
+        Выполняет команду, печатая её вывод в реальном времени,
+        и захватывает его для возврата.
+        """
+        # shell=True оставлен для совместимости с вашим кодом,
+        # но безопаснее передавать команду списком и убрать shell=True.
+        process = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT, 
+            shell=True,
+            text=True,
+            encoding='utf-8'
+        )
+
+        captured_lines = []
+        for line in process.stdout:
+            sys.stdout.write(line)
+            captured_lines.append(line) 
+
+        process.wait()
+        returncode = process.returncode
+
+        captured_output = "".join(captured_lines)
+
+        if returncode != 0:
+            raise CommandFailed(command, returncode, captured_output)
+
+        Result = c.namedtuple('Result', ['stdout', 'returncode'])
+        return Result(stdout=captured_output, returncode=returncode)
+
+
 
     @staticmethod
     def rm(container_name, force=False):
@@ -144,11 +172,11 @@ class DeploymentJob:
     def add_alias_to_all_container_networks(self, service):
         full_container_name = f'{self.config.project_name}-{service}_{self.next_color}'
         rs = DeploymentJob.run(['docker', 'inspect', full_container_name, '--format={{json .NetworkSettings.Networks}}'])
-        nets = json.loads(rs.stdout)
+        nets = json.loads(rs.stdout.strip())
         for net in nets:
             print(f'[Deploy: networks] Reconnecting {full_container_name} to {net} with alias {service}_{self.next_color}')
-            rs = DeploymentJob.run(f'docker network disconnect {net} {full_container_name}')
-            rs = DeploymentJob.run(f'docker network connect {net} {full_container_name} --alias {service}_{self.next_color}')
+            DeploymentJob.run(f'docker network disconnect {net} {full_container_name}')
+            DeploymentJob.run(f'docker network connect {net} {full_container_name} --alias {service}_{self.next_color}')
 
     def find_latest_scale(self, service):
         for c in self.project_containers:
