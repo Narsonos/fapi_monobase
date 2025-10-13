@@ -46,6 +46,9 @@ RUN pipx ensurepath
 WORKDIR $PYSETUP_PATH
 COPY poetry.lock pyproject.toml ./
 RUN poetry install --no-ansi --without dev --no-root
+# Export a requirements.txt for the prod stage so we can pip install there
+# This avoids copying a virtualenv between stages which is fragile.
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes --without dev
 
 
 #######################################
@@ -85,10 +88,12 @@ FROM base AS prod_base
 ENV FASTAPI_ENV=prod
 WORKDIR /app
 
-COPY --from=builder $VENV_PATH $VENV_PATH
-COPY ./app /app/
+# Copy exported requirements from builder and install into the system Python
+COPY --from=builder /app/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
-ENV PATH="$PYSETUP_PATH/.venv/bin:$PATH"
+# Copy only the application package into the final image to keep it lightweight
+COPY ./app /app/
 
 
 FROM prod_base AS prod
