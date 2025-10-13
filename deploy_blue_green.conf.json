@@ -8,11 +8,11 @@
       "is_upstream": true
     },
     {
-      "name": "celery",
+      "name": "celery_worker",
       "is_upstream": true
     },
     {
-      "name": "celery-beat",
+      "name": "celery_beat",
       "is_upstream": true
     }
   ]
