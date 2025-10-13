@@ -109,7 +109,7 @@ class DeploymentJob:
 
     @staticmethod
     def run(command):
-        result = subprocess.run(command, capture_output=True, text=True, shell=True)
+        result = subprocess.run(command, capture_output=True, text=True, shell=True, stdout=sys.stdout)
         if result.returncode != 0:
             raise CommandFailed(command, result.returncode, result.stderr)
         return result
@@ -166,8 +166,8 @@ class DeploymentJob:
             if self.request_rollback_event.is_set():
                 return 
             
-            reuslt = self.run("docker inspect --format='{{.State.Health.Status}} " + container_name)
-            status = reuslt.stdout.strip().strip("'").lower()
+            result = self.run(f"docker inspect --format='{{.State.Health.Status}}' {container_name}")
+            status = result.stdout.strip().lower()
             if status == 'healthy':
                 break
             await asyncio.sleep(interval_s)
