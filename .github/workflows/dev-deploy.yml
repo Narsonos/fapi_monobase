@@ -173,6 +173,7 @@ jobs:
         run: |
           cat <<EOF > .env
           #---------------Application envs are below-------------
+          GIT_COMMIT=${{ github.sha }}
           APP_NAME=${{ env.SERVICE_NAME }}
           DEFAULT_ADMIN_PASSWORD=${{ secrets.DEFAULT_ADMIN_PASSWORD}}
           SECRET=${{ secrets.SECRET }}
@@ -219,4 +220,4 @@ jobs:
           script: |
             set -e
             cd ${{ env.PROD_SSH_DEPLOY_TARGET_PATH }}
-            python3 deploy_blue_green.py --project_name="${{ env.SERVICE_NAME }}"
+            python3 -u deploy_blue_green.py --project_name="${{ env.SERVICE_NAME }}"
