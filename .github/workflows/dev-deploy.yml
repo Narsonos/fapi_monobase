@@ -51,7 +51,7 @@ jobs:
         uses: docker/setup-docker-action@v4
           
       - name: Run test compose
-        run: docker compose -f ./${{ env.TEST_COMPOSE_PATH}} up --build --abort-on-container-exit --exit-code-from ${{ env.COMPOSE_APP_SERVICE_NAME}}
+        run: docker compose --env-file=./.env.test -f ./${{ env.TEST_COMPOSE_PATH}} up --build --abort-on-container-exit --exit-code-from ${{ env.COMPOSE_APP_SERVICE_NAME}}
   
   build:
     name: Build prod
