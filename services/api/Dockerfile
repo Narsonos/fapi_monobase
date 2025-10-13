@@ -92,7 +92,7 @@ ENV PATH="$PYSETUP_PATH/.venv/bin:$PATH"
 
 
 FROM prod_base AS prod
-CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "main:app", "-c", "gunicorn_conf.py"]
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "app.main:app", "-c", "gunicorn_conf.py"]
 
 FROM prod_base AS celery
 CMD ["celery", "--help"]
