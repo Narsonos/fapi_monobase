@@ -1,23 +1,43 @@
-import subprocess, json, os, time, typing as t, argparse, re, pydantic as p, asyncio, sys
+import subprocess, json, os, time, typing as t, argparse, re, asyncio, sys, dataclasses as dc, pathlib
 import traceback
-import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--project_name", type=str, required=True, help="Specifies project name")
 args=parser.parse_args()
 
 
-class TargetService(p.BaseModel):
+@dc.ataclass
+class TargetService:
     name: str
     is_upstream: bool
 
 
-class DeploymentConfig(p.BaseModel):
-    project_name: str = p.Field(default=args.project_name)
-    compose_path: p.FilePath
-    upstream_conf: p.FilePath
-    env_path: p.FilePath | None = None
+@dc.dataclass
+class DeploymentConfig:
+    project_name: str
+    compose_path: pathlib.Path
+    upstream_conf: pathlib.Path
+    env_path: pathlib.Path | None
     services: list[TargetService]
+
+    @staticmethod
+    def from_json(path: str, default_project_name: t.Optional[str] = None) -> "DeploymentConfig":
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        # подставляем project_name, если его нет
+        if "project_name" not in data and default_project_name:
+            data["project_name"] = default_project_name
+
+        # преобразуем в объекты
+        data["compose_path"] = pathlib.Path(data["compose_path"])
+        data["upstream_conf"] = pathlib.Path(data["upstream_conf"])
+        if data.get("env_path"):
+            data["env_path"] = pathlib.Path(data["env_path"])
+
+        data["services"] = [TargetService(**s) for s in data.get("services", [])]
+
+        return DeploymentConfig(**data)
 
 
 class CommandFailed(Exception):
@@ -36,7 +56,7 @@ class DeploymentJob:
     def __init__(self, deploy_json_path='./deploy.json'):
         self.config = None
         with open(deploy_json_path, 'r') as f:
-            self.config = DeploymentConfig.model_validate_json(f.read())
+            self.config = DeploymentConfig.from_json(deploy_json_path, args.project_name)
         
         self.current_color = None
         self.next_color = 'blue'
