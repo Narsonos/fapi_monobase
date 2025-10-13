@@ -202,12 +202,6 @@ jobs:
           SCRIPT_AFTER: |
             sudo chown -R ${{ secrets.PROD_SSH_DEPLOY_USERNAME }}:${{ secrets.PROD_SSH_DEPLOY_USERNAME }} ${{ env.PROD_SSH_DEPLOY_TARGET_PATH }}
 
-      - name: Install yq
-        run: |
-          sudo wget https://github.com/mikefarah/yq/releases/download/v4.16.1/yq_linux_amd64 -O /usr/bin/yq
-          sudo chmod +x /usr/bin/yq
-
-
       - uses: docker/setup-docker-action@v4
 
       - name: lowercase
@@ -226,5 +220,5 @@ jobs:
           script: |
             set -e
             cd ${{ env.PROD_SSH_DEPLOY_TARGET_PATH }}
-
+            pip install pydantic
             python3 deploy_blue_green.py --project_name="${{ env.SERVICE_NAME }}"
