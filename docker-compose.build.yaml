@@ -3,7 +3,7 @@ name: ${APP_NAME}
 
 services:
   app:
-    image: ${IMAGE_BASE:-default}-app:${GIT_COMMIT:-none}
+    image: ${IMAGE_BASE:-default}-app:latest
     build:
       context: ./services/api
       dockerfile: Dockerfile
@@ -29,7 +29,7 @@ services:
 
 
   celery_worker:
-    image: ${IMAGE_BASE:-default}-celery:${GIT_COMMIT:-none}
+    image: ${IMAGE_BASE:-default}-celery:latest
     build:
       context: ./services/api
       dockerfile: Dockerfile
@@ -59,7 +59,7 @@ services:
 
 
   celery_beat:
-    image: ${IMAGE_BASE:-default}-celery-beat:${GIT_COMMIT:-none}
+    image: ${IMAGE_BASE:-default}-celery-beat:latest
     build:
       context: ./services/api
       dockerfile: Dockerfile

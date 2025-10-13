@@ -121,8 +121,7 @@ jobs:
             echo "🏷️ Tagging $IMAGE_ID as:"
             echo "   - $SHA_TAG"
             echo "   - $LATEST_TAG"
-            docker tag "$IMAGE_ID" "$SHA_TAG"
-            docker tag "$IMAGE_ID" "$LATEST_TAG"
+            docker tag "$LATEST_TAG" "$SHA_TAG"
 
             echo "✅ Image for $service is ready to push."
             PUSH_TASKS+=("$service")
