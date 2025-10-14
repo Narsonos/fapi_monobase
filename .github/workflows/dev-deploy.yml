@@ -140,15 +140,14 @@ jobs:
                 "dockerfile": (.value.build.dockerfile // "Dockerfile"),
                 "target": (.value.build.target // "")
               })
-          ' "${{ env.PROD_COMPOSE_PATH }}")
+          ' "${{ env.PROD_COMPOSE_PATH }}" | jq -c '.')
           echo "$SERVICES" > services.json
 
       - id: set-matrix
         run: |
           MATRIX_JSON=$(cat services.json)
-          echo "matrix<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$MATRIX_JSON" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
+          echo $MATRIX_JSON
+          echo "matrix={\"include\": $MATRIX_JSON}" >> "$GITHUB_OUTPUT"
 
 
   build:
