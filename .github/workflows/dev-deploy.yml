@@ -190,6 +190,11 @@ jobs:
           echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
 
       - name: Build and Push ${{ matrix.name }}
+        env:
+          # ensure BuildKit enabled and verbose logs
+          DOCKER_BUILDKIT: 1
+          BUILDKIT_PROGRESS: plain
+          BUILDKIT_STEP_LOG: 1
         run: |
           NAME=${{ matrix.name }}
           CONTEXT=${{ matrix.context }}
@@ -204,8 +209,8 @@ jobs:
             -t "$IMAGE_BASE-$NAME:latest" \
             -t "$IMAGE_BASE-$NAME:${{ github.sha }}" \
             --target "$TARGET" \
-            --cache-from=type=gha,scope=build-${{ matrix.name }} \
-            --cache-to=type=gha,mode=max,scope=build-${{ matrix.name }} \
+            --cache-from=type=gha,scope=${{ env.CACHE_SCOPE }} \
+            --cache-to=type=gha,mode=max,scope=${{ env.CACHE_SCOPE }} \
             "$CONTEXT"
   
   deploy:
