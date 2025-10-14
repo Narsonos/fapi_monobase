@@ -28,7 +28,7 @@ services:
 
 
   celery_worker:
-    image: ${IMAGE_BASE:-default}-celery:${GIT_COMMIT:-none}
+    image: ${IMAGE_BASE:-default}-celery_worker:${GIT_COMMIT:-none}
     build:
       context: ./services/api
       dockerfile: Dockerfile
