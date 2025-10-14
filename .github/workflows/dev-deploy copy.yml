@@ -23,7 +23,7 @@ jobs:
     name: Run tests
     runs-on: ubuntu-latest
     steps:
-      - name: Clone repo and setup Docker
+      - name: Clone repo
         uses: actions/checkout@v4
         with: 
           sparse-checkout: |
@@ -115,8 +115,6 @@ jobs:
           #-------------------------------------------------------
           EOF
 
-      - name: Set up Docker
-        uses: docker/setup-docker-action@v4
 
       - name: Convert image base to lowercase.
         env: 
@@ -133,7 +131,7 @@ jobs:
         run: |
           SERVICES=$(yq --output-format=json '.services | to_entries[] | select(.value | has("build")) | {"name": .key, "context": (.value.build.context // "."), "dockerfile": (.value.build.dockerfile // "Dockerfile"), "target": (.value.build.target // "")}' \
           ${{ env.BUILD_COMPOSE_PATH }})
-       
+          
           echo "$SERVICES" | jq -c '.' | while read -r service; do
             NAME=$(echo "$service" | jq -r '.name')
             CONTEXT=$(echo "$service" | jq -r '.context')
