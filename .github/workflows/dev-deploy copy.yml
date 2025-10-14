@@ -50,7 +50,7 @@ jobs:
 
       - name: Extract services
         run: |
-          SERVICES=$(yq --output-format=json '.services | to_entries[] | select(.value | has("build")) | {name: .key, context: (.value.build.context // "."), dockerfile: (.value.build.dockerfile // "Dockerfile"), target: (.value.build.target // "")}' ${{ env.TEST_COMPOSE_PATH }})
+          SERVICES=$(yq --output-format=json '.services | to_entries[] | select(.value | has("build")) | {"name": .key, "context": (.value.build.context // "."), "dockerfile": (.value.build.dockerfile // "Dockerfile"), "target": (.value.build.target // "")}' ${{ env.TEST_COMPOSE_PATH }})
        
           echo "$SERVICES" | jq -c '.' | while read -r service; do
             NAME=$(echo "$service" | jq -r '.name')
