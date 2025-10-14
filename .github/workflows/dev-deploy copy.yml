@@ -29,9 +29,8 @@ jobs:
           sparse-checkout: |
             ${{ env.TEST_COMPOSE_PATH}}
             services
-          #needs .env.test
 
-      - name: Create a .env file. #Enter
+      - name: Create a .env file.
         run: |
           cat <<EOF > .env.test
           #---------------Application envs are below-------------
@@ -48,7 +47,7 @@ jobs:
           #-------------------------------------------------------
           EOF
 
-      - name: Extract services
+      - name: Parse test.compose and build with buildx
         run: |
           SERVICES=$(yq --output-format=json '.services | to_entries[] | select(.value | has("build")) | {"name": .key, "context": (.value.build.context // "."), "dockerfile": (.value.build.dockerfile // "Dockerfile"), "target": (.value.build.target // "")}' ${{ env.TEST_COMPOSE_PATH }})
        
@@ -57,10 +56,28 @@ jobs:
             CONTEXT=$(echo "$service" | jq -r '.context')
             DOCKERFILE=$(echo "$service" | jq -r '.dockerfile')
             TARGET=$(echo "$service" | jq -r '.target')
+        
+            echo "Building service: $NAME"
+            echo "Context: $CONTEXT"
+            echo "Dockerfile: $DOCKERFILE"
+            echo "Target: $TARGET\n"
+
+            docker buildx build \
+            --builder default \
+            --load \
+            --file "$CONTEXT/$DOCKERFILE" \
+            -t "$NAME:test" \
+            --target "$TARGET" \
+            --cache-from=type=gha \
+            --cache-to=type=gha,mode=max \
+            "$CONTEXT"
           
-          echo "Building service: $NAME"
-          echo "Context: $CONTEXT"
-          echo "Dockerfile: $DOCKERFILE"
-          echo "Target: $TARGET"
           done
 
+      - name: Login to GHCR
+        run: |
+          echo "🔐 Logging in to GHCR..."
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
+      
+      - name: Run test compose
+        run: docker compose --env-file=./.env.test -f ./${{ env.TEST_COMPOSE_PATH}} up --abort-on-container-exit --exit-code-from ${{ env.COMPOSE_APP_SERVICE_NAME}}
