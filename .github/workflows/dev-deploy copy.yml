@@ -1,0 +1,53 @@
+name: Testing YQ
+on:
+  workflow_dispatch:
+
+env:
+  SERVICE_NAME: userauth_service                      #basically, project name
+  COMPOSE_APP_SERVICES: app,celery_worker,celery_beat        #the names of the services that are to built in building stage
+  COMPOSE_APP_SERVICE_NAME: app                       #the name ofo the app service in compose files
+  PROD_COMPOSE_PATH: ./docker-compose.prod.yaml       #path to prod compose from project root
+  TEST_COMPOSE_PATH: ./docker-compose.test.yaml       #path to test compose from project root
+  BUILD_COMPOSE_PATH: ./docker-compose.build.yaml   #path to dev (build) compose from project root
+
+  #Change these carefully. These are prebaked-values for the empty test mysql database.
+  #If changing, then you must rebake mysql image with your changes reflected in .env.test (locally)
+  BAKED_MYSQL_PASSWORD: 123123123
+  BAKED_MYSQL_USER: test
+
+  
+  
+  
+jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repo and setup Docker
+        uses: actions/checkout@v4
+        with: 
+          sparse-checkout: |
+            ${{ env.TEST_COMPOSE_PATH}}
+            services
+          #needs .env.test
+
+      - name: Create a .env file. #Enter
+        run: |
+          cat <<EOF > .env.test
+          #---------------Application envs are below-------------
+          APP_NAME=${{ env.SERVICE_NAME }}
+          DEFAULT_ADMIN_PASSWORD=${{ secrets.DEFAULT_ADMIN_PASSWORD}}
+          SECRET=${{ secrets.SECRET }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          REFRESH_SECRET=${{ secrets.REFRESH_SECRET }}
+          MYSQL_ROOT_PASSWORD=${{ env.BAKED_MYSQL_PASSWORD }}
+          MYSQL_USER=${{ env.BAKED_MYSQL_USER }}
+          MYSQL_PASSWORD=${{ env.BAKED_MYSQL_PASSWORD }}
+          MYSQL_DATABASE=${{ env.BAKED_MYSQL_USER }}
+          REDIS_PASS=${{ secrets.REDIS_PASS }}
+          #-------------------------------------------------------
+          EOF
+
+      - name: Extract services
+        run: |
+          yq '.services[]' ${{ env.TEST_COMPOSE_PATH }}
