@@ -3,6 +3,10 @@ name: ${APP_NAME}
 services:
   app:
     image: ${IMAGE_BASE}-app:${GIT_COMMIT:-latest}
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+      target: prod
     restart: unless-stopped
     depends_on:
       db:
@@ -29,6 +33,10 @@ services:
 
   celery_worker:
     image: ${IMAGE_BASE}-celery_worker:${GIT_COMMIT:-latest}
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+      target: prod
     restart: unless-stopped
     depends_on:
       db:
@@ -58,6 +66,10 @@ services:
 
   celery_beat:
     image: ${IMAGE_BASE}-celery_beat:${GIT_COMMIT:-latest}
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+      target: prod
     restart: unless-stopped
     depends_on:
       db:

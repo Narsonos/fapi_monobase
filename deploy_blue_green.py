@@ -18,6 +18,7 @@ class TargetService:
 @dc.dataclass
 class DeploymentConfig:
     project_name: str
+    build: bool
     compose_path: pathlib.Path
     upstream_conf: pathlib.Path
     treat_nginx_as_new: bool
@@ -34,7 +35,7 @@ class DeploymentConfig:
             data["project_name"] = default_project_name
 
         data['treat_nginx_as_new'] = data.get('treat_nginx_as_new', True)
-
+        data['build'] = data.get('build', True)
         data["compose_path"] = pathlib.Path(data["compose_path"])
         data["upstream_conf"] = pathlib.Path(data["upstream_conf"])
         if data.get("env_path"):
@@ -214,25 +215,26 @@ class DeploymentJob:
 
     def run_new_app(self, build_whole_compose=False):
         print('[Deploy] Starting compose file')
+
+
+        cmd = ['docker', 'compose']
+        if self.config.env_path:
+            cmd += ['--env-file', str(self.config.env_path)]
+
         if build_whole_compose:
-            cmd = ['docker', 'compose']
-            if self.config.env_path:
-                cmd += ['--env-file', str(self.config.env_path)]
-            cmd += ['-f', str(self.config.compose_path), 'up', '-d', '--build', '--no-recreate']
-            DeploymentJob.run(cmd)
+            cmd += ['-f', str(self.config.compose_path), 'up', '-d', '--no-recreate']
         else:
-            cmd = ['docker', 'compose']
-            if self.config.env_path:
-                cmd += ['--env-file', str(self.config.env_path)]
             cmd += ['-f', str(self.config.compose_path), 'up']
-            
             for service in self.config.services:
                 cmd.append(service.name)
             cmd += ['-d', '--no-recreate']
             
             for service in self.config.services:
                 cmd += ['--scale', f'{service.name}=2']
-            DeploymentJob.run(cmd)
+
+        if self.config.build:
+            cmd += ['--build']
+        DeploymentJob.run(cmd)
         print('[Deploy] Compose done. Waiting health.')
         asyncio.run(self.wait_and_rename_all_services())
 

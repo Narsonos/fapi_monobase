@@ -1,6 +1,7 @@
 {
   "compose_path": "./docker-compose.prod.yaml",
   "upstream_conf": "./services/nginx/upstream.conf",
+  "build": false,
   "env_path": "./.env",
   "services": [
     {

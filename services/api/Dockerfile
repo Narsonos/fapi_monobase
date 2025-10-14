@@ -59,8 +59,7 @@ WORKDIR $PYSETUP_PATH
 #Copy Poetry and venv from builder stage
 COPY --from=builder $PYSETUP_PATH $PYSETUP_PATH
 COPY --from=builder /root/.local/bin/poetry /root/.local/bin/poetry
-#All content of Dockerfile parent directory will be copied
-COPY . .
+#All content of Dockerfile parent directory is in the volume
 RUN poetry install --no-ansi --no-root
 WORKDIR /app
 
@@ -70,12 +69,6 @@ WORKDIR /app
 FROM dev_base AS dev
 CMD ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--proxy-headers"]
 
-
-###########################
-####### Test: runs tests #
-###########################
-FROM dev_base AS test
-CMD ["poetry", "run", "pytest"]
 
 ##################################
 # Prod: Minimalistic and light   #
@@ -93,7 +86,3 @@ ENV PATH="$PYSETUP_PATH/.venv/bin:$PATH"
 
 FROM prod_base AS prod
 CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "app.main:app", "-c", "app/gunicorn_conf.py"]
-
-
-FROM prod_base AS celery
-CMD ["celery", "--help"]

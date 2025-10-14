@@ -1,4 +1,4 @@
-name: Testing YQ2
+name: test-build-deploy
 on:
   workflow_dispatch:
 
@@ -8,14 +8,13 @@ env:
   COMPOSE_APP_SERVICE_NAME: app                       #the name ofo the app service in compose files
   PROD_COMPOSE_PATH: ./docker-compose.prod.yaml       #path to prod compose from project root
   TEST_COMPOSE_PATH: ./docker-compose.test.yaml       #path to test compose from project root
-  BUILD_COMPOSE_PATH: ./docker-compose.build.yaml   #path to dev (build) compose from project root
 
   #Change these carefully. These are prebaked-values for the empty test mysql database.
   #If changing, then you must rebake mysql image with your changes reflected in .env.test (locally)
   BAKED_MYSQL_PASSWORD: 123123123
   BAKED_MYSQL_USER: test
 
-  # stable cache scope used by buildx gha exporter/importer
+  #stable cache scope used by buildx gha exporter/importer
   CACHE_SCOPE: buildx-${{ github.repository }}-${{ github.ref }}
 
 jobs:
@@ -118,7 +117,7 @@ jobs:
         uses: actions/checkout@v4
         with: 
           sparse-checkout: |
-            ${{ env.BUILD_COMPOSE_PATH}}
+            ${{ env.PROD_COMPOSE_PATH}}
 
       - id: parse
         run: |
@@ -128,7 +127,7 @@ jobs:
               "context": (.value.build.context // "."),
               "dockerfile": (.value.build.dockerfile // "Dockerfile"),
               "target": (.value.build.target // "")
-            }' ${{ env.BUILD_COMPOSE_PATH }} | jq -c -s '.')
+            }' ${{ env.PROD_COMPOSE_PATH }} | jq -c -s '.')
           echo "$SERVICES" > services.json
 
       - id: set-matrix
@@ -150,7 +149,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           sparse-checkout: |
-            ${{ env.BUILD_COMPOSE_PATH }}
+            ${{ env.PROD_COMPOSE_PATH }}
             services
 
       - name: Expose GitHub Runtime
