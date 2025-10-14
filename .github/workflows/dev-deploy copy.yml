@@ -72,7 +72,7 @@ jobs:
 
             docker buildx build \
             --builder default \
-            --load \
+            --push \
             --file "$CONTEXT/$DOCKERFILE" \
             -t "$NAME:test" \
             --target "$TARGET" \
