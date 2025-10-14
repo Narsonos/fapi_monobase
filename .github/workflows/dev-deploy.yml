@@ -1,5 +1,4 @@
-name: CI/CD
-
+name: Testing YQ2
 on:
   workflow_dispatch:
 
@@ -16,23 +15,22 @@ env:
   BAKED_MYSQL_PASSWORD: 123123123
   BAKED_MYSQL_USER: test
 
-  
-  
-  
+  # stable cache scope used by buildx gha exporter/importer
+  CACHE_SCOPE: buildx-${{ github.repository }}-${{ github.ref }}
+
 jobs:
   test:
     name: Run tests
     runs-on: ubuntu-latest
     steps:
-      - name: Clone repo and setup Docker
+      - name: Clone repo
         uses: actions/checkout@v4
         with: 
           sparse-checkout: |
             ${{ env.TEST_COMPOSE_PATH}}
             services
-          #needs .env.test
 
-      - name: Create a .env file. #Enter
+      - name: Create a .env file.
         run: |
           cat <<EOF > .env.test
           #---------------Application envs are below-------------
@@ -49,17 +47,62 @@ jobs:
           #-------------------------------------------------------
           EOF
 
-      - name: Setup docker
-        uses: docker/setup-docker-action@v4
-      
       - name: Login to GHCR
         run: |
           echo "🔐 Logging in to GHCR..."
           echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
-      
-      - name: Run test compose
-        run: docker compose --env-file=./.env.test -f ./${{ env.TEST_COMPOSE_PATH}} up --build --abort-on-container-exit --exit-code-from ${{ env.COMPOSE_APP_SERVICE_NAME}}
-  
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Setup buildx
+        uses: docker/setup-buildx-action@v3.11.1
+
+      - name: Convert image base to lowercase.
+        env: 
+          IMAGE_BASE: ghcr.io/${{ github.repository_owner }}/${{ env.SERVICE_NAME }}
+        run: |
+          echo "IMAGE_BASE=${IMAGE_BASE@L}" >> "${GITHUB_ENV}"
+
+      - name: Parse compose and build with buildx (detailed BuildKit logs)
+        env:
+          # ensure BuildKit enabled and verbose logs
+          DOCKER_BUILDKIT: 1
+          BUILDKIT_PROGRESS: plain
+          BUILDKIT_STEP_LOG: 1
+        run: |
+          SERVICES=$(yq --output-format=json '.services | to_entries[] | select(.value | has("build")) | {"name": .key, "context": (.value.build.context // "."), "dockerfile": (.value.build.dockerfile // "Dockerfile"), "target": (.value.build.target // "")}' ${{ env.TEST_COMPOSE_PATH }})
+       
+          echo "$SERVICES" | jq -c '.' | while read -r service; do
+            NAME=$(echo "$service" | jq -r '.name')
+            CONTEXT=$(echo "$service" | jq -r '.context')
+            DOCKERFILE=$(echo "$service" | jq -r '.dockerfile')
+            TARGET=$(echo "$service" | jq -r '.target')
+        
+            echo "::group::Building service $NAME"
+            echo "Context: $CONTEXT"
+            echo "Dockerfile: $DOCKERFILE"
+            echo "Target: $TARGET\n"
+
+            # export envs to ensure BuildKit verbosity in this shell
+            export DOCKER_BUILDKIT=1
+            export BUILDKIT_PROGRESS=plain
+            export BUILDKIT_STEP_LOG=1
+
+            docker buildx build \
+              --builder default \
+              --load \
+              --progress=plain \
+              --file "$CONTEXT/$DOCKERFILE" \
+              -t "$IMAGE_BASE-$NAME:test" \
+              --target "$TARGET" \
+              --cache-from=type=gha,scope=${{ env.CACHE_SCOPE }} \
+              --cache-to=type=gha,mode=max,scope=${{ env.CACHE_SCOPE }}  \
+              "$CONTEXT"
+            echo "::endgroup::"
+          
+          done
+
   build:
     name: Build prod
     runs-on: ubuntu-latest
@@ -70,10 +113,15 @@ jobs:
         with:
           sparse-checkout: |
             ${{ env.BUILD_COMPOSE_PATH }}
-            services/api
+            services
 
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v2
 
-      - name: Create a .env file. #Enter
+      - name: Setup buildx
+        uses: docker/setup-buildx-action@v3.11.1
+
+      - name: Create a .env file. 
         run: |
           cat <<EOF > .env
           #---------------Application envs are below-------------
@@ -90,71 +138,56 @@ jobs:
           #-------------------------------------------------------
           EOF
 
-      - name: Set up Docker
-        uses: docker/setup-docker-action@v4
-
       - name: Convert image base to lowercase.
         env: 
           IMAGE_BASE: ghcr.io/${{ github.repository_owner }}/${{ env.SERVICE_NAME }}
         run: |
           echo "IMAGE_BASE=${IMAGE_BASE@L}" >> "${GITHUB_ENV}"
 
-      - name: Building and refreshing GHCR prod image
+      - name: Login to GHCR
         run: |
-          set -e
-          echo "Building Docker image for ${{ env.SERVICE_NAME }} - [${{ env.COMPOSE_APP_SERVICES }}]"
-          IFS=',' read -ra SERVICES <<< "${{ env.COMPOSE_APP_SERVICES }}"
-
           echo "🔐 Logging in to GHCR..."
           echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
-      
-          PUSH_TASKS=()
-          for service in "${SERVICES[@]}"; do
-            echo "🚀 Building image for service: $service"
-            docker compose --env-file=./.env -f "${{ env.BUILD_COMPOSE_PATH }}" build "$service"
 
-            SHA_TAG="${IMAGE_BASE}-${service}:${{ github.sha }}"
-            LATEST_TAG="${IMAGE_BASE}-${service}:latest"
+      - name: Parse compose and build with buildx (detailed BuildKit logs)
+        env:
+          DOCKER_BUILDKIT: 1
+          BUILDKIT_PROGRESS: plain
+          BUILDKIT_STEP_LOG: 1
+        run: |
+          SERVICES=$(yq --output-format=json '.services | to_entries[] | select(.value | has("build")) | {"name": .key, "context": (.value.build.context // "."), "dockerfile": (.value.build.dockerfile // "Dockerfile"), "target": (.value.build.target // "")}' \
+          ${{ env.BUILD_COMPOSE_PATH }})
+          
+          echo "$SERVICES" | jq -c '.' | while read -r service; do
+            NAME=$(echo "$service" | jq -r '.name')
+            CONTEXT=$(echo "$service" | jq -r '.context')
+            DOCKERFILE=$(echo "$service" | jq -r '.dockerfile')
+            TARGET=$(echo "$service" | jq -r '.target')
+        
+            echo "::group::Building service $NAME"
+            echo "Context: $CONTEXT"
+            echo "Dockerfile: $DOCKERFILE"
+            echo "Tags: $IMAGE_BASE-$NAME:latest, $IMAGE_BASE-$NAME:${{ github.sha }}"
+            echo "Target: $TARGET\n"
 
-            echo "🏷️ Tagging image as:"
-            echo "   - $SHA_TAG"
-            echo "   - $LATEST_TAG"
-            docker tag "$LATEST_TAG" "$SHA_TAG"
+            export DOCKER_BUILDKIT=1
+            export BUILDKIT_PROGRESS=plain
+            export BUILDKIT_STEP_LOG=1
 
-            echo "✅ Image for $service is ready to push."
-            PUSH_TASKS+=("$service")
-            echo
+            docker buildx build \
+              --builder default \
+              --push \
+              --progress=plain \
+              --file "$CONTEXT/$DOCKERFILE" \
+              -t "$IMAGE_BASE-$NAME:latest" \
+              -t "$IMAGE_BASE-$NAME:${{ github.sha }}" \
+              --target "$TARGET" \
+              --cache-from=type=gha,scope=${{ env.CACHE_SCOPE }}  \
+              --cache-to=type=gha,mode=max,scope=${{ env.CACHE_SCOPE }}  \
+              "$CONTEXT"
+            echo "::endgroup::"
+          
           done
-          echo "📤 Starting parallel pushes..."
-
-          for service in "${PUSH_TASKS[@]}"; do
-            (
-              SHA_TAG="${IMAGE_BASE}-${service}:${{ github.sha }}"
-              LATEST_TAG="${IMAGE_BASE}-${service}:latest"
-              echo "➡️ Pushing $service ..."
-              docker push "$SHA_TAG" >"push_${service}.log" 2>&1
-              docker push "$LATEST_TAG" >>"push_${service}.log" 2>&1
-              echo "✅ $service pushed successfully!"
-            ) &
-            PUSH_PIDS[$service]=$!
-          done
-          EXIT_CODE=0
-          for service in "${!PUSH_PIDS[@]}"; do
-            wait ${PUSH_PIDS[$service]} || EXIT_CODE=1
-            if [ $EXIT_CODE -ne 0 ]; then
-              echo "❌ Push failed for service: $service. Logs:"
-              cat "push_${service}.log"
-            fi
-          done
-
-          if [ $EXIT_CODE -ne 0 ]; then
-            echo "⚠️ Some pushes failed."
-            exit 1
-          fi
-
-          echo "🎉 All images pushed successfully!"
-
-
   
   deploy:
     name: Deploy
@@ -171,9 +204,7 @@ jobs:
             deploy_blue_green.py
             deploy_blue_green.conf.json
 
-          #needs .env
-
-      - name: Create a .env file. #Enter
+      - name: Create a .env file.
         run: |
           cat <<EOF > .env
           #---------------Application envs are below-------------
@@ -191,7 +222,6 @@ jobs:
           #-------------------------------------------------------
           EOF
 
-
       - uses: easingthemes/ssh-deploy@v5.1.0
         with:
           SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_DEPLOY_KEY }}
@@ -200,13 +230,8 @@ jobs:
           REMOTE_USER: ${{ secrets.PROD_SSH_DEPLOY_USERNAME }}
           SOURCE: "./"
           TARGET: "${{ env.PROD_SSH_DEPLOY_TARGET_PATH }}"
-          SCRIPT_BEFORE: |
-            whoami
-            ls -al
           SCRIPT_AFTER: |
             sudo chown -R ${{ secrets.PROD_SSH_DEPLOY_USERNAME }}:${{ secrets.PROD_SSH_DEPLOY_USERNAME }} ${{ env.PROD_SSH_DEPLOY_TARGET_PATH }}
-
-      - uses: docker/setup-docker-action@v4
 
       - name: lowercase
         env: 
