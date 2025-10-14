@@ -91,7 +91,7 @@ class DeploymentJob:
         print(f'[Deploy] Strategy: {"No color" if self.current_color is None else self.current_color} ---starting---> {self.next_color}')
         try:
             self.deploy_sequence()
-        except (CommandFailed, ManualStop) as e:
+        except Exception as e:
             print(e)
             self.rollback_and_exit()
         
@@ -161,8 +161,6 @@ class DeploymentJob:
             DeploymentJob.run(['docker', 'network', 'connect', net, full_container_name, '--alias', f'{service}_{self.next_color}'])
 
     def find_latest_scale(self, service):
-        
-        
         pattern = re.compile(rf'^{re.escape(self.config.project_name)}-{re.escape(service)}-(\d+)$')
         candidates: list[tuple[int,str]] = []
         for c in self.project_containers:
@@ -215,6 +213,7 @@ class DeploymentJob:
             raise
 
     def run_new_app(self, build_whole_compose=False):
+        print('[Deploy] Starting compose file')
         if build_whole_compose:
             cmd = ['docker', 'compose']
             if self.config.env_path:
