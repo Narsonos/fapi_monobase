@@ -67,9 +67,21 @@ jobs:
 
       - name: Parse compose and build with buildx (detailed BuildKit logs)
         run: |
-          SERVICES=$(yq --output-format=json '.services | to_entries[] | select(.value | has("build")) | {"name": .key, "context": (.value.build.context // "."), "dockerfile": (.value.build.dockerfile // "Dockerfile"), "target": (.value.build.target // "")}' ${{ env.TEST_COMPOSE_PATH }})
-
-          echo "$SERVICES" | jq -c '.' | while read -r service; do
+          SERVICES=$(yq --output-format=json '
+          .services
+          | to_entries
+          | map(select(.value | has("build")))
+          | group_by(.value.image // .key)
+          | map(.[0])  
+          | map({
+              "name": .key,
+              "image": (.value.image // ""),
+              "context": (.value.build.context // "."),
+              "dockerfile": (.value.build.dockerfile // "Dockerfile"),
+              "target": (.value.build.target // "")
+            })' "${{ env.PROD_COMPOSE_PATH }}")
+          
+            echo "$SERVICES" | jq -c '.' | while read -r service; do
             NAME=$(echo "$service" | jq -r '.name')
             CONTEXT=$(echo "$service" | jq -r '.context')
             DOCKERFILE=$(echo "$service" | jq -r '.dockerfile')
