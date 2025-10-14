@@ -149,7 +149,7 @@ jobs:
             --builder default \
             --push \
             --file "$CONTEXT/$DOCKERFILE" \
-            -t "IMAGE_BASE-$NAME:latest" \
+            -t "$IMAGE_BASE-$NAME:latest" \
             -t "$IMAGE_BASE-$NAME:${{ github.sha }}" \
             --target "$TARGET" \
             --cache-from=type=gha \
