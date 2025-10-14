@@ -98,6 +98,10 @@ jobs:
             echo "::endgroup::"
           done
 
+      - name: Parse compose and build with buildx (detailed BuildKit logs)
+        run: docker compose -f ${{ env.TEST_COMPOSE_PATH }} up
+          
+
 
 
   prepare:
