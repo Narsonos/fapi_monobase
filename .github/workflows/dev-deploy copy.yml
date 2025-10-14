@@ -61,7 +61,7 @@ jobs:
             echo "Context: $CONTEXT"
             echo "Dockerfile: $DOCKERFILE"
             echo "Target: $TARGET\n"
-            echo "::endgroup::"
+
 
             docker buildx build \
             --builder default \
@@ -69,9 +69,10 @@ jobs:
             --file "$CONTEXT/$DOCKERFILE" \
             -t "$NAME:test" \
             --target "$TARGET" \
-            --cache-from=type=gha \
-            --cache-to=type=gha,mode=max \
+            --cache-from=type=gha,scope=action \
+            --cache-to=type=gha,mode=max,scope=action  \
             "$CONTEXT"
+            echo "::endgroup::"
           
           done
 
@@ -143,7 +144,7 @@ jobs:
             echo "Dockerfile: $DOCKERFILE"
             echo "Tags: $IMAGE_BASE-$NAME:latest, $IMAGE_BASE-$NAME:${{ github.sha }}"
             echo "Target: $TARGET\n"
-            echo "::endgroup::"
+            
 
             docker buildx build \
             --builder default \
@@ -152,9 +153,10 @@ jobs:
             -t "$IMAGE_BASE-$NAME:latest" \
             -t "$IMAGE_BASE-$NAME:${{ github.sha }}" \
             --target "$TARGET" \
-            --cache-from=type=gha \
-            --cache-to=type=gha,mode=max \
+            --cache-from=type=gha,scope=action  \
+            --cache-to=type=gha,mode=max,scope=action  \
             "$CONTEXT"
+            echo "::endgroup::"
           
           done
   
