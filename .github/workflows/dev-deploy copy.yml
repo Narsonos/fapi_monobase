@@ -50,4 +50,4 @@ jobs:
 
       - name: Extract services
         run: |
-          yq '.services[]' ${{ env.TEST_COMPOSE_PATH }}
+          yq '.services | keys[]' ${{ env.TEST_COMPOSE_PATH }}
