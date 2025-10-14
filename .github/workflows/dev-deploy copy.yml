@@ -54,6 +54,8 @@ jobs:
           echo "🔐 Logging in to GHCR..."
           echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
 
+      - name: Setup buildx
+        uses: docker/setup-buildx-action@v3.11.1
 
 
       - name: Convert image base to lowercase.
@@ -81,7 +83,7 @@ jobs:
 
             docker buildx build \
             --builder default \
-            --push \
+            --load \
             --file "$CONTEXT/$DOCKERFILE" \
             -t "$IMAGE_BASE-$NAME:test" \
             --target "$TARGET" \
@@ -110,6 +112,9 @@ jobs:
           sparse-checkout: |
             ${{ env.BUILD_COMPOSE_PATH }}
             services
+
+      - name: Setup buildx
+        uses: docker/setup-buildx-action@v3.11.1
 
 
       - name: Create a .env file. 
