@@ -1,5 +1,8 @@
 import subprocess, json, os, time, typing as t, argparse, re, asyncio, sys, dataclasses as dc, pathlib
-import traceback
+import traceback, logging
+
+logging.basicConfig()
+logger = logging.getLogger('app')
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--project_name", type=str, required=True, help="Specifies project name")
@@ -156,7 +159,7 @@ class DeploymentJob:
                 return m[0]
 
 
-    async def wait_and_rename_single_service(self, service, retries=20, interval_s=5):
+    async def wait_and_rename_single_service(self, service, retries=60, interval_s=5):
         container_name = self.find_latest_scale(service)
 
         if not container_name:
@@ -166,8 +169,10 @@ class DeploymentJob:
             if self.request_rollback_event.is_set():
                 return 
             
-            result = self.run(f"docker inspect --format='{{.State.Health.Status}}' {container_name}")
-            status = result.stdout.strip().lower()
+            result = self.run(f"""docker inspect --format='{{{{.State.Health.Status}}}}' {container_name}""")
+            status = result.stdout.strip().strip("'").lower()
+            print(f'{container_name} ===> {status}')
+            logger.info(f'{container_name} ===> {status}')
             if status == 'healthy':
                 break
             await asyncio.sleep(interval_s)
@@ -175,6 +180,8 @@ class DeploymentJob:
             rs = self.run(f"docker logs {container_name}")
             print(f'Container logs:\n{rs.stdout}')
             raise ManualStop(f"App container {container_name} failed to become healthy")
+        
+        logger.info(f'{container_name} ===> DONE')
         new_name = f'{self.config.project_name}-{service}_{self.next_color}'
         self.run(f'docker rename {container_name} "{new_name}"')
         self.add_alias_to_all_container_networks(service)
@@ -199,6 +206,7 @@ class DeploymentJob:
                 scale_sub += f'--scale {service.name}=2 '
             command = f'docker compose {f"--env-file {self.config.env_path}" if self.config.env_path else None} -f {self.config.compose_path} up {services_sub.strip()} -d --no-recreate {scale_sub.strip()}'
             DeploymentJob.run(command)
+        print('[Deploy] Compose done. Waiting health.')
         asyncio.run(self.wait_and_rename_all_services())
 
             
