@@ -47,6 +47,9 @@ jobs:
           #-------------------------------------------------------
           EOF
 
+      - name: Expose GitHub Runtime
+        uses: crazy-max/ghaction-github-runtime@v3
+
       - name: Login to GHCR
         run: |
           echo "🔐 Logging in to GHCR..."
@@ -116,6 +119,9 @@ jobs:
           sparse-checkout: |
             ${{ env.BUILD_COMPOSE_PATH }}
             services
+
+      - name: Expose GitHub Runtime
+        uses: crazy-max/ghaction-github-runtime@v3
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v2
