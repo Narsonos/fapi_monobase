@@ -1,3 +1,7 @@
+#Description:
+#This workflow builds unique images (decided by service.image) of TEST (used for TEST) and PROD (pushed to GHCR)
+#- Cache is used for both jobs (so, in many cases, "build" stage just builds images from cache, pushes them to GHCR)
+
 name: test-build-deploy
 on:
   workflow_dispatch:
