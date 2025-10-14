@@ -74,6 +74,6 @@ jobs:
             set -e
             cd ${{ env.PROD_SSH_DEPLOY_TARGET_PATH }}
             echo "GIT_COMMIT: $GIT_COMMIT"
-            python3 -u deploy_blue_green.py --project_name="${{ env.SERVICE_NAME }}"
+            python3 -u deploy_blue_green.py --project_name="${{ env.SERVICE_NAME }} --build"
 
 

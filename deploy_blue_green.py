@@ -36,10 +36,9 @@ class DeploymentConfig:
 
         #overridables
         data["project_name"] = overrides.get('project_name', data.get('project_name', 'default'))
-        data["project_name"] = overrides.get('build', data.get('build', False))
+        data["build"] = overrides.get('build', data.get('build', False))
 
         data['treat_nginx_as_new'] = data.get('treat_nginx_as_new', True) #Useful for deploys that completely overwrite upstream.conf every time.
-        data['build'] = data.get('build', True)
         data["compose_path"] = pathlib.Path(data["compose_path"])
         data["upstream_conf"] = pathlib.Path(data["upstream_conf"])
         if data.get("env_path"):
