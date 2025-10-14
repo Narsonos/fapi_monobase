@@ -57,6 +57,8 @@ jobs:
 
       - name: Setup buildx
         uses: docker/setup-buildx-action@v3.11.1
+        with: 
+          name: asdasdasd
 
       - name: Convert image base to lowercase.
         env: 
@@ -90,7 +92,7 @@ jobs:
             export BUILDKIT_STEP_LOG=1
 
             docker buildx build \
-              --builder default \
+              --builder asdasdasd \
               --load \
               --progress=plain \
               --file "$CONTEXT/$DOCKERFILE" \
@@ -120,6 +122,8 @@ jobs:
 
       - name: Setup buildx
         uses: docker/setup-buildx-action@v3.11.1
+        with: 
+          name: asdasdasd
 
       - name: Create a .env file. 
         run: |
@@ -175,7 +179,7 @@ jobs:
             export BUILDKIT_STEP_LOG=1
 
             docker buildx build \
-              --builder default \
+              --builder asdasdasd \
               --push \
               --progress=plain \
               --file "$CONTEXT/$DOCKERFILE" \
