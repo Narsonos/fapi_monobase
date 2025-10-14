@@ -47,7 +47,7 @@ jobs:
           #-------------------------------------------------------
           EOF
 
-      - name: Parse test.compose and build with buildx
+      - name: Parse compose and build with buildx
         run: |
           SERVICES=$(yq --output-format=json '.services | to_entries[] | select(.value | has("build")) | {"name": .key, "context": (.value.build.context // "."), "dockerfile": (.value.build.dockerfile // "Dockerfile"), "target": (.value.build.target // "")}' ${{ env.TEST_COMPOSE_PATH }})
        
@@ -57,10 +57,11 @@ jobs:
             DOCKERFILE=$(echo "$service" | jq -r '.dockerfile')
             TARGET=$(echo "$service" | jq -r '.target')
         
-            echo "Building service: $NAME"
+            echo "::group::Building service $NAME"
             echo "Context: $CONTEXT"
             echo "Dockerfile: $DOCKERFILE"
             echo "Target: $TARGET\n"
+            echo "::endgroup::"
 
             docker buildx build \
             --builder default \
@@ -81,3 +82,80 @@ jobs:
       
       - name: Run test compose
         run: docker compose --env-file=./.env.test -f ./${{ env.TEST_COMPOSE_PATH}} up --abort-on-container-exit --exit-code-from ${{ env.COMPOSE_APP_SERVICE_NAME}}
+
+
+
+  build:
+    name: Build prod
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            ${{ env.BUILD_COMPOSE_PATH }}
+            services
+
+
+      - name: Create a .env file. 
+        run: |
+          cat <<EOF > .env
+          #---------------Application envs are below-------------
+          APP_NAME=${{ env.SERVICE_NAME }}
+          DEFAULT_ADMIN_PASSWORD=${{ secrets.DEFAULT_ADMIN_PASSWORD}}
+          SECRET=${{ secrets.SECRET }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          REFRESH_SECRET=${{ secrets.REFRESH_SECRET }}
+          MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_USER=${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
+          REDIS_PASS=${{ secrets.REDIS_PASS }}
+          #-------------------------------------------------------
+          EOF
+
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v4
+
+      - name: Convert image base to lowercase.
+        env: 
+          IMAGE_BASE: ghcr.io/${{ github.repository_owner }}/${{ env.SERVICE_NAME }}
+        run: |
+          echo "IMAGE_BASE=${IMAGE_BASE@L}" >> "${GITHUB_ENV}"
+
+      - name: Login to GHCR
+        run: |
+          echo "🔐 Logging in to GHCR..."
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
+
+      - name: Parse compose and build with buildx
+        run: |
+          SERVICES=$(yq --output-format=json '.services | to_entries[] | select(.value | has("build")) | {"name": .key, "context": (.value.build.context // "."), "dockerfile": (.value.build.dockerfile // "Dockerfile"), "target": (.value.build.target // "")}' \
+          ${{ env.BUILD_COMPOSE_PATH }})
+       
+          echo "$SERVICES" | jq -c '.' | while read -r service; do
+            NAME=$(echo "$service" | jq -r '.name')
+            CONTEXT=$(echo "$service" | jq -r '.context')
+            DOCKERFILE=$(echo "$service" | jq -r '.dockerfile')
+            TARGET=$(echo "$service" | jq -r '.target')
+        
+            echo "::group::Building service $NAME"
+            echo "Context: $CONTEXT"
+            echo "Dockerfile: $DOCKERFILE"
+            echo "Tags: $IMAGE_BASE-$NAME:latest, $IMAGE_BASE-$NAME:${{ github.sha }}"
+            echo "Target: $TARGET\n"
+            echo "::endgroup::"
+
+            docker buildx build \
+            --builder default \
+            --push \
+            --file "$CONTEXT/$DOCKERFILE" \
+            -t "IMAGE_BASE-$NAME:latest" \
+            -t "$IMAGE_BASE-$NAME:${{ github.sha }}" \
+            --target "$TARGET" \
+            --cache-from=type=gha \
+            --cache-to=type=gha,mode=max \
+            "$CONTEXT"
+          
+          done
