@@ -79,9 +79,9 @@ jobs:
               "context": (.value.build.context // "."),
               "dockerfile": (.value.build.dockerfile // "Dockerfile"),
               "target": (.value.build.target // "")
-            })' "${{ env.PROD_COMPOSE_PATH }}" | jq -c -s '.')
+            })' "${{ env.PROD_COMPOSE_PATH }}")
           
-          echo "$SERVICES" | jq -c '.' | while read -r service; do
+          echo "$SERVICES" | jq -c '.[]'  | while read -r service; do
             NAME=$(echo "$service" | jq -r '.name')
             CONTEXT=$(echo "$service" | jq -r '.context')
             DOCKERFILE=$(echo "$service" | jq -r '.dockerfile')
