@@ -1,4 +1,4 @@
-import subprocess, json, os, time, typing as t, argparse, re, asyncio, sys, dataclasses as dc, pathlib
+import subprocess, json, os, time, typing as t, argparse, re, asyncio, sys, dataclasses as dc, pathlib, shlex
 import traceback, logging
 
 logging.basicConfig()
@@ -28,11 +28,11 @@ class DeploymentConfig:
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        # подставляем project_name, если его нет
+        
         if "project_name" not in data and default_project_name:
             data["project_name"] = default_project_name
 
-        # преобразуем в объекты
+        
         data["compose_path"] = pathlib.Path(data["compose_path"])
         data["upstream_conf"] = pathlib.Path(data["upstream_conf"])
         if data.get("env_path"):
@@ -112,23 +112,28 @@ class DeploymentJob:
 
     @staticmethod
     def run(command):
-        result = subprocess.run(command, capture_output=True, text=True, shell=True)
+        if isinstance(command, str):
+            args = shlex.split(command, posix=(os.name != 'nt'))
+        else:
+            args = command
+
+        result = subprocess.run(args, capture_output=True, text=True, shell=False)
         if result.returncode != 0:
-            raise CommandFailed(command, result.returncode, result.stderr)
+            raise CommandFailed(' '.join(args), result.returncode, result.stderr)
         return result
 
     @staticmethod
     def rm(container_name, force=False):
         if force:
-            DeploymentJob.run(f'docker rm --force {container_name}')
+            DeploymentJob.run(['docker', 'rm', '--force', container_name])
         else:
-            DeploymentJob.run(f"docker stop {container_name}")
-            DeploymentJob.run(f"docker rm {container_name}")
+            DeploymentJob.run(['docker', 'stop', container_name])
+            DeploymentJob.run(['docker', 'rm', container_name])
         print(f'[Cleaner] Container "{container_name}" was removed!')
         
     @property
     def project_containers(self):
-        res = DeploymentJob.run('docker ps -a --format {{.Names}}')
+        res = DeploymentJob.run(['docker', 'ps', '-a', '--format', '{{.Names}}'])
         return [c for c in res.stdout.splitlines() if c.startswith(self.config.project_name)]
     
 
@@ -146,17 +151,29 @@ class DeploymentJob:
 
     def add_alias_to_all_container_networks(self, service):
         full_container_name = f'{self.config.project_name}-{service}_{self.next_color}'
-        rs = DeploymentJob.run(['docker', 'inspect', full_container_name, '--format={{json .NetworkSettings.Networks}}'])
+        rs = DeploymentJob.run(['docker', 'inspect', '--format', '{{json .NetworkSettings.Networks}}', full_container_name])
         nets = json.loads(rs.stdout)
         for net in nets:
             print(f'[Deploy: networks] Reconnecting {full_container_name} to {net} with alias {service}_{self.next_color}')
-            rs = DeploymentJob.run(f'docker network disconnect {net} {full_container_name}')
-            rs = DeploymentJob.run(f'docker network connect {net} {full_container_name} --alias {service}_{self.next_color}')
+            DeploymentJob.run(['docker', 'network', 'disconnect', net, full_container_name])
+            DeploymentJob.run(['docker', 'network', 'connect', net, full_container_name, '--alias', f'{service}_{self.next_color}'])
 
     def find_latest_scale(self, service):
+        
+        
+        pattern = re.compile(rf'^{re.escape(self.config.project_name)}-{re.escape(service)}-(\d+)$')
+        candidates: list[tuple[int,str]] = []
         for c in self.project_containers:
-            if m := re.match(rf'{self.config.project_name}-{service}-(\d+)', c):
-                return m[0]
+            m = pattern.match(c)
+            if m:
+                try:
+                    num = int(m.group(1))
+                except ValueError:
+                    continue
+                candidates.append((num, c))
+        if not candidates:
+            return None
+        return max(candidates, key=lambda x: x[0])[1]
 
 
     async def wait_and_rename_single_service(self, service, retries=60, interval_s=5):
@@ -169,7 +186,7 @@ class DeploymentJob:
             if self.request_rollback_event.is_set():
                 return 
             
-            result = self.run(f"""docker inspect --format='{{{{.State.Health.Status}}}}' {container_name}""")
+            result = self.run(['docker', 'inspect', '--format', '{{.State.Health.Status}}', container_name])
             status = result.stdout.strip().strip("'").lower()
             print(f'{container_name} ===> {status}')
             logger.info(f'{container_name} ===> {status}')
@@ -177,13 +194,13 @@ class DeploymentJob:
                 break
             await asyncio.sleep(interval_s)
         else:
-            rs = self.run(f"docker logs {container_name}")
+            rs = self.run(['docker', 'logs', container_name])
             print(f'Container logs:\n{rs.stdout}')
             raise ManualStop(f"App container {container_name} failed to become healthy")
         
         logger.info(f'{container_name} ===> DONE')
         new_name = f'{self.config.project_name}-{service}_{self.next_color}'
-        self.run(f'docker rename {container_name} "{new_name}"')
+        self.run(['docker', 'rename', container_name, new_name])
         self.add_alias_to_all_container_networks(service)
 
     async def wait_and_rename_all_services(self):
@@ -197,15 +214,24 @@ class DeploymentJob:
 
     def run_new_app(self, build_whole_compose=False):
         if build_whole_compose:
-            DeploymentJob.run(f'docker compose {f"--env-file {self.config.env_path}" if self.config.env_path else None} -f {self.config.compose_path} up -d --build --no-recreate')
+            cmd = ['docker', 'compose']
+            if self.config.env_path:
+                cmd += ['--env-file', str(self.config.env_path)]
+            cmd += ['-f', str(self.config.compose_path), 'up', '-d', '--build', '--no-recreate']
+            DeploymentJob.run(cmd)
         else:
-            services_sub = ''
-            scale_sub = ''
+            cmd = ['docker', 'compose']
+            if self.config.env_path:
+                cmd += ['--env-file', str(self.config.env_path)]
+            cmd += ['-f', str(self.config.compose_path), 'up']
+            
             for service in self.config.services:
-                services_sub += f'{service.name} '
-                scale_sub += f'--scale {service.name}=2 '
-            command = f'docker compose {f"--env-file {self.config.env_path}" if self.config.env_path else None} -f {self.config.compose_path} up {services_sub.strip()} -d --no-recreate {scale_sub.strip()}'
-            DeploymentJob.run(command)
+                cmd.append(service.name)
+            cmd += ['-d', '--no-recreate']
+            
+            for service in self.config.services:
+                cmd += ['--scale', f'{service.name}=2']
+            DeploymentJob.run(cmd)
         print('[Deploy] Compose done. Waiting health.')
         asyncio.run(self.wait_and_rename_all_services())
 
@@ -235,7 +261,7 @@ class DeploymentJob:
             conf.truncate()
             print('[Nginx] Reloading nginx...')   
             try:
-                self.run(f'docker exec {self.nginx_container_name} nginx -s reload')
+                self.run(['docker', 'exec', self.nginx_container_name, 'nginx', '-s', 'reload'])
             except CommandFailed:
                 print('[Nginx] Reload failed. Restoring nginx upstream.conf content')
                 conf.truncate(0)
