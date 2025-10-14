@@ -54,6 +54,15 @@ jobs:
           echo "🔐 Logging in to GHCR..."
           echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
 
+
+
+      - name: Convert image base to lowercase.
+        env: 
+          IMAGE_BASE: ghcr.io/${{ github.repository_owner }}/${{ env.SERVICE_NAME }}
+        run: |
+          echo "IMAGE_BASE=${IMAGE_BASE@L}" >> "${GITHUB_ENV}"
+
+
       - name: Parse compose and build with buildx
         run: |
           SERVICES=$(yq --output-format=json '.services | to_entries[] | select(.value | has("build")) | {"name": .key, "context": (.value.build.context // "."), "dockerfile": (.value.build.dockerfile // "Dockerfile"), "target": (.value.build.target // "")}' ${{ env.TEST_COMPOSE_PATH }})
@@ -74,7 +83,7 @@ jobs:
             --builder default \
             --push \
             --file "$CONTEXT/$DOCKERFILE" \
-            -t "$NAME:test" \
+            -t "$IMAGE_BASE-$NAME:test" \
             --target "$TARGET" \
             --cache-from=type=gha,scope=action \
             --cache-to=type=gha,mode=max,scope=action  \
