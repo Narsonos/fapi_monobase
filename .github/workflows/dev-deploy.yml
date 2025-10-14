@@ -98,8 +98,8 @@ jobs:
             echo "::endgroup::"
           done
 
-      - name: Parse compose and build with buildx (detailed BuildKit logs)
-        run: docker compose --env-file=./.env.test -f ${{ env.TEST_COMPOSE_PATH }} up
+      - name: Run test compose
+        run: docker compose --env-file=./.env.test -f ./${{ env.TEST_COMPOSE_PATH}} up --abort-on-container-exit --exit-code-from ${{ env.COMPOSE_APP_SERVICE_NAME}}
           
 
 
