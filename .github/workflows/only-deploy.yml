@@ -1,0 +1,79 @@
+#Description:
+#This workflow just deploys and that's it.
+
+name: only-deploy
+on:
+  workflow_dispatch:
+
+
+
+env:
+  SERVICE_NAME: userauth_service                      #basically, project name
+  PROD_COMPOSE_PATH: ./docker-compose.prod.yaml       #path to prod compose from project root
+
+
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    env:
+      PROD_SSH_DEPLOY_TARGET_PATH: "/srv/${{ github.event.repository.name }}"
+    steps:
+      - uses: actions/checkout@v4
+        with: 
+          sparse-checkout: |
+            ${{ env.PROD_COMPOSE_PATH }}
+            services
+            deploy_blue_green.py
+            deploy_blue_green.conf.json
+
+      - name: Create a .env file.
+        run: |
+          cat <<EOF > .env
+          #---------------Application envs are below-------------
+          GIT_COMMIT=${{ github.sha }}
+          APP_NAME=${{ env.SERVICE_NAME }}
+          DEFAULT_ADMIN_PASSWORD=${{ secrets.DEFAULT_ADMIN_PASSWORD}}
+          SECRET=${{ secrets.SECRET }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          REFRESH_SECRET=${{ secrets.REFRESH_SECRET }}
+          MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_USER=${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
+          REDIS_PASS=${{ secrets.REDIS_PASS }}
+          #-------------------------------------------------------
+          EOF
+
+      - uses: easingthemes/ssh-deploy@v5.1.0
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_DEPLOY_KEY }}
+          ARGS: "-rlgoDzvc --delete --inplace"
+          REMOTE_HOST: ${{ secrets.PROD_SSH_DEPLOY_HOST }}
+          REMOTE_USER: ${{ secrets.PROD_SSH_DEPLOY_USERNAME }}
+          SOURCE: "./"
+          TARGET: "${{ env.PROD_SSH_DEPLOY_TARGET_PATH }}"
+          SCRIPT_AFTER: |
+            sudo chown -R ${{ secrets.PROD_SSH_DEPLOY_USERNAME }}:${{ secrets.PROD_SSH_DEPLOY_USERNAME }} ${{ env.PROD_SSH_DEPLOY_TARGET_PATH }}
+
+      - name: lowercase
+        env: 
+          IMAGE_BASE: ghcr.io/${{ github.repository_owner }}/${{ env.SERVICE_NAME }}
+        run: |
+          echo "IMAGE_BASE=${IMAGE_BASE@L}" >> "${GITHUB_ENV}"
+
+      - name: Run deploy script
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.PROD_SSH_DEPLOY_HOST }}
+          username: ${{ secrets.PROD_SSH_DEPLOY_USERNAME }}
+          key: ${{ secrets.PROD_SSH_DEPLOY_KEY }}
+          envs: IMAGE_BASE
+          script: |
+            set -e
+            cd ${{ env.PROD_SSH_DEPLOY_TARGET_PATH }}
+            echo "GIT_COMMIT: $GIT_COMMIT"
+            python3 -u deploy_blue_green.py --project_name="${{ env.SERVICE_NAME }}"
+
+

@@ -29,7 +29,6 @@ jobs:
   test:
     name: Run tests
     runs-on: ubuntu-latest
-    if: ${{ vars.SKIP_TESTS != 'true' }}
     steps:
       - name: Clone repo
         uses: actions/checkout@v4
@@ -124,7 +123,6 @@ jobs:
     name: Parse compose
     runs-on: ubuntu-latest
     needs: test
-    if: ${{ (needs.test.result == 'success' || (needs.test.result == 'skipped' && vars.SKIP_TESTS == 'true')) && (vars.SKIP_BUILD != 'true')}}
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
@@ -233,13 +231,10 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    needs: [prepare, build]
-    if: (needs.build.result == 'success' || (needs.prepare.result == 'skipped' && vars.SKIP_BUILD == 'true')) && (vars.SKIP_DEPLOY != 'true')
+    needs: build
     env:
       PROD_SSH_DEPLOY_TARGET_PATH: "/srv/${{ github.event.repository.name }}"
     steps:
-      - run: echo ${{ (needs.build.result == 'success' || (needs.prepare.result == 'skipped' && vars.SKIP_BUILD == 'true')) && (vars.SKIP_DEPLOY != 'true')}}
-
       - uses: actions/checkout@v4
         with: 
           sparse-checkout: |
@@ -296,11 +291,6 @@ jobs:
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
             cd ${{ env.PROD_SSH_DEPLOY_TARGET_PATH }}
             echo "GIT_COMMIT: $GIT_COMMIT"
+            python3 -u deploy_blue_green.py --project_name="${{ env.SERVICE_NAME }}"
 
-            if [ "${{vars.SKIP_BUILD}}" = "true" ]; then
-              echo "build job skipped -> building locally."
-              python3 -u deploy_blue_green.py --project_name="${{ env.SERVICE_NAME }}" --build
-            else
-              python3 -u deploy_blue_green.py --project_name="${{ env.SERVICE_NAME }}"
-            fi
 
