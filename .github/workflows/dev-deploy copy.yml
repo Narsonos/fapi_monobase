@@ -62,4 +62,5 @@ jobs:
           echo "Context: $CONTEXT"
           echo "Dockerfile: $DOCKERFILE"
           echo "Target: $TARGET"
+          done
 
