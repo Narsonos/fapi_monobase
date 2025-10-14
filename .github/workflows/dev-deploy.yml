@@ -66,11 +66,6 @@ jobs:
           echo "IMAGE_BASE=${IMAGE_BASE@L}" >> "${GITHUB_ENV}"
 
       - name: Parse compose and build with buildx (detailed BuildKit logs)
-        env:
-          # ensure BuildKit enabled and verbose logs
-          DOCKER_BUILDKIT: 1
-          BUILDKIT_PROGRESS: plain
-          BUILDKIT_STEP_LOG: 1
         run: |
           SERVICES=$(yq --output-format=json '.services | to_entries[] | select(.value | has("build")) | {"name": .key, "context": (.value.build.context // "."), "dockerfile": (.value.build.dockerfile // "Dockerfile"), "target": (.value.build.target // "")}' ${{ env.TEST_COMPOSE_PATH }})
 
@@ -189,11 +184,6 @@ jobs:
           echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
 
       - name: Build and Push ${{ matrix.name }}
-        env:
-          # ensure BuildKit enabled and verbose logs
-          DOCKER_BUILDKIT: 1
-          BUILDKIT_PROGRESS: plain
-          BUILDKIT_STEP_LOG: 1
         run: |
           NAME=${{ matrix.name }}
           CONTEXT=${{ matrix.context }}
