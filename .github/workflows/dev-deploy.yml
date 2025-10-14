@@ -92,11 +92,6 @@ jobs:
             echo "Dockerfile: $DOCKERFILE"
             echo "Target: $TARGET\n"
 
-            # export envs to ensure BuildKit verbosity in this shell
-            export DOCKER_BUILDKIT=1
-            export BUILDKIT_PROGRESS=plain
-            export BUILDKIT_STEP_LOG=1
-
             docker buildx build \
               --builder builder \
               --load \
@@ -111,7 +106,7 @@ jobs:
           done
 
       - name: Run test compose
-        run: docker compose --env-file=./.env.test -f ./${{ env.TEST_COMPOSE_PATH}} up --abort-on-container-exit --exit-code-from ${{ env.COMPOSE_APP_SERVICE_NAME}}
+        run: docker compose --env-file=./.env.test -f ${{ env.TEST_COMPOSE_PATH}} up --abort-on-container-exit --exit-code-from ${{ env.COMPOSE_APP_SERVICE_NAME}}
           
 
 
