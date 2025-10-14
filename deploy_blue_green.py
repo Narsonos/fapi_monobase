@@ -20,6 +20,7 @@ class DeploymentConfig:
     project_name: str
     compose_path: pathlib.Path
     upstream_conf: pathlib.Path
+    treat_nginx_as_new: bool
     env_path: pathlib.Path | None
     services: list[TargetService]
 
@@ -32,7 +33,8 @@ class DeploymentConfig:
         if "project_name" not in data and default_project_name:
             data["project_name"] = default_project_name
 
-        
+        data['treat_nginx_as_new'] = data.get('treat_nginx_as_new', True)
+
         data["compose_path"] = pathlib.Path(data["compose_path"])
         data["upstream_conf"] = pathlib.Path(data["upstream_conf"])
         if data.get("env_path"):
@@ -238,10 +240,10 @@ class DeploymentJob:
             
     def rewrite_nginx(self):
         names_mapping = {}
-        if self.current_color in ['blue','green']:
+        if not self.config.treat_nginx_as_new and self.current_color in ['blue','green']:
             color = self.current_color
         else:
-            color = ''
+            color = ''  #since nginx is new -> there're "no-color" upstreams only
         print('[Nginx] Rewriting nginx using the following mapping:')        
         for service in self.config.services:
             if service.is_upstream:
