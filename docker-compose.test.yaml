@@ -7,7 +7,7 @@ services:
       context: ./services/api
       dockerfile: Dockerfile
       target: dev
-    command: ["CMD", "poetry","run", "pytest"]
+    command: ["poetry", "run", "pytest"]
     depends_on:
       db:
         condition: service_healthy
