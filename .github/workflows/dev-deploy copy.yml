@@ -30,6 +30,8 @@ jobs:
             ${{ env.TEST_COMPOSE_PATH}}
             services
 
+
+            
       - name: Create a .env file.
         run: |
           cat <<EOF > .env.test
@@ -46,6 +48,11 @@ jobs:
           REDIS_PASS=${{ secrets.REDIS_PASS }}
           #-------------------------------------------------------
           EOF
+
+      - name: Login to GHCR
+        run: |
+          echo "🔐 Logging in to GHCR..."
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
 
       - name: Parse compose and build with buildx
         run: |
@@ -76,10 +83,7 @@ jobs:
           
           done
 
-      - name: Login to GHCR
-        run: |
-          echo "🔐 Logging in to GHCR..."
-          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
+
       
       - name: Run test compose
         run: docker compose --env-file=./.env.test -f ./${{ env.TEST_COMPOSE_PATH}} up --abort-on-container-exit --exit-code-from ${{ env.COMPOSE_APP_SERVICE_NAME}}
