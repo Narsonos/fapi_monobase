@@ -118,16 +118,17 @@ jobs:
         run: |
           SERVICES=$(yq --output-format=json \
             '.services | to_entries[] | select(.value | has("build")) | {
-              name: .key,
-              context: (.value.build.context // "."),
-              dockerfile: (.value.build.dockerfile // "Dockerfile"),
-              target: (.value.build.target // "")
-            }' docker-compose.test.yaml | jq -c -s '.')
+              "name": .key,
+              "context": (.value.build.context // "."),
+              "dockerfile": (.value.build.dockerfile // "Dockerfile"),
+              "target": (.value.build.target // "")
+            }' ${{ env.BUILD_COMPOSE_PATH}} | jq -c -s '.')
           echo "$SERVICES" > services.json
 
       - id: set-matrix
         run: |
           MATRIX_JSON=$(cat services.json)
+          echo $MATRIX_JSON
           echo "matrix={\"include\": $MATRIX_JSON}" >> "$GITHUB_OUTPUT"
 
 
