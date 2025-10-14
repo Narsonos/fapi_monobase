@@ -61,7 +61,7 @@ jobs:
       - name: Setup buildx
         uses: docker/setup-buildx-action@v3.11.1
         with: 
-          name: asdasdasd
+          name: builder
 
       - name: Convert image base to lowercase.
         env: 
@@ -77,9 +77,8 @@ jobs:
           BUILDKIT_STEP_LOG: 1
         run: |
           SERVICES=$(yq --output-format=json '.services | to_entries[] | select(.value | has("build")) | {"name": .key, "context": (.value.build.context // "."), "dockerfile": (.value.build.dockerfile // "Dockerfile"), "target": (.value.build.target // "")}' ${{ env.TEST_COMPOSE_PATH }})
-       
+
           echo "$SERVICES" | jq -c '.' | while read -r service; do
-          {
             NAME=$(echo "$service" | jq -r '.name')
             CONTEXT=$(echo "$service" | jq -r '.context')
             DOCKERFILE=$(echo "$service" | jq -r '.dockerfile')
@@ -96,7 +95,7 @@ jobs:
             export BUILDKIT_STEP_LOG=1
 
             docker buildx build \
-              --builder asdasdasd \
+              --builder builder \
               --load \
               --progress=plain \
               --file "$CONTEXT/$DOCKERFILE" \
@@ -106,8 +105,6 @@ jobs:
               --cache-to=type=gha,mode=max,scope=${{ env.CACHE_SCOPE }}  \
               "$CONTEXT"
             echo "::endgroup::"
-          } &
-          wait 
           done
 
   build:
@@ -131,7 +128,7 @@ jobs:
       - name: Setup buildx
         uses: docker/setup-buildx-action@v3.11.1
         with: 
-          name: asdasdasd
+          name: builder
 
       - name: Create a .env file. 
         run: |
@@ -170,7 +167,8 @@ jobs:
           SERVICES=$(yq --output-format=json '.services | to_entries[] | select(.value | has("build")) | {"name": .key, "context": (.value.build.context // "."), "dockerfile": (.value.build.dockerfile // "Dockerfile"), "target": (.value.build.target // "")}' \
           ${{ env.BUILD_COMPOSE_PATH }})
           
-          echo "$SERVICES" | jq -c '.' | while read -r service; do
+          echo "$SERVICES" | jq -c '.' | while read -r service; do 
+          {
             NAME=$(echo "$service" | jq -r '.name')
             CONTEXT=$(echo "$service" | jq -r '.context')
             DOCKERFILE=$(echo "$service" | jq -r '.dockerfile')
@@ -187,7 +185,7 @@ jobs:
             export BUILDKIT_STEP_LOG=1
 
             docker buildx build \
-              --builder asdasdasd \
+              --builder builder \
               --push \
               --progress=plain \
               --file "$CONTEXT/$DOCKERFILE" \
@@ -198,8 +196,10 @@ jobs:
               --cache-to=type=gha,mode=max,scope=${{ env.CACHE_SCOPE }}  \
               "$CONTEXT"
             echo "::endgroup::"
+          } &
           
           done
+          wait
   
   deploy:
     name: Deploy
