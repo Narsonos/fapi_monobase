@@ -11,7 +11,7 @@ parser.add_argument("--project_name", type=str, help="Specifies project name")
 parser.add_argument("--build", action='store_true', help="If compose should build")
 
 args=parser.parse_args()
-
+overrides = {k:v for k,v in args._get_kwargs()}
 
 @dc.dataclass
 class TargetService:
@@ -66,7 +66,7 @@ class DeploymentJob:
     def __init__(self, deploy_json_path='./deploy.json'):
         self.config = None
         with open(deploy_json_path, 'r') as f:
-            self.config = DeploymentConfig.from_json(deploy_json_path, args._get_kwargs())
+            self.config = DeploymentConfig.from_json(deploy_json_path, **overrides)
         
         self.current_color = None
         self.next_color = 'blue'
