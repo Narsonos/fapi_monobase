@@ -140,7 +140,7 @@ jobs:
                 "dockerfile": (.value.build.dockerfile // "Dockerfile"),
                 "target": (.value.build.target // "")
               })
-          ' "${{ env.PROD_COMPOSE_PATH }}" | jq -c -s '.')
+          ' "${{ env.PROD_COMPOSE_PATH }}")
           echo "$SERVICES" > services.json
 
       - id: set-matrix
