@@ -120,14 +120,20 @@ jobs:
 
       - id: parse
         run: |
-          SERVICES=$(yq --output-format=json \
-            '.services | to_entries[] | select(.value | has("build")) | {
-              "name": .key,
-              "context": (.value.build.context // "."),
-              "dockerfile": (.value.build.dockerfile // "Dockerfile"),
-              "target": (.value.build.target // "")
-            }' ${{ env.PROD_COMPOSE_PATH }} | jq -c -s '.')
-          echo "$SERVICES" > services.json
+          SERVICES=$(yq --output-format=json '
+            .services
+            | to_entries
+            | map(select(.value | has("build")))
+            | group_by(.value.image // .key)
+            | map(.[0])  
+            | map({
+                "name": .key,
+                "image": (.value.image // ""),
+                "context": (.value.build.context // "."),
+                "dockerfile": (.value.build.dockerfile // "Dockerfile"),
+                "target": (.value.build.target // "")
+              })
+          ' "${{ env.PROD_COMPOSE_PATH }}" | jq -c -s '.')
 
       - id: set-matrix
         run: |

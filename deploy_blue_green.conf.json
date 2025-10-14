@@ -10,11 +10,11 @@
     },
     {
       "name": "celery_worker",
-      "is_upstream": true
+      "is_upstream": false
     },
     {
       "name": "celery_beat",
-      "is_upstream": true
+      "is_upstream": false
     }
   ]
 }
