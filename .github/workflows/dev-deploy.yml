@@ -54,49 +54,49 @@ jobs:
           echo "🔐 Logging in to GHCR..."
           echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
 
-      - name: Setup buildx
-        uses: docker/setup-buildx-action@v3.11.1
-        with: 
-          name: builder
-
-      - name: Convert image base to lowercase.
-        env: 
-          IMAGE_BASE: ghcr.io/${{ github.repository_owner }}/${{ env.SERVICE_NAME }}
-        run: |
-          echo "IMAGE_BASE=${IMAGE_BASE@L}" >> "${GITHUB_ENV}"
-
-      - name: Parse compose and build with buildx (detailed BuildKit logs)
-        run: |
-          SERVICES=$(yq --output-format=json '.services | to_entries[] | select(.value | has("build")) | {"name": .key, "context": (.value.build.context // "."), "dockerfile": (.value.build.dockerfile // "Dockerfile"), "target": (.value.build.target // "")}' ${{ env.TEST_COMPOSE_PATH }})
-
-          echo "$SERVICES" | jq -c '.' | while read -r service; do
-            NAME=$(echo "$service" | jq -r '.name')
-            CONTEXT=$(echo "$service" | jq -r '.context')
-            DOCKERFILE=$(echo "$service" | jq -r '.dockerfile')
-            TARGET=$(echo "$service" | jq -r '.target')
-        
-            echo "::group::Building service $NAME"
-            echo "Context: $CONTEXT"
-            echo "Dockerfile: $DOCKERFILE"
-            echo "Target: $TARGET\n"
-
-            # export envs to ensure BuildKit verbosity in this shell
-            export DOCKER_BUILDKIT=1
-            export BUILDKIT_PROGRESS=plain
-            export BUILDKIT_STEP_LOG=1
-
-            docker buildx build \
-              --builder builder \
-              --load \
-              --progress=plain \
-              --file "$CONTEXT/$DOCKERFILE" \
-              -t "$IMAGE_BASE-$NAME:test" \
-              --target "$TARGET" \
-              --cache-from=type=gha,scope=${{ env.CACHE_SCOPE }} \
-              --cache-to=type=gha,mode=max,scope=${{ env.CACHE_SCOPE }}  \
-              "$CONTEXT"
-            echo "::endgroup::"
-          done
+      #- name: Setup buildx
+      #  uses: docker/setup-buildx-action@v3.11.1
+      #  with: 
+      #    name: builder
+#
+      #- name: Convert image base to lowercase.
+      #  env: 
+      #    IMAGE_BASE: ghcr.io/${{ github.repository_owner }}/${{ env.SERVICE_NAME }}
+      #  run: |
+      #    echo "IMAGE_BASE=${IMAGE_BASE@L}" >> "${GITHUB_ENV}"
+#
+      #- name: Parse compose and build with buildx (detailed BuildKit logs)
+      #  run: |
+      #    SERVICES=$(yq --output-format=json '.services | to_entries[] | select(.value | has("build")) | {"name": .key, "context": (.value.build.context // "."), "dockerfile": (.value.build.dockerfile // "Dockerfile"), "target": (.value.build.target // "")}' ${{ env.TEST_COMPOSE_PATH }})
+#
+      #    echo "$SERVICES" | jq -c '.' | while read -r service; do
+      #      NAME=$(echo "$service" | jq -r '.name')
+      #      CONTEXT=$(echo "$service" | jq -r '.context')
+      #      DOCKERFILE=$(echo "$service" | jq -r '.dockerfile')
+      #      TARGET=$(echo "$service" | jq -r '.target')
+      #  
+      #      echo "::group::Building service $NAME"
+      #      echo "Context: $CONTEXT"
+      #      echo "Dockerfile: $DOCKERFILE"
+      #      echo "Target: $TARGET\n"
+#
+      #      # export envs to ensure BuildKit verbosity in this shell
+      #      export DOCKER_BUILDKIT=1
+      #      export BUILDKIT_PROGRESS=plain
+      #      export BUILDKIT_STEP_LOG=1
+#
+      #      docker buildx build \
+      #        --builder builder \
+      #        --load \
+      #        --progress=plain \
+      #        --file "$CONTEXT/$DOCKERFILE" \
+      #        -t "$IMAGE_BASE-$NAME:test" \
+      #        --target "$TARGET" \
+      #        --cache-from=type=gha,scope=${{ env.CACHE_SCOPE }} \
+      #        --cache-to=type=gha,mode=max,scope=${{ env.CACHE_SCOPE }}  \
+      #        "$CONTEXT"
+      #      echo "::endgroup::"
+      #    done
 
       - name: Run test compose
         run: docker compose --env-file=./.env.test -f ./${{ env.TEST_COMPOSE_PATH}} up --abort-on-container-exit --exit-code-from ${{ env.COMPOSE_APP_SERVICE_NAME}}
