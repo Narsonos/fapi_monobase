@@ -288,7 +288,7 @@ class DeploymentJob:
             for service in self.config.services:
                 self.rm(f'{self.config.project_name}-{service.name}_{self.current_color}')
         print("[Deploy] Deployment has been executed successfully!")
-        os._exit(1)
+        os._exit(0)
 
 
 
