@@ -4,8 +4,12 @@ import traceback, logging
 logging.basicConfig()
 logger = logging.getLogger('app')
 
+
+#Args (if exist) override json values
 parser = argparse.ArgumentParser()
-parser.add_argument("--project_name", type=str, required=True, help="Specifies project name")
+parser.add_argument("--project_name", type=str, help="Specifies project name")
+parser.add_argument("--build", action='store_true', help="If compose should build")
+
 args=parser.parse_args()
 
 
@@ -26,15 +30,15 @@ class DeploymentConfig:
     services: list[TargetService]
 
     @staticmethod
-    def from_json(path: str, default_project_name: t.Optional[str] = None) -> "DeploymentConfig":
+    def from_json(path: str, **overrides) -> "DeploymentConfig":
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        
-        if "project_name" not in data and default_project_name:
-            data["project_name"] = default_project_name
+        #overridables
+        data["project_name"] = overrides.get('project_name', data.get('project_name', 'default'))
+        data["project_name"] = overrides.get('build', data.get('build', False))
 
-        data['treat_nginx_as_new'] = data.get('treat_nginx_as_new', True)
+        data['treat_nginx_as_new'] = data.get('treat_nginx_as_new', True) #Useful for deploys that completely overwrite upstream.conf every time.
         data['build'] = data.get('build', True)
         data["compose_path"] = pathlib.Path(data["compose_path"])
         data["upstream_conf"] = pathlib.Path(data["upstream_conf"])
@@ -62,7 +66,7 @@ class DeploymentJob:
     def __init__(self, deploy_json_path='./deploy.json'):
         self.config = None
         with open(deploy_json_path, 'r') as f:
-            self.config = DeploymentConfig.from_json(deploy_json_path, args.project_name)
+            self.config = DeploymentConfig.from_json(deploy_json_path, args._get_kwargs())
         
         self.current_color = None
         self.next_color = 'blue'
