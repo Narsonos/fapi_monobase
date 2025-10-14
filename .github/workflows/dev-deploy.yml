@@ -141,6 +141,7 @@ jobs:
                 "target": (.value.build.target // "")
               })
           ' "${{ env.PROD_COMPOSE_PATH }}" | jq -c -s '.')
+          echo "$SERVICES" > services.json
 
       - id: set-matrix
         run: |
