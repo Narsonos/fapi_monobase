@@ -113,7 +113,13 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      
+      - name: Clone compose
+        uses: actions/checkout@v4
+        with: 
+          sparse-checkout: |
+            ${{ env.BUILD_COMPOSE_PATH}}
+
       - id: parse
         run: |
           SERVICES=$(yq --output-format=json \
@@ -122,7 +128,7 @@ jobs:
               "context": (.value.build.context // "."),
               "dockerfile": (.value.build.dockerfile // "Dockerfile"),
               "target": (.value.build.target // "")
-            }' ${{ env.BUILD_COMPOSE_PATH}} | jq -c -s '.')
+            }' ${{ env.BUILD_COMPOSE_PATH }} | jq -c -s '.')
           echo "$SERVICES" > services.json
 
       - id: set-matrix
@@ -192,7 +198,7 @@ jobs:
 
           echo "🚀 Building $NAME (target=$TARGET)"
           docker buildx build \
-            --builder default \
+            --builder builder \
             --push \
             --file "$CONTEXT/$DOCKERFILE" \
             -t "$IMAGE_BASE-$NAME:latest" \
