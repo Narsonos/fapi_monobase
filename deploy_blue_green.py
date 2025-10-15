@@ -290,9 +290,16 @@ class DeploymentJob:
 
         self.run_new_app(build_whole_compose=build_whole_compose)
         self.rewrite_nginx()
-        if self.current_color:
+        if self.current_color in ["blue","green"]:
             for service in self.config.services:
                 self.rm(f'{self.config.project_name}-{service.name}_{self.current_color}')
+        elif self.current_color == "none": #i.e. containers are numeric
+            container_name = self.find_latest_scale('nginx') 
+            replica_number = container_name.split('-')[-1]
+            for service in self.config.services:
+                self.rm(f'{self.config.project_name}-{service.name}-{replica_number}')
+
+
         print("[Deploy] Deployment has been executed successfully!")
         os._exit(0)
 
