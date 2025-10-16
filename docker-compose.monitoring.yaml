@@ -9,8 +9,8 @@ services:
       - "127.0.0.1:9010:80"
       - "127.0.0.1:9017:4317"
     volumes:
-      - ./monitoring/nginx/monitoring.default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./monitoring/nginx/monitoring.upstream.conf:/etc/nginx/conf.d/upstream.conf:ro
+      - ./monitoring/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./monitoring/nginx/upstream.conf:/etc/nginx/conf.d/upstream.conf:ro
       - ./monitoring/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
       - project-network
