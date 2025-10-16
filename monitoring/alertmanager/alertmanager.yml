@@ -9,8 +9,8 @@ route:
 receivers:
   - name: telegram-notifications
     telegram_configs:
-      - bot_token: 7853679368:AAHiAa2J5drZ6kHiC0GIIpI0HIQwZ7Ap5xg
-        chat_id: -4961181784 
+      - bot_token: token
+        chat_id: id
         parse_mode: "HTML"
         message: |
           🚨 <b>Alert Manager Notification</b>
