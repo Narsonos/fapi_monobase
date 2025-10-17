@@ -2,6 +2,7 @@
 This repo contains a template of a FastAPI monolith application that can be extended as a project it is used for needs. 
 
 For monitoring/observability module:
+
 👉 [See this repo](https://github.com/Narsonos/warden)
 
 Contains:
