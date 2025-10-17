@@ -10,19 +10,19 @@ class OAuthTokenizer:
     def __init__(
         self,
         refresh_secret: str,
-        jwt_secret: str,
+        access_secret: str,
         algorithm: str,
         access_expires_mins: int,
         refresh_expires_hours: int,
     ) -> None:
         self.refresh_secret = refresh_secret
-        self.jwt_secret = jwt_secret
+        self.access_secret = access_secret
         self.algorithm = algorithm
         self.access_expires_mins = access_expires_mins
         self.refresh_expires_hours = refresh_expires_hours
 
     def exctract_token_data(self, token: str, refresh: bool = False) -> dict:
-        secret = self.refresh_secret if refresh else self.jwt_secret
+        secret = self.refresh_secret if refresh else self.access_secret
         try:
             data = jwt.decode(token, secret, algorithms=[self.algorithm])
             return data
@@ -32,7 +32,7 @@ class OAuthTokenizer:
             raise appexc.CredentialsException() from e
 
     def create_token(self, payload: dict, expires_delta: dt.timedelta, refresh: bool = False) -> tuple[str, float]:
-        secret = self.refresh_secret if refresh else self.jwt_secret
+        secret = self.refresh_secret if refresh else self.access_secret
         expiration_time = (dt.datetime.now(dt.timezone.utc) + expires_delta).timestamp()
         encoded_jwt = jwt.encode(payload | {"exp": expiration_time}, secret, algorithm=self.algorithm)
         return encoded_jwt, expiration_time

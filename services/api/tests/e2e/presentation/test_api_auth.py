@@ -49,7 +49,7 @@ async def test_logout(async_client, cache_client):
 
     tokenizer = OAuthTokenizer(
         refresh_secret=strat.refresh_secret,
-        jwt_secret=strat.jwt_secret,
+        access_secret=strat.access_secret,
         algorithm=strat.algorithm,
         access_expires_mins=strat.access_expires_mins,
         refresh_expires_hours=strat.refresh_expires_hours,
@@ -77,7 +77,7 @@ async def test_refresh(async_client, cache_client):
     strat = ideps.AuthStrategyType(session_repo=None, user_repo=None, password_hasher=hasher)
     tokenizer = OAuthTokenizer(
         refresh_secret=strat.refresh_secret,
-        jwt_secret=strat.jwt_secret,
+        access_secret=strat.access_secret,
         algorithm=strat.algorithm,
         access_expires_mins=strat.access_expires_mins,
         refresh_expires_hours=strat.refresh_expires_hours,

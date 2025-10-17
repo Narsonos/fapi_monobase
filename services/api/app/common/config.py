@@ -20,7 +20,7 @@ class Config():
     #Security settings
     DEFAULT_ADMIN_USERNAME = os.getenv("DEFAULT_ADMIN_USERNAME", "admin")
     DEFAULT_ADMIN_PASSWORD = os.getenv("DEFAULT_ADMIN_PASSWORD")
-    JWT_SECRET = os.getenv("JWT_SECRET")
+    ACCESS_SECRET = os.getenv("ACCESS_SECRET")
     REFRESH_SECRET = os.getenv("REFRESH_SECRET")
     ALGORITHM = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES = 240
@@ -57,8 +57,8 @@ class Config():
     }
 
     #OpenTelemetry
-    OTEL_GRPC_ENDPOINT = 'host.docker.internal:9017'
-    OTEL_SERVICE_NAME = 'user_auth'
+    OTEL_GRPC_HOST = os.getenv("OTEL_GRPC_HOST")
+    OTEL_SERVICE_NAME = os.getenv("OTEL_SERVICE_NAME")
     
 
 

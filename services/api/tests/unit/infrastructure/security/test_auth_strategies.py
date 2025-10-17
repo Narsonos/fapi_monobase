@@ -12,7 +12,7 @@ import app.presentation.schemas as schemas
 import app.domain.models as dmod
 import app.application.models as amod
 
-JWT_SECRET = 'abc123' 
+ACCESS_SECRET = 'abc123' 
 REFRESH_SECCRET = 'abc321'
 
 class FakeHasher:
@@ -75,7 +75,7 @@ def get_full_oauth_setup(mocker,user_data):
             session_repo=mock_sess_repo,
             user_repo=mock_user_repo,
             password_hasher=AsyncFakeHasher(FakeHasher()),
-            jwt_secret=JWT_SECRET,
+            access_secret=ACCESS_SECRET,
             refresh_secret=REFRESH_SECCRET
         )
         suite = SOAuthTestSuite(user=user, mock_user_repo=mock_user_repo, mock_sess_repo=mock_sess_repo, mocker=mocker, strat=strat)
@@ -89,12 +89,12 @@ def get_valid_token_pair():
             user_repo=None,
             session_repo=None,
             password_hasher=AsyncFakeHasher(FakeHasher()),
-            jwt_secret=JWT_SECRET,
+            access_secret=ACCESS_SECRET,
             refresh_secret=REFRESH_SECCRET
         )
         tokenizer = OAuthTokenizer(
             refresh_secret=strat.refresh_secret,
-            jwt_secret=strat.jwt_secret,
+            access_secret=strat.access_secret,
             algorithm=strat.algorithm,
             access_expires_mins=strat.access_expires_mins,
             refresh_expires_hours=strat.refresh_expires_hours,
@@ -110,7 +110,7 @@ async def test_SOAuth_create_tokens_and_extract_data(get_valid_token_pair):
         session_repo=None,
         user_repo=None,
         password_hasher=FakeHasher(),
-        jwt_secret=JWT_SECRET,
+        access_secret=ACCESS_SECRET,
         refresh_secret=REFRESH_SECCRET
     )
     payload = {'session_id': '1'}
@@ -119,7 +119,7 @@ async def test_SOAuth_create_tokens_and_extract_data(get_valid_token_pair):
 
     tokenizer = OAuthTokenizer(
         refresh_secret=strat.refresh_secret,
-        jwt_secret=strat.jwt_secret,
+        access_secret=strat.access_secret,
         algorithm=strat.algorithm,
         access_expires_mins=strat.access_expires_mins,
         refresh_expires_hours=strat.refresh_expires_hours,
@@ -166,7 +166,7 @@ async def test_SOAuth_login_logout(get_full_oauth_setup, credentials, user_exist
         await suite.strat.logout(credentials={'token': tokens.access_token})
         tokenizer = OAuthTokenizer(
             refresh_secret=suite.strat.refresh_secret,
-            jwt_secret=suite.strat.jwt_secret,
+            access_secret=suite.strat.access_secret,
             algorithm=suite.strat.algorithm,
             access_expires_mins=suite.strat.access_expires_mins,
             refresh_expires_hours=suite.strat.refresh_expires_hours,

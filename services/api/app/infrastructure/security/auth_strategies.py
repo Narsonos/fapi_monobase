@@ -27,7 +27,7 @@ class StatefulOAuthStrategy(iapp.IAuthStrategy, iapp.ITokenMixin, iapp.IPassword
         password_hasher: domsvc.IPasswordHasherAsync,
         *,
         refresh_secret: t.Optional[str] = None,
-        jwt_secret: t.Optional[str] = None,
+        access_secret: t.Optional[str] = None,
         access_expires_mins: t.Optional[int] = None,
         refresh_expires_hours: t.Optional[int] = None,
         algorithm: t.Optional[str] = None,
@@ -38,7 +38,7 @@ class StatefulOAuthStrategy(iapp.IAuthStrategy, iapp.ITokenMixin, iapp.IPassword
         self._hasher = password_hasher
 
         self.refresh_secret = refresh_secret or Config.REFRESH_SECRET
-        self.jwt_secret = jwt_secret or Config.JWT_SECRET
+        self.access_secret = access_secret or Config.ACCESS_SECRET
         self.access_expires_mins = (
             access_expires_mins or Config.ACCESS_TOKEN_EXPIRE_MINUTES
         )
@@ -48,7 +48,7 @@ class StatefulOAuthStrategy(iapp.IAuthStrategy, iapp.ITokenMixin, iapp.IPassword
         self.algorithm = algorithm or Config.ALGORITHM
 
     def __exctract_token_data(self, token: str, refresh: bool = False):
-        secret = self.refresh_secret if refresh else self.jwt_secret
+        secret = self.refresh_secret if refresh else self.access_secret
         try:
             data = jwt.decode(token, secret, algorithms=[self.algorithm])
             return data
@@ -59,7 +59,7 @@ class StatefulOAuthStrategy(iapp.IAuthStrategy, iapp.ITokenMixin, iapp.IPassword
 
     @TracerType.traced
     def __create_token(self, payload: dict, expires_delta: dt.timedelta, refresh: bool = False) -> tuple[str, float]:
-        secret = self.refresh_secret if refresh else self.jwt_secret
+        secret = self.refresh_secret if refresh else self.access_secret
         expiration_time = (dt.datetime.now(dt.timezone.utc) + expires_delta).timestamp()
         encoded_jwt = jwt.encode(
             payload | {"exp": expiration_time}, secret, algorithm=self.algorithm

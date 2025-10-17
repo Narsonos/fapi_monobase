@@ -35,8 +35,7 @@ jobs:
           GIT_COMMIT=${{ github.sha }}
           APP_NAME=${{ env.SERVICE_NAME }}
           DEFAULT_ADMIN_PASSWORD=${{ secrets.DEFAULT_ADMIN_PASSWORD}}
-          SECRET=${{ secrets.SECRET }}
-          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          ACCESS_SECRET=${{ secrets.ACCESS_SECRET }}
           REFRESH_SECRET=${{ secrets.REFRESH_SECRET }}
           MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
           MYSQL_USER=${{ secrets.MYSQL_USER }}

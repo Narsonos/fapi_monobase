@@ -21,8 +21,8 @@ def setup_opentelemetry(app):
         "service.instance.id": f"worker-{os.getpid()}",
         })
 
-    metric_exporter = OTLPMetricExporter(endpoint=Config.OTEL_GRPC_ENDPOINT, insecure=True)
-    span_exporter = OTLPSpanExporter(endpoint=Config.OTEL_GRPC_ENDPOINT, insecure=True)
+    metric_exporter = OTLPMetricExporter(endpoint=Config.OTEL_GRPC_HOST, insecure=True)
+    span_exporter = OTLPSpanExporter(endpoint=Config.OTEL_GRPC_HOST, insecure=True)
     default_span_processor = BatchSpanProcessor(span_exporter)
     
     reader = PeriodicExportingMetricReader(
